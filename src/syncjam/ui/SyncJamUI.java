@@ -35,7 +35,7 @@ public class SyncJamUI extends JPanel implements Updatable
         c.weighty = 0.18;
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(16,8,8,8);
-        c.ipady = 110;
+        c.ipady = 112;
         c.gridx = 0;
         c.gridy = 0;
         this.add(playerUI, c);
@@ -43,15 +43,15 @@ public class SyncJamUI extends JPanel implements Updatable
         controlUI = new ControlUI();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1.0;
-        c.weighty = 0.15;
+        c.weighty = 0.1;
         //c.insets = new Insets(4,4,4,4);
-        c.ipady = 60;
+        c.ipady = 40;
         c.gridx = 0;
         c.gridy = 1;
         this.add(controlUI, c);
 
         playlistUI = new PlaylistUI();
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.weighty = 1.0;
         //c.insets = new Insets(4,4,4,4);

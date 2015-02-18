@@ -23,7 +23,7 @@ public class ControlUI extends JPanel implements Updatable
         this.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
-        playButton = new PlayButton(40, 40);
+        playButton = new PlayButton(35, 35);
         c.fill = GridBagConstraints.CENTER;
         c.gridx = 0;
         c.gridy = 1;
