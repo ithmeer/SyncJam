@@ -22,6 +22,8 @@ public class SyncJam implements Updatable
     {
         mainWindow = new SyncJamUI();
 
+        NowPlaying.setSong(new Song("Spectrum", "Shook", "Spectrum", 324));
+
         Ticker t = new Ticker(this, 30);
         Thread th = new Thread(t);
         th.start();

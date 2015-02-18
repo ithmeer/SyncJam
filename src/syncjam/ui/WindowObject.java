@@ -9,7 +9,7 @@ public class WindowObject extends JFrame
     {
         this.setTitle("SyncJam");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setUndecorated(true);
+        this.setUndecorated(false);
 
         this.add(panel);
         this.setSize((int) panel.getPreferredSize().getWidth(),
@@ -24,7 +24,7 @@ public class WindowObject extends JFrame
 
     public WindowObject(JPanel panel, int minW, int minH)
     {
-        this(panel, minW, minH, false);
+        this(panel, minW, minH, true);
     }
 
     public WindowObject(JPanel panel)

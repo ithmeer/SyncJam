@@ -6,36 +6,36 @@ import syncjam.base.Updatable;
 import syncjam.ui.buttons.PlayButton;
 import syncjam.ui.buttons.UIButton;
 
+import javax.swing.*;
 import java.awt.*;
 
-public class PlayerUI implements Updatable
+public class PlayerUI extends JPanel implements Updatable
 {
     private int myX, myY, myW, myH;
     private int aaWidth = 100; //album art width
     private int aaHeight = 100; //album art height
     private UIButton playButton;
 
-    public PlayerUI(int x, int y, int w, int h)
+    public PlayerUI(int w, int h)
     {
-        myX = x;
-        myY = y;
+        setPreferredSize(new Dimension(w, h));
+        setBackground(Colors.c_Background1);
+
         myW = w;
         myH = h;
 
-        playButton = new PlayButton(w / 2, y + 150, 40, 40);
+        playButton = new PlayButton(w / 2, 150, 40, 40);
     }
-
-    public int getX() { return myX; }
-
-    public int getY() { return myY; }
 
     public int getW() { return myW; }
 
     public int getH() { return myH; }
 
-    public void draw(Graphics g)
+    public void paintComponent(Graphics g)
     {
-        NowPlaying.setSong(new Song("Spectrum", "Shook", "Spectrum", 324));
+        super.paintComponent(g);
+        //g.fillRect(0, 0, getW(), getH());
+
         drawAlbumArt(g);
         drawSongInfo(g);
         drawControls(g);
@@ -44,24 +44,26 @@ public class PlayerUI implements Updatable
     private void drawAlbumArt(Graphics g)
     {
         g.setColor(Colors.c_Highlight);
-        g.drawRect(getX(), getY(), aaWidth + 4, aaHeight + 4);
-        g.drawRect(getX() + 1, getY() + 1, aaWidth + 2, aaHeight + 2);
+        g.drawRect(0, 0, aaWidth + 4, aaHeight + 4);
+        g.drawRect(1, 1, aaWidth + 2, aaHeight + 2);
         if (NowPlaying.getAlbumArt() != null)
         {
-            g.drawImage(NowPlaying.getScaledAlbumArt(aaWidth, aaHeight), getX() + 2, getY() + 2, null);
+            g.drawImage(NowPlaying.getScaledAlbumArt(aaWidth, aaHeight), 2, 2, null);
         }
     }
 
     private void drawSongInfo(Graphics g)
     {
         Colors.setFont(g, 23);
+
         int spacing = 28;
+
         g.setColor(Colors.c_Foreground1);
-        g.drawString(NowPlaying.getSongName(), getX() + aaWidth + 12, getY() + 18);
+        g.drawString(NowPlaying.getSongName(), aaWidth + 12, 18);
         g.setColor(Colors.c_Foreground2);
-        g.drawString(NowPlaying.getArtistName(),       getX() + aaWidth + 12, getY() + 18 + spacing);
-        g.drawString(NowPlaying.getAlbumName(),        getX() + aaWidth + 12, getY() + 18 + spacing * 2);
-        g.drawString(NowPlaying.getSongLengthString(), getX() + aaWidth + 12, getY() + 18 + spacing * 3);
+        g.drawString(NowPlaying.getArtistName(),       aaWidth + 12, 18 + spacing);
+        g.drawString(NowPlaying.getAlbumName(),        aaWidth + 12, 18 + spacing * 2);
+        g.drawString(NowPlaying.getSongLengthString(), aaWidth + 12, 18 + spacing * 3);
     }
 
     private void drawControls(Graphics g)
@@ -72,5 +74,6 @@ public class PlayerUI implements Updatable
     public void update()
     {
         playButton.update();
+        this.repaint();
     }
 }

@@ -20,23 +20,34 @@ public class SyncJamUI extends JPanel implements Updatable
         window.addMouseListener(mouse);
         window.addMouseMotionListener(mouse);
 
-        playerUI = new PlayerUI(8, 24, this.getWidth() - 8, 100);
-        //this.add(playerUI);
+        this.setBackground(Colors.c_Background1);
+        this.setLayout(new BorderLayout());
+
+        this.add(tempPanel(350,20), BorderLayout.NORTH);
+
+        playerUI = new PlayerUI(350, 200);
+        this.add(playerUI, BorderLayout.SOUTH);
+
+        validate();
+        repaint();
+    }
+
+    public JPanel tempPanel(int w, int h)
+    {
+        JPanel t = new JPanel();
+        t.setMinimumSize(new Dimension(w, h));
+        t.setBackground(Colors.c_Background2);
+        return t;
     }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-
-        g.setColor(Colors.c_Background1);
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());
-
-        //playerUI.draw(g);
     }
 
     public void update()
     {
-        playerUI.update();
         repaint();
+        playerUI.update();
     }
 }

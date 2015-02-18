@@ -4,7 +4,9 @@ import syncjam.base.Mouse;
 import syncjam.base.Updatable;
 import syncjam.ui.Colors;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class UIButton implements Updatable
 {
@@ -27,9 +29,7 @@ public class UIButton implements Updatable
 
     public int getH() { return myH; }
 
-    public void clicked()
-    {
-    }
+    public void clicked() {}
 
     public void draw(Graphics g)
     {
@@ -41,7 +41,7 @@ public class UIButton implements Updatable
 
     public void update()
     {
-        hovering = Mouse.liesWithin(myX, myY, myW, myH);
+        hovering = Mouse.liesWithin(getX(), getY(), getW(), getH());
         if (hovering && Mouse.pressed(0))
         {
             Mouse.releaseAll();

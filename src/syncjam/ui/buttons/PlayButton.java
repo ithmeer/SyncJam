@@ -1,6 +1,7 @@
 package syncjam.ui.buttons;
 
 import syncjam.NowPlaying;
+import syncjam.base.Mouse;
 
 import java.awt.*;
 
@@ -16,6 +17,7 @@ public class PlayButton extends UIButton
     public void clicked()
     {
         NowPlaying.isPlaying = !NowPlaying.isPlaying;
+        System.out.println("("+ Mouse.getX()+","+Mouse.getY()+")");
     }
 
     public void draw(Graphics g)
