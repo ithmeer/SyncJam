@@ -3,6 +3,7 @@ package syncjam;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.Format;
@@ -11,6 +12,8 @@ import java.text.SimpleDateFormat;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+
+import javax.imageio.ImageIO;
 
 public class Song
 {
@@ -21,9 +24,16 @@ public class Song
     private int songLength = 0; //In seconds, can change if necessary
 
     // !!!! This is for you, cat !!!!
+
+    /**
+     * Read song from file and set song info.
+     * @param fileName path to file
+     */
     public Song(String fileName)
     {
         String[] parts = fileName.split("\\.");
+
+        // not mp3, just set name
         if (!parts[1].equals("mp3"))
             songName = parts[0];
         else
@@ -31,11 +41,10 @@ public class Song
             Mp3File mp3;
             ID3v1 tags = null;
 
+            // open file, scanning for errors and fetching length
             try
             {
-                long time = System.nanoTime();
                 mp3 = new Mp3File(fileName);
-                System.out.println((System.nanoTime() - time) / 1000000000.0);
                 songLength = (int) mp3.getLengthInSeconds();
             }
             catch (Exception e)
@@ -100,16 +109,24 @@ public class Song
                 new BufferedImage(width, height, this.getAlbumArt().getType()));
     }
 
+    // Read tag info and initialize fields
     private void readTags(ID3v1 tags)
     {
         songName = tags.getTitle();
         albumName = tags.getAlbum();
         artistName = tags.getArtist();
+
+        // read album art
         if (tags instanceof ID3v2)
         {
             ID3v2 tags2 = (ID3v2) tags;
-            System.out.println(tags2.getAlbumImageMimeType());
-            System.out.println(songLength);
+            try
+            {
+                albumArt = ImageIO.read(new ByteArrayInputStream(tags2.getAlbumImage()));
+            } catch (IOException e)
+            {
+                // if we can't read, oh well
+            }
         }
     }
 }
