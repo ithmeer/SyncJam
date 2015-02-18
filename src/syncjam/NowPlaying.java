@@ -13,7 +13,10 @@ public class NowPlaying
         np_Song = song;
     }
     public static Song getSong()                { return np_Song; }
-    public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
+    public static BufferedImage getAlbumArt()
+    {
+        return np_Song.getAlbumArt();
+    }
 
     public static String getSongName()          { return np_Song.getSongName(); }
     public static String getArtistName()        { return np_Song.getArtistName(); }

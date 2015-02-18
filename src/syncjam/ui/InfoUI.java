@@ -9,23 +9,19 @@ import syncjam.ui.buttons.UIButton;
 import javax.swing.*;
 import java.awt.*;
 
-public class PlayerUI extends JPanel implements Updatable
+public class InfoUI extends JPanel implements Updatable
 {
-    private int myX, myY, myW, myH;
+    private int myW, myH;
     private int aaWidth = 100; //album art width
     private int aaHeight = 100; //album art height
-    private UIButton playButton;
 
-    public PlayerUI(int w, int h)
+    public InfoUI()
     {
-        setPreferredSize(new Dimension(w, h));
+        myW = 350;
+        myH = 100;
+
+        setMinimumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background1);
-
-        myW = w;
-        myH = h;
-
-        playButton = new PlayButton(w / 2, 150, 40, 40);
-        this.add(playButton);
     }
 
     public int getW() { return myW; }
@@ -36,9 +32,11 @@ public class PlayerUI extends JPanel implements Updatable
     {
         super.paintComponent(g);
 
-        drawAlbumArt(g);
-        drawSongInfo(g);
-        drawControls(g);
+        if(NowPlaying.getSong() != null)
+        {
+            drawAlbumArt(g);
+            drawSongInfo(g);
+        }
     }
 
     private void drawAlbumArt(Graphics g)
@@ -66,14 +64,8 @@ public class PlayerUI extends JPanel implements Updatable
         g.drawString(NowPlaying.getSongLengthString(), aaWidth + 12, 18 + spacing * 3);
     }
 
-    private void drawControls(Graphics g)
-    {
-        //playButton.draw(g);
-    }
-
     public void update()
     {
-        playButton.update();
         this.repaint();
     }
 }
