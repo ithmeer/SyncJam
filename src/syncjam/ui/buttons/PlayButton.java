@@ -9,9 +9,10 @@ public class PlayButton extends UIButton
 {
     private Polygon playShape;
 
-    public PlayButton(int w, int h)
+    public PlayButton(int w, int h) { super(w, h); }
+    public PlayButton(int w, int h, Color c)
     {
-        super(w, h);
+        super(w, h, c);
     }
 
     public void clicked()
@@ -31,8 +32,8 @@ public class PlayButton extends UIButton
         }
         if (NowPlaying.isPlaying)
         {
-            g.fillRect(0 + (getW() / 8), 0, getW() / 4, getH());
-            g.fillRect(0 + (getW() / 8) * 5, 0, getW() / 4, getH());
+            g.fillRect(0 + (getW() / 32) * 5, 0, getW() / 4, getH());
+            g.fillRect(0 + (getW() / 32) * 21, 0, getW() / 4, getH());
         }
     }
 

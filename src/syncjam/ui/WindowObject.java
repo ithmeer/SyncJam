@@ -12,8 +12,6 @@ public class WindowObject extends JFrame
         this.setUndecorated(false);
 
         this.add(panel);
-        this.setSize((int) panel.getPreferredSize().getWidth(),
-                     (int) panel.getPreferredSize().getHeight());
         this.setMinimumSize(new Dimension(minW, minH));
 
         this.pack();

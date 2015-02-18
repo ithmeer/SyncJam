@@ -11,9 +11,14 @@ import java.awt.event.ActionListener;
 
 public class UIButton extends JButton implements Updatable, ActionListener
 {
-    public int myW, myH;
+    private int myW, myH;
+    private Color background;
 
     public UIButton(int w, int h)
+    {
+        this(w,h,Colors.c_Background1);
+    }
+    public UIButton(int w, int h, Color bg)
     {
         myW = w;
         myH = h;
@@ -24,6 +29,9 @@ public class UIButton extends JButton implements Updatable, ActionListener
 
         this.setPreferredSize(new Dimension(myW, myH));
         this.setBorderPainted(false);
+        this.setFocusPainted(false);
+        background = bg;
+
     }
 
     public int getW() { return myW; }
@@ -43,6 +51,9 @@ public class UIButton extends JButton implements Updatable, ActionListener
 
     public void paintComponent(Graphics g)
     {
+        g.setColor(background);
+        g.fillRect(0,0,getW(),getH());
+
         if (getModel().isRollover())
             g.setColor(Colors.c_Highlight);
         else
