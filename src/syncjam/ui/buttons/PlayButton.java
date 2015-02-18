@@ -9,40 +9,36 @@ public class PlayButton extends UIButton
 {
     private Polygon playShape;
 
-    public PlayButton(int x, int y, int w, int h)
+    public PlayButton(int w, int h)
     {
-        super(x - w / 2, y - h / 2, w, h);
+        super(w, h);
     }
 
     public void clicked()
     {
         NowPlaying.isPlaying = !NowPlaying.isPlaying;
-        System.out.println("("+ Mouse.getX()+","+Mouse.getY()+")");
     }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
-        if (!NowPlaying.isPlaying)
+        if (!NowPlaying.isPlaying) {
+            Polygon playShape = new Polygon(
+                    new int[]{0, 0, 0 + getW()},
+                    new int[]{0, 0 + getH(), 0 + getH() / 2}, 3);
             g.fillPolygon(playShape);
+        }
         if (NowPlaying.isPlaying)
         {
-            g.fillRect(getX() + (getW() / 8), getY(), getW() / 4, getH());
-            g.fillRect(getX() + (getW() / 8) * 5, getY(), getW() / 4, getH());
+            g.fillRect(0 + (getW() / 8), 0, getW() / 4, getH());
+            g.fillRect(0 + (getW() / 8) * 5, 0, getW() / 4, getH());
         }
     }
 
     public void update()
     {
         super.update();
-        buildShapes(getX(), getY(), getW(), getH());
-    }
-
-    private void buildShapes(int x, int y, int w, int h)
-    {
-        playShape = new Polygon(
-                new int[]{x, x, x + w},
-                new int[]{y, y + h, y + h / 2}, 3);
+        repaint();
     }
 }

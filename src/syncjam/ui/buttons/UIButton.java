@@ -11,24 +11,20 @@ import java.awt.event.ActionListener;
 
 public class UIButton extends JButton implements Updatable, ActionListener
 {
-    public int myX, myY, myW, myH;
-    public boolean hovering = false;
+    public int myW, myH;
 
-    public UIButton(int x, int y, int w, int h)
+    public UIButton(int w, int h)
     {
-        myX = x;
-        myY = y;
         myW = w;
         myH = h;
 
         validate();
         addActionListener(this);
         this.setActionCommand("clicked");
+
+        this.setPreferredSize(new Dimension(myW, myH));
+        this.setBorderPainted(false);
     }
-
-    public int getX() { return myX; }
-
-    public int getY() { return myY; }
 
     public int getW() { return myW; }
 
@@ -47,7 +43,7 @@ public class UIButton extends JButton implements Updatable, ActionListener
 
     public void paintComponent(Graphics g)
     {
-        if (hovering)
+        if (getModel().isRollover())
             g.setColor(Colors.c_Foreground1);
         else
             g.setColor(Colors.c_Foreground2);
@@ -55,12 +51,11 @@ public class UIButton extends JButton implements Updatable, ActionListener
 
     public void update()
     {
-        hovering = Mouse.liesWithin(getX(), getY(), getW(), getH());
-        if (hovering && Mouse.pressed(0))
+        /*if (hovering && Mouse.pressed(0))
         {
             Mouse.releaseAll();
             clicked();
-        }
+        } */
         repaint();
     }
 }
