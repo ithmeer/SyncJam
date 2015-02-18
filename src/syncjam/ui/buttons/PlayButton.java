@@ -20,9 +20,9 @@ public class PlayButton extends UIButton
         System.out.println("("+ Mouse.getX()+","+Mouse.getY()+")");
     }
 
-    public void draw(Graphics g)
+    public void paintComponent(Graphics g)
     {
-        super.draw(g);
+        super.paintComponent(g);
 
         if (!NowPlaying.isPlaying)
             g.fillPolygon(playShape);

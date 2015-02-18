@@ -26,7 +26,7 @@ public class SyncJamUI extends JPanel implements Updatable
         this.add(tempPanel(350,20), BorderLayout.NORTH);
 
         playerUI = new PlayerUI(350, 200);
-        this.add(playerUI, BorderLayout.SOUTH);
+        this.add(playerUI, BorderLayout.WEST);
 
         validate();
         repaint();

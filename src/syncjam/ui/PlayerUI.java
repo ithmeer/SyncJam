@@ -25,6 +25,7 @@ public class PlayerUI extends JPanel implements Updatable
         myH = h;
 
         playButton = new PlayButton(w / 2, 150, 40, 40);
+        this.add(playButton);
     }
 
     public int getW() { return myW; }
@@ -34,7 +35,6 @@ public class PlayerUI extends JPanel implements Updatable
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        //g.fillRect(0, 0, getW(), getH());
 
         drawAlbumArt(g);
         drawSongInfo(g);
@@ -68,7 +68,7 @@ public class PlayerUI extends JPanel implements Updatable
 
     private void drawControls(Graphics g)
     {
-        playButton.draw(g);
+        //playButton.draw(g);
     }
 
     public void update()
