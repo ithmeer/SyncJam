@@ -44,7 +44,7 @@ public class UIButton extends JButton implements Updatable, ActionListener
     public void paintComponent(Graphics g)
     {
         if (getModel().isRollover())
-            g.setColor(Colors.c_Foreground1);
+            g.setColor(Colors.c_Highlight);
         else
             g.setColor(Colors.c_Foreground2);
     }
