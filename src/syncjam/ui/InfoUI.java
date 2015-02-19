@@ -52,16 +52,24 @@ public class InfoUI extends JPanel implements Updatable
 
     private void drawSongInfo(Graphics g)
     {
-        int spacing = 28;
+        int hOffset = 12;
+        int vOffset = 20;
+        int spacing = 32;
 
         g.setColor(Colors.c_Foreground1);
-        Colors.setFont(g, 25);
-        g.drawString(NowPlaying.getSongName(), aaWidth + 12, 18);
+        Colors.setFont(g, 24);
+        String songname = NowPlaying.getSongName();
+        if(songname.length() > 16)
+        {
+            songname = songname.substring(0,14) + "...";
+        }
+        g.drawString(songname, aaWidth + hOffset, vOffset);
+
         g.setColor(Colors.c_Foreground2);
-        Colors.setFont(g, 20);
-        g.drawString(NowPlaying.getArtistName(),       aaWidth + 12, 18 + spacing);
-        g.drawString(NowPlaying.getAlbumName(),        aaWidth + 12, 18 + spacing * 2);
-        g.drawString(NowPlaying.getSongLengthString(), aaWidth + 12, 18 + spacing * 3);
+        Colors.setFont(g, 23);
+        g.drawString(NowPlaying.getArtistName(),       aaWidth + hOffset, vOffset + spacing);
+        g.drawString(NowPlaying.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
+        g.drawString(NowPlaying.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
     }
 
     public void update()

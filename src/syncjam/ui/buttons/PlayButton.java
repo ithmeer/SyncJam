@@ -7,7 +7,6 @@ import java.awt.*;
 
 public class PlayButton extends UIButton
 {
-    private Polygon playShape;
 
     public PlayButton(int w, int h) { super(w, h); }
     public PlayButton(int w, int h, Color c)
