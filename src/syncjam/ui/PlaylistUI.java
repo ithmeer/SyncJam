@@ -14,7 +14,7 @@ public class PlaylistUI extends JPanel implements Updatable
     public PlaylistUI()
     {
         myW = 350;
-        myH = 440;
+        myH = 0;//440;
 
         setMinimumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background2);

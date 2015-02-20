@@ -19,7 +19,7 @@ public class SyncJamUI extends JPanel implements Updatable
 
     public SyncJamUI()
     {
-        window = new WindowObject(this, 380, 600);
+        window = new WindowObject(this, 360, 500);
         window.addMouseListener(mouse);
         window.addMouseMotionListener(mouse);
 
@@ -31,40 +31,49 @@ public class SyncJamUI extends JPanel implements Updatable
         //this.add(tempPanel(350,20), BorderLayout.NORTH);
 
 
-        controlUI = new ControlUI();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1.0;
-        c.weighty = 0.02;
-        c.gridx = 0;
-        c.gridy = 1;
-        this.add(controlUI, c);
-
         playerUI = new InfoUI();
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weightx = 1.0;
-        c.weighty = 0.18;
+        c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(3,3,3,3);
+        c.insets = new Insets(6,6,6,6);
+        c.weightx = 1.0;
+        c.weighty = 0.0;
+        c.ipadx = 0;
         c.ipady = 114;
         c.gridx = 0;
         c.gridy = 0;
         this.add(playerUI, c);
 
-        songPosition = new SliderBarUI(350, 40);
+        controlUI = new ControlUI();
+        c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.BOTH;
-        c.gridx = 0;
-        c.gridy = 2;
-        c.ipadx = 250;
-        c.ipady = 16;
         c.weightx = 1.0;
         c.weighty = 0.0;
+        c.ipadx = 0;
+        c.ipady = 0;
+        c.gridx = 0;
+        c.gridy = 1;
+        this.add(controlUI, c);
+
+        songPosition = new SongPositionUI();
+        c.anchor = GridBagConstraints.PAGE_START;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(0,6,0,6);
+        c.weightx = 1.0;
+        c.weighty = 0.0;
+        c.ipadx = 0;
+        c.ipady = 28;
+        c.gridx = 0;
+        c.gridy = 2;
         this.add(songPosition, c);
 
         playlistUI = new PlaylistUI();
+        c.anchor = GridBagConstraints.PAGE_END;
         c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(6,6,6,6);
         c.weightx = 1.0;
         c.weighty = 1.0;
-        c.ipady = 420;
+        c.ipadx = 0;
+        c.ipady = 0;
         c.gridx = 0;
         c.gridy = 3;
         this.add(playlistUI, c);

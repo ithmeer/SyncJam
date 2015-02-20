@@ -13,6 +13,7 @@ public class WindowObject extends JFrame
 
         this.add(panel);
         this.setMinimumSize(new Dimension(minW, minH));
+        this.setPreferredSize(new Dimension(minW+20, minH+150));
 
         this.pack();
         this.setLocationRelativeTo(null);

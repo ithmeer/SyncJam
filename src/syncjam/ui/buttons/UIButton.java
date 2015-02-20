@@ -52,7 +52,7 @@ public class UIButton extends JButton implements Updatable, ActionListener
     public void paintComponent(Graphics g)
     {
         g.setColor(background);
-        g.fillRect(0,0,getW(),getH());
+        g.fillRect(0,0,getWidth(),getHeight());
 
         if (getModel().isPressed())
             g.setColor(Colors.c_Foreground1);

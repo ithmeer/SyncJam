@@ -18,9 +18,10 @@ public class InfoUI extends JPanel implements Updatable
     public InfoUI()
     {
         myW = 350;
-        myH = 112;
+        myH = 114;
 
         setMinimumSize(new Dimension(myW, myH));
+        setMaximumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background1);
     }
 

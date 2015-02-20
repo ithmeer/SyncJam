@@ -6,10 +6,15 @@ import java.awt.*;
 
 public class PrevButton extends UIButton
 {
-    public PrevButton(int w, int h) { super(w, h); }
+    public PrevButton(int w, int h)
+    {
+        super(w, h);
+        setPreferredSize(new Dimension(getW() + 20, getH()));
+    }
     public PrevButton(int w, int h, Color c)
     {
         super(w, h, c);
+        setPreferredSize(new Dimension(getW() + 20, getH()));
     }
 
     public void clicked() {}

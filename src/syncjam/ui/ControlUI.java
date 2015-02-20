@@ -17,37 +17,21 @@ public class ControlUI extends JPanel implements Updatable
     public ControlUI()
     {
         myW = 380;
-        myH = 90;
+        myH = 36;
 
         setMinimumSize(new Dimension(myW, myH));
+        setMaximumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background1);
 
-        this.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
 
         prevButton = new PrevButton(36, 36);
-        c.fill = GridBagConstraints.CENTER;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 0.1;
-        c.weighty = 1.0;
-        this.add(prevButton, c);
+        this.add(prevButton);
 
         playButton = new PlayButton(36, 36);
-        c.fill = GridBagConstraints.CENTER;
-        c.gridx = 1;
-        c.gridy = 0;
-        c.weightx = 0.0;
-        c.weighty = 1.0;
-        this.add(playButton, c);
+        this.add(playButton);
 
         nexButton = new NextButton(36, 36);
-        c.fill = GridBagConstraints.CENTER;
-        c.gridx = 2;
-        c.gridy = 0;
-        c.weightx = 0.1;
-        c.weighty = 1.0;
-        this.add(nexButton, c);
+        this.add(nexButton);
     }
     public void paintComponent(Graphics g)
     {

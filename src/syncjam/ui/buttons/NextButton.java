@@ -4,10 +4,15 @@ import java.awt.*;
 
 public class NextButton extends UIButton
 {
-    public NextButton(int w, int h) { super(w, h); }
+    public NextButton(int w, int h)
+    {
+        super(w, h);
+        setPreferredSize(new Dimension(getW() + 19, getH()));
+    }
     public NextButton(int w, int h, Color c)
     {
         super(w, h, c);
+        setPreferredSize(new Dimension(getW() + 19, getH()));
     }
 
     public void clicked() {}
@@ -16,8 +21,8 @@ public class NextButton extends UIButton
     {
         super.paintComponent(g);
 
-        g.fillPolygon(arrowShape(0,0));
-        g.fillPolygon(arrowShape(getW()/7*2,0));
+        g.fillPolygon(arrowShape(getWidth()-getW(),0));
+        g.fillPolygon(arrowShape(getWidth()-getW() + getW()/7*2,0));
     }
 
     public Polygon arrowShape(int x, int y)

@@ -5,18 +5,12 @@ import java.io.IOException;
 
 public class NowPlaying
 {
-    private static Song np_Song = null;
+    private static Song np_Song;
     public static boolean isPlaying = false;
 
-    public static void setSong(Song song)
-    {
-        np_Song = song;
-    }
+    public static void setSong(Song song)       { np_Song = song; }
     public static Song getSong()                { return np_Song; }
-    public static BufferedImage getAlbumArt()
-    {
-        return np_Song.getAlbumArt();
-    }
+    public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
 
     public static String getSongName()          { return np_Song.getSongName(); }
     public static String getArtistName()        { return np_Song.getArtistName(); }
