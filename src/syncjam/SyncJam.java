@@ -1,6 +1,5 @@
 package syncjam;
 
-import syncjam.base.Mouse;
 import syncjam.base.Ticker;
 import syncjam.base.Updatable;
 import syncjam.ui.SyncJamUI;
@@ -29,7 +28,7 @@ public class SyncJam implements Updatable
         th.start();
         */
 
-        Timer timer = new Timer(1000/20,new ActionListener()
+        Timer timer = new Timer(1000/60,new ActionListener()
         {
             public void actionPerformed(ActionEvent event)
             {
@@ -47,6 +46,6 @@ public class SyncJam implements Updatable
 
     public void update()
     {
-        mainWindow.update();
+        mainWindow.repaint();
     }
 }
