@@ -1,6 +1,5 @@
-package syncjam.ui.buttons;
+package syncjam.ui.buttons.base;
 
-import syncjam.base.Mouse;
 import syncjam.base.Updatable;
 import syncjam.ui.Colors;
 
@@ -9,16 +8,16 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class UIButton extends JButton implements Updatable, ActionListener
+public class ButtonUI extends JButton implements Updatable, ActionListener
 {
     private int myW, myH;
     private Color background;
 
-    public UIButton(int w, int h)
+    public ButtonUI(int w, int h)
     {
         this(w,h,Colors.c_Background1);
     }
-    public UIButton(int w, int h, Color bg)
+    public ButtonUI(int w, int h, Color bg)
     {
         myW = w;
         myH = h;

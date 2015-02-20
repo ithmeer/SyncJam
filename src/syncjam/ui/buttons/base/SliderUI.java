@@ -1,4 +1,6 @@
-package syncjam.ui;
+package syncjam.ui.buttons.base;
+
+import syncjam.ui.Colors;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,10 +8,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-public class SliderBarUI extends JPanel implements MouseListener, MouseMotionListener
+public class SliderUI extends JPanel implements MouseListener, MouseMotionListener
 {
     protected int value = 0;
-    protected int max = 100;
+    protected int max = 0;
     protected int posOnBar = 0;
 
     protected int barXOffset = 0;
@@ -20,22 +22,22 @@ public class SliderBarUI extends JPanel implements MouseListener, MouseMotionLis
     private boolean updateWhileDragging = true;
     private boolean dragging = false;
 
-    public SliderBarUI()
+    public SliderUI()
     {
         this(0, 100, true);
     }
 
-    public SliderBarUI(int maxValue)
+    public SliderUI(int maxValue)
     {
         this(0, maxValue, true);
     }
 
-    public SliderBarUI(int startValue, int maxValue)
+    public SliderUI(int startValue, int maxValue)
     {
         this(startValue, maxValue, true);
     }
 
-    public SliderBarUI(int startValue, int maxValue, boolean dragUpdate)
+    public SliderUI(int startValue, int maxValue, boolean dragUpdate)
     {
         myW = getWidth() - 50;
         myH = 20;
@@ -84,16 +86,16 @@ public class SliderBarUI extends JPanel implements MouseListener, MouseMotionLis
         if(value < 0) value = 0;
         if(value > max) value = max;
 
-        barXOffset = getWidth()/2 - getW()/2;
+        barXOffset = getWidth()/2 - myW/2;
         barYOffset = 21;
 
         g.setColor(Colors.c_Foreground2);
-        g.fillRect(barXOffset,barYOffset,getW(),3); //Draw Bar
+        g.fillRect(barXOffset,barYOffset,myW,3); //Draw Bar
 
         if(max != 0)
         {
             if(dragging) g.setColor(Colors.c_Foreground1);
-            int pob = (int)(((float)posOnBar/(float)max)*getW());
+            int pob = (int)(((float)posOnBar/(float)max)*myW);
             g.fillRect(barXOffset+pob-1, barYOffset-4, 2, 11); //Draw notch on bar, draw Notch on bar
 
             drawValue(g);
@@ -115,9 +117,9 @@ public class SliderBarUI extends JPanel implements MouseListener, MouseMotionLis
     {
         if(mouseY > barYOffset-4 && mouseY < barYOffset+10)
         {
-            if(mouseX > barXOffset && mouseX < barXOffset+getW())
+            if(mouseX > barXOffset && mouseX < barXOffset+myW)
             {
-                posOnBar = (mouseX-barXOffset)*max/getW();
+                posOnBar = (mouseX - barXOffset) * max / myW;
                 dragging = true;
             }
         }
@@ -147,7 +149,7 @@ public class SliderBarUI extends JPanel implements MouseListener, MouseMotionLis
         {
             mouseX = e.getX();
             mouseY = e.getY();
-            posOnBar = (mouseX-barXOffset)*max/getW();
+            posOnBar = (mouseX-barXOffset)*max/myW;
 
             if(posOnBar > max) posOnBar = max;
             else if (posOnBar < 0) posOnBar = 0;

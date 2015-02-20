@@ -4,7 +4,7 @@ import syncjam.base.Updatable;
 import syncjam.ui.buttons.NextButton;
 import syncjam.ui.buttons.PlayButton;
 import syncjam.ui.buttons.PrevButton;
-import syncjam.ui.buttons.UIButton;
+import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.awt.*;
 public class ControlUI extends JPanel implements Updatable
 {
     private int myW, myH;
-    private UIButton playButton, prevButton, nexButton;
+    private ButtonUI playButton, prevButton, nexButton;
 
     public ControlUI()
     {

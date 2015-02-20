@@ -1,8 +1,10 @@
 package syncjam.ui.buttons;
 
+import syncjam.ui.buttons.base.ButtonUI;
+
 import java.awt.*;
 
-public class NextButton extends UIButton
+public class NextButton extends ButtonUI
 {
     public NextButton(int w, int h)
     {

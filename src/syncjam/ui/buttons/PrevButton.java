@@ -1,10 +1,10 @@
 package syncjam.ui.buttons;
 
-import syncjam.NowPlaying;
+import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
 
-public class PrevButton extends UIButton
+public class PrevButton extends ButtonUI
 {
     public PrevButton(int w, int h)
     {

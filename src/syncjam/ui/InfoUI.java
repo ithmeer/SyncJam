@@ -1,15 +1,12 @@
 package syncjam.ui;
 
 import syncjam.NowPlaying;
-import syncjam.Song;
 import syncjam.base.Updatable;
-import syncjam.ui.buttons.PlayButton;
-import syncjam.ui.buttons.UIButton;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class InfoUI extends JPanel implements Updatable
+public class InfoUI extends JPanel
 {
     private int myW, myH;
     private int aaWidth = 120; //album art width
@@ -71,10 +68,5 @@ public class InfoUI extends JPanel implements Updatable
         g.drawString(NowPlaying.getArtistName(),       aaWidth + hOffset, vOffset + spacing);
         g.drawString(NowPlaying.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
         g.drawString(NowPlaying.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
-    }
-
-    public void update()
-    {
-        this.repaint();
     }
 }

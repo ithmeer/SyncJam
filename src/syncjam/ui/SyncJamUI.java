@@ -1,35 +1,29 @@
 package syncjam.ui;
 
-import syncjam.base.Mouse;
-import syncjam.base.Ticker;
 import syncjam.base.Updatable;
+import syncjam.ui.buttons.base.SliderUI;
+import syncjam.ui.buttons.SongPositionSlider;
 
 import javax.swing.*;
 import java.awt.*;
 
 
-public class SyncJamUI extends JPanel implements Updatable
+public class SyncJamUI extends JPanel
 {
     public WindowObject window = null;
     private InfoUI playerUI = null;
     private ControlUI controlUI = null;
     private PlaylistUI playlistUI = null;
-    private SliderBarUI songPosition = null;
-    private Mouse mouse = new Mouse();
+    private SliderUI songPosition = null;
 
     public SyncJamUI()
     {
         window = new WindowObject(this, 360, 500);
-        window.addMouseListener(mouse);
-        window.addMouseMotionListener(mouse);
 
         this.setBackground(Colors.c_Background1);
 
         this.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-
-        //this.add(tempPanel(350,20), BorderLayout.NORTH);
-
 
         playerUI = new InfoUI();
         c.anchor = GridBagConstraints.PAGE_START;
@@ -54,7 +48,7 @@ public class SyncJamUI extends JPanel implements Updatable
         c.gridy = 1;
         this.add(controlUI, c);
 
-        songPosition = new SongPositionUI();
+        songPosition = new SongPositionSlider();
         c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(0,6,0,6);
@@ -94,11 +88,5 @@ public class SyncJamUI extends JPanel implements Updatable
     {
         super.paintComponent(g);
         ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    }
-
-    public void update()
-    {
-        repaint();
-        playerUI.update();
     }
 }

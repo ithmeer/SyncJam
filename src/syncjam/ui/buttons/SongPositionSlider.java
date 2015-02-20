@@ -1,15 +1,16 @@
-package syncjam.ui;
+package syncjam.ui.buttons;
 
 import syncjam.NowPlaying;
+import syncjam.ui.Colors;
+import syncjam.ui.buttons.base.SliderUI;
 
-import javax.swing.*;
 import java.awt.*;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 
-public class SongPositionUI extends SliderBarUI
+public class SongPositionSlider extends SliderUI
 {
-    public SongPositionUI()
+    public SongPositionSlider()
     {
         super(0, 0, false);
     }
@@ -21,7 +22,7 @@ public class SongPositionUI extends SliderBarUI
         }
 
         if(NowPlaying.isPlaying && getValue() < getMaxValue()) {
-            setValue(getValue() + 1);
+            setValue(value + 1);
         }
 
         super.paintComponent(g);
@@ -36,7 +37,7 @@ public class SongPositionUI extends SliderBarUI
         g.setColor(Colors.c_Highlight);
         String timeToMax = "-" + getTimeStamp(this.getMaxValue() - this.getPosOnBar());
         int strWidth = g.getFontMetrics().stringWidth(timeToMax);
-        g.drawString(timeToMax,barXOffset+getW()-strWidth,barYOffset-9);
+        g.drawString(timeToMax,barXOffset + getW() - strWidth,barYOffset-9);
     }
     public String getTimeStamp(int seconds)
     {

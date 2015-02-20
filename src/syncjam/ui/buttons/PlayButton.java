@@ -1,11 +1,11 @@
 package syncjam.ui.buttons;
 
 import syncjam.NowPlaying;
-import syncjam.base.Mouse;
+import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
 
-public class PlayButton extends UIButton
+public class PlayButton extends ButtonUI
 {
 
     public PlayButton(int w, int h) { super(w, h); }
