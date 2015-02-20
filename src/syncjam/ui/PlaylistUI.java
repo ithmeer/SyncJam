@@ -46,14 +46,21 @@ public class PlaylistUI extends JPanel
         int xOffset = 8, yOffset = 8;
         int itemHeight = 50;
 
-        scrollbar.setMaxValue(songs.size()*itemHeight);
+        scrollbar.setMaxValue(songs.size() * itemHeight + yOffset*2);
         //System.out.println(scrollbar.getMaxValue() + " - " + scrollbar.getValue());
 
         for(int i = 0; i < songs.size(); i++)
         {
+            int itemYPos = yOffset + i*itemHeight - (scrollbar.getValue());
+
             g.setColor(Colors.c_Foreground2);
-            Colors.setFont(g, 16);
-            g.drawString(""+i, xOffset, (yOffset+itemHeight/2) + i*itemHeight - (scrollbar.getValue()));
+
+            Colors.setFont(g, 14);
+            int textHeight = (int)g.getFontMetrics().getHeight();
+            g.drawString(""+i, xOffset, itemYPos + itemHeight/2 + textHeight/2);
+
+            int ins = 5; //album art inset
+            g.drawRect(xOffset + ins + 20, itemYPos + ins, itemHeight - ins*2, itemHeight - ins*2);
         }
     }
 }
