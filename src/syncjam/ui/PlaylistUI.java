@@ -28,7 +28,7 @@ public class PlaylistUI extends JPanel
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
 
-        for(int i = 0; i < 42; i++)
+        for(int i = 0; i < 26; i++)
             songs.add(new Song("Song " + i, "Artist", "Album", 60));
 
         this.addMouseWheelListener(new MouseWheelListener() {

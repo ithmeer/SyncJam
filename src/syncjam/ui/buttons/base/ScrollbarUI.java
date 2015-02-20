@@ -79,6 +79,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             else
                 g.setColor(Colors.c_Foreground2);
 
+            //length is bad for short lists -- work on later
             length = (int)((float)myH / ((float)max / (float)getHeight())); //a lot of complicated mumbor jumbor
             pos = (int) (((float) value / (float) max) * (myH - length));   //to get the scrool bar length and pos
 
@@ -124,8 +125,24 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void componentResized(ComponentEvent e)
     {
         //update with JPanel size changes
-        int temp = myH;
+        int pu = myH; //pre-update value
         myH = (int)getSize().getHeight() - inset*2;
+
+        int temp = pu-myH;
+
+        while(value > 0 && temp != 0) //Makes resizing make sense!
+        {
+            if(temp < 0)
+            {
+                setValue(value-1); //as the window gets larger, the position shifts down
+                temp += 1;
+            }
+            else if(temp > 0)
+            {
+                setValue(value+1); //as the window gets smaller, the position shifts up
+                temp -= 1;
+            }
+        } //these do not take effect if the scroll position is at the top, this is good!
     }
     public void componentMoved(ComponentEvent e) {}
     public void componentShown(ComponentEvent e) {}
