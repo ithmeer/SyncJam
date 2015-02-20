@@ -61,6 +61,8 @@ public class PlaylistUI extends JPanel
 
             int ins = 5; //album art inset
             g.drawRect(xOffset + ins + 20, itemYPos + ins, itemHeight - ins*2, itemHeight - ins*2);
+            g.setColor(Colors.c_Background1);
+            g.fillRect(xOffset + ins + 21, itemYPos + ins +1, itemHeight - ins*2 - 2, itemHeight - ins*2 - 2);
         }
     }
 }
