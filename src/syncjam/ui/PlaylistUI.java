@@ -28,19 +28,14 @@ public class PlaylistUI extends JPanel
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
 
-        for(int i = 0; i < 17; i++)
+        for(int i = 0; i < 42; i++)
             songs.add(new Song("Song " + i, "Artist", "Album", 60));
 
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e)
             {
-                if(e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
-                {
-                    int sc = scrollbar.getValue() + e.getUnitsToScroll() * 150;
-
-                    scrollbar.setTargetValue(sc);
-                }
+                scrollbar.scrollEvent(e);
             }
         });
     }
@@ -58,7 +53,7 @@ public class PlaylistUI extends JPanel
         {
             g.setColor(Colors.c_Foreground2);
             Colors.setFont(g, 16);
-            g.drawString(""+i, xOffset, (yOffset+itemHeight/2) + i*itemHeight - (scrollbar.getValue()/2));
+            g.drawString(""+i, xOffset, (yOffset+itemHeight/2) + i*itemHeight - (scrollbar.getValue()));
         }
     }
 }

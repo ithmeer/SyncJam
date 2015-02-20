@@ -17,7 +17,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
     private int pos = 0, length = 0, target = value;
 
-    protected boolean dragging = false;
+    protected boolean dragging = false, scrolling = false;
 
     public ScrollbarUI() { this(Colors.c_Background1); }
     public ScrollbarUI(Color bg)
@@ -40,32 +40,37 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void setValue(int v)
     {
         value = v;
+        target = v;
     }
     public int  getValue()      { return value; }
 
-    public void setMaxValue(int n) { max = n; }
+    public void setMaxValue(int n) { max = n - getHeight(); }
     public int  getMaxValue()      { return max; }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
-        if(max > getHeight())
+        if(max > 0)
         {
             int SNAPSPEED = 4;
 
-            if(!dragging) //allows dragging past the edges for snapback effect
+            //only turn off scrolling when half a scroll off the edge of list
+            if(scrolling && value < target / 2 || value-max > (target-max) / 2)
+                scrolling = false;
+
+            //allows scrolling past the edges for snapback effect
+            if(!dragging && !scrolling)
             {
                 if(target < 0) target = 0;
                 else if(target > max) target = max;
             }
 
-            //smooth bar movement stuff
-            if (value < target)
-            {
+            //smooth bar movement
+            if (value < target) {
                 value = value - (value - target) / SNAPSPEED + 1;
-            } else if (value > target)
-            {
+            }
+            else if (value > target) {
                 value = value - (value - target) / SNAPSPEED - 1;
             }
 
@@ -90,8 +95,8 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             {
                 dragging = true;
                 //math for getting the scrollbar value of the mouse pos
-                float  p = (e.getY() * max) / (getHeight()/2);
-                setTargetValue((int)p - getHeight());
+                float  p = (e.getY() * max) / getHeight();
+                setTargetValue((int)p - length/2);
             }
         }
     }
@@ -109,8 +114,8 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         if(dragging)
         {
             //math for getting the scrollbar value of the mouse pos
-            float  p = (e.getY() * max) / (getHeight()/2);
-            setTargetValue((int) p - getHeight());
+            float  p = (e.getY() * max) / getHeight();
+            setTargetValue((int) p - length/2);
         }
     }
     public void mouseMoved(MouseEvent e) {}
@@ -119,6 +124,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void componentResized(ComponentEvent e)
     {
         //update with JPanel size changes
+        int temp = myH;
         myH = (int)getSize().getHeight() - inset*2;
     }
     public void componentMoved(ComponentEvent e) {}
@@ -128,9 +134,17 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     @Override
     public void mouseWheelMoved(MouseWheelEvent e)
     {
+        scrollEvent(e);
+    }
+
+    public void scrollEvent(MouseWheelEvent e)
+    {
         if(e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
         {
-            setTargetValue(value + e.getUnitsToScroll() * 150);
+            int sc = value + e.getUnitsToScroll() * getHeight()/4;
+
+            setTargetValue(sc);
+            scrolling = true;
         }
     }
 }
