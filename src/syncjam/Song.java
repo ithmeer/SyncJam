@@ -94,15 +94,18 @@ public class Song
     }
 
     //snipped this from the internet cause it was a lot better than the stuff i was doing hahahahahaha
-    public BufferedImage getScaledAlbumArt(int width, int height) throws IOException
+    public BufferedImage getScaledAlbumArt(int width, int height)
     {
+        if(albumArt == null)
+            return null;
+
         int imageWidth  = this.getAlbumArt().getWidth();
         int imageHeight = this.getAlbumArt().getHeight();
 
         double scaleX = (double)width/imageWidth;
         double scaleY = (double)height/imageHeight;
         AffineTransform scaleTransform = AffineTransform.getScaleInstance(scaleX, scaleY);
-        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BICUBIC);
 
         return bilinearScaleOp.filter(
                 this.getAlbumArt(),

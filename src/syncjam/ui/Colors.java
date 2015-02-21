@@ -31,11 +31,6 @@ public class Colors
 
     public static void setFont(Graphics g, int size)
     {
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(
-                RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-
         Font font = new Font("Calibri", Font.PLAIN, size);
 
         Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
@@ -44,6 +39,6 @@ public class Colors
         attributes.put(TextAttribute.TRANSFORM, new TransformAttribute(AffineTransform.getScaleInstance(1, 1.04)));
         Font font2 = font.deriveFont(attributes);
 
-        g2.setFont(font2);
+        g.setFont(font2);
     }
 }

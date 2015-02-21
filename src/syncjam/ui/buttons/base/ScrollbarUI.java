@@ -54,10 +54,19 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         if(max > 0)
         {
             int SNAPSPEED = 4;
+            System.out.println(""+myH+" - "+max);
 
             //only turn off scrolling when half a scroll off the edge of list
-            if(scrolling && value < target / 2 || value-max > (target-max) / 2)
+            if(scrolling && value < target / 4 || value-max > (target-max) / 4)
                 scrolling = false;
+
+            //smooth bar movement
+            if (value < target) {
+                value -= (value - target) / SNAPSPEED + 1;
+            }
+            else if (value > target) {
+                value -= (value - target) / SNAPSPEED - 1;
+            }
 
             //allows scrolling past the edges for snapback effect
             if(!dragging && !scrolling)
@@ -65,13 +74,10 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
                 if(target < 0) target = 0;
                 else if(target > max) target = max;
             }
-
-            //smooth bar movement
-            if (value < target) {
-                value = value - (value - target) / SNAPSPEED + 1;
-            }
-            else if (value > target) {
-                value = value - (value - target) / SNAPSPEED - 1;
+            else if(dragging)
+            {
+                if(value < 0) value = (value/4);
+                else if(value > max) value = max + (value-max)/4;
             }
 
             if (dragging)
@@ -80,7 +86,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
                 g.setColor(Colors.c_Foreground2);
 
             //length is bad for short lists -- work on later
-            length = (int)((float)myH / ((float)max / (float)getHeight())); //a lot of complicated mumbor jumbor
+            length = myH - (max - myH); //a lot of complicated mumbor jumbor
             pos = (int) (((float) value / (float) max) * (myH - length));   //to get the scrool bar length and pos
 
             g.fillRect(inset, inset + pos, myW, length);
@@ -97,7 +103,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
                 dragging = true;
                 //math for getting the scrollbar value of the mouse pos
                 float  p = (e.getY() * max) / (myH - length);
-                setTargetValue((int) p - getHeight()/2 - length); //this needs some work
+                setTargetValue((int) p - length/2); //this needs some work
             }
         }
     }
@@ -116,7 +122,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         {
             //math for getting the scrollbar value of the mouse pos
             float  p = (e.getY() * max) / (myH - length);
-            setTargetValue((int) p - getHeight()/2 - length); //this needs some work
+            setTargetValue((int) p - length/2); //this needs some work
         }
     }
     public void mouseMoved(MouseEvent e) {}
@@ -128,7 +134,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         int pu = myH; //pre-update value
         myH = (int)getSize().getHeight() - inset*2;
 
-        int temp = pu-myH;
+        int temp = (pu-myH);
 
         while(value > 0 && temp != 0) //Makes resizing make sense!
         {

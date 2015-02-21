@@ -22,13 +22,6 @@ public class NowPlaying
 
     public static BufferedImage getScaledAlbumArt(int w, int h)
     {
-        try {
-            return np_Song.getScaledAlbumArt(w, h);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
+        return np_Song.getScaledAlbumArt(w, h);
     }
 }

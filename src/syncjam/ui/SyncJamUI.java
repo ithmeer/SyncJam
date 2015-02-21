@@ -28,7 +28,7 @@ public class SyncJamUI extends JPanel
         playerUI = new InfoUI();
         c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(6,6,6,6);
+        c.insets = new Insets(8,8,8,8);
         c.weightx = 1.0;
         c.weighty = 0.0;
         c.ipadx = 0;
@@ -63,7 +63,7 @@ public class SyncJamUI extends JPanel
         playlistUI = new PlaylistUI();
         c.anchor = GridBagConstraints.PAGE_END;
         c.fill = GridBagConstraints.BOTH;
-        c.insets = new Insets(6,6,6,6);
+        c.insets = new Insets(8,8,8,8);
         c.weightx = 1.0;
         c.weighty = 1.0;
         c.ipadx = 0;
@@ -88,5 +88,6 @@ public class SyncJamUI extends JPanel
     {
         super.paintComponent(g);
         ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     }
 }
