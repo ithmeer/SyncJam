@@ -95,7 +95,7 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
         if(max != 0)
         {
             if(dragging) g.setColor(Colors.c_Foreground1);
-            int pob = (int)(((float)posOnBar/(float)max)*myW);
+            int pob = (int)( ( (float)posOnBar / (float)max ) * myW );
             g.fillRect(barXOffset+pob-1, barYOffset-4, 2, 11); //Draw notch on bar, draw Notch on bar
 
             drawValue(g);
@@ -115,11 +115,11 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
     @Override
     public void mousePressed(MouseEvent e)
     {
-        if(mouseY > barYOffset-4 && mouseY < barYOffset+10)
+        if(e.getY() > barYOffset-4 && e.getY() < barYOffset+10)
         {
-            if(mouseX > barXOffset && mouseX < barXOffset+myW)
+            if(e.getX() > barXOffset && e.getX() < barXOffset+myW)
             {
-                posOnBar = (mouseX - barXOffset) * max / myW;
+                posOnBar = (e.getX() - barXOffset) * max / myW;
                 dragging = true;
             }
         }
@@ -147,9 +147,7 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
     {
         if(dragging)
         {
-            mouseX = e.getX();
-            mouseY = e.getY();
-            posOnBar = (mouseX-barXOffset)*max/myW;
+            posOnBar = (e.getX() - barXOffset) * max/myW;
 
             if(posOnBar > max) posOnBar = max;
             else if (posOnBar < 0) posOnBar = 0;
@@ -159,9 +157,5 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
     }
 
     @Override
-    public void mouseMoved(MouseEvent e)
-    {
-        mouseX = e.getX();
-        mouseY = e.getY();
-    }
+    public void mouseMoved(MouseEvent e) {}
 }

@@ -31,15 +31,8 @@ public class PrevButton extends ButtonUI
     {
         x = getW()-(-x);
 
-        Polygon shape = new Polygon(
+        return new Polygon(
                 new int[]{x,            x,                  x - getW()/2},
                 new int[]{y + getH()/4, y + (getH()/4) * 3, y + getH()/2}, 3);
-        return shape;
-    }
-
-    public void update()
-    {
-        super.update();
-        repaint();
     }
 }

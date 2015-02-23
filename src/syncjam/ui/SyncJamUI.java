@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import syncjam.base.Updatable;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
 

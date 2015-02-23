@@ -2,7 +2,6 @@ package syncjam.ui;
 
 import syncjam.NowPlaying;
 import syncjam.Song;
-import syncjam.base.Updatable;
 import syncjam.ui.buttons.base.ScrollbarUI;
 
 import javax.swing.*;
@@ -34,7 +33,7 @@ public class PlaylistUI extends JPanel
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
 
-        for(int i = 1; i <= 15; i++)
+        for(int i = 1; i <= 30; i++)
             songs.add(new Song("Song " + i, "Artist", "Album", 60));
         //songs.set(0, new Song("05 Jam for Jerry.mp3"));
 
@@ -59,7 +58,7 @@ public class PlaylistUI extends JPanel
             if(songs.get(i) != null)
             {
                 drawAlbumArt(g, i);
-                //drawSongName(g, i);
+                drawSongName(g, i);
             }
         }
     }

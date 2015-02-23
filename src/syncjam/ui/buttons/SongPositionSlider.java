@@ -17,11 +17,13 @@ public class SongPositionSlider extends SliderUI
 
     public void paintComponent(Graphics g)
     {
-        if(NowPlaying.getSong()!= null) {
+        if(NowPlaying.getSong()!= null)
+        {
             setMaxValue(NowPlaying.getSongLength());
         }
 
-        if(NowPlaying.isPlaying && getValue() < getMaxValue()) {
+        if(NowPlaying.isPlaying && getValue() < getMaxValue())
+        {
             setValue(value + 1);
         }
 
@@ -31,13 +33,16 @@ public class SongPositionSlider extends SliderUI
     @Override
     protected void drawValue(Graphics g)
     {
-        g.setColor(Colors.c_Highlight);
-        g.drawString(getTimeStamp(this.getPosOnBar()), barXOffset, barYOffset - 9);
+        if(NowPlaying.getSong()!= null)
+        {
+            g.setColor(Colors.c_Highlight);
+            g.drawString(getTimeStamp(this.getPosOnBar()), barXOffset, barYOffset - 9);
 
-        g.setColor(Colors.c_Highlight);
-        String timeToMax = "-" + getTimeStamp(this.getMaxValue() - this.getPosOnBar());
-        int strWidth = g.getFontMetrics().stringWidth(timeToMax);
-        g.drawString(timeToMax,barXOffset + getW() - strWidth,barYOffset-9);
+            g.setColor(Colors.c_Highlight);
+            String timeToMax = "-" + getTimeStamp(this.getMaxValue() - this.getPosOnBar());
+            int strWidth = g.getFontMetrics().stringWidth(timeToMax);
+            g.drawString(timeToMax, barXOffset + getW() - strWidth, barYOffset - 9);
+        }
     }
     public String getTimeStamp(int seconds)
     {

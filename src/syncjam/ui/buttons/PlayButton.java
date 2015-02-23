@@ -16,29 +16,25 @@ public class PlayButton extends ButtonUI
 
     public void clicked()
     {
-        NowPlaying.isPlaying = !NowPlaying.isPlaying;
+        if(NowPlaying.getSong() != null)
+            NowPlaying.isPlaying = !NowPlaying.isPlaying;
     }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
-        if (!NowPlaying.isPlaying) {
+        if (!NowPlaying.isPlaying)
+        {
             Polygon playShape = new Polygon(
-                    new int[]{0, 0, 0 + getW()},
-                    new int[]{0, 0 + getH(), 0 + getH() / 2}, 3);
+                    new int[]{0, 0,      getW()},
+                    new int[]{0, getH(), getH() / 2}, 3);
             g.fillPolygon(playShape);
         }
-        if (NowPlaying.isPlaying)
+        else
         {
-            g.fillRect(0 + (getW() / 32) * 5, 0, getW() / 4, getH());
-            g.fillRect(0 + (getW() / 32) * 21, 0, getW() / 4, getH());
+            g.fillRect((getW() / 32) * 5,  0, getW() / 4, getH());
+            g.fillRect((getW() / 32) * 21, 0, getW() / 4, getH());
         }
-    }
-
-    public void update()
-    {
-        super.update();
-        repaint();
     }
 }

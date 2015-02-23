@@ -1,7 +1,5 @@
 package syncjam;
 
-import syncjam.base.Ticker;
-import syncjam.base.Updatable;
 import syncjam.ui.SyncJamUI;
 import syncjam.ui.WindowObject;
 
@@ -9,7 +7,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SyncJam implements Updatable
+public class SyncJam
 {
     private SyncJamUI mainWindow = null;
 
@@ -40,7 +38,7 @@ public class SyncJam implements Updatable
         timer.start();
 
 
-        NowPlaying.setSong(new Song("Spectrum", "Shook", "Spectrum", 324));
+        //NowPlaying.setSong(new Song("Spectrum", "Shook", "Spectrum", 324));
         //NowPlaying.setSong(new Song("05 Jam for Jerry.mp3"));
     }
 

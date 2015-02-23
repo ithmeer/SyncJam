@@ -29,15 +29,8 @@ public class NextButton extends ButtonUI
 
     public Polygon arrowShape(int x, int y)
     {
-        Polygon shape = new Polygon(
+        return new Polygon(
                 new int[]{x,            x,                  x + getW()/2},
                 new int[]{y + getH()/4, y + (getH()/4) * 3, y + getH()/2}, 3);
-        return shape;
-    }
-
-    public void update()
-    {
-        super.update();
-        repaint();
     }
 }

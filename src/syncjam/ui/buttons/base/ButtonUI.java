@@ -1,6 +1,5 @@
 package syncjam.ui.buttons.base;
 
-import syncjam.base.Updatable;
 import syncjam.ui.Colors;
 
 import javax.swing.*;
@@ -8,7 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ButtonUI extends JButton implements Updatable, ActionListener
+public class ButtonUI extends JButton implements ActionListener
 {
     private int myW, myH;
     private Color background;
@@ -59,15 +58,5 @@ public class ButtonUI extends JButton implements Updatable, ActionListener
             g.setColor(Colors.c_Highlight);
         else
             g.setColor(Colors.c_Foreground2);
-    }
-
-    public void update()
-    {
-        /*if (hovering && Mouse.pressed(0))
-        {
-            Mouse.releaseAll();
-            clicked();
-        } */
-        repaint();
     }
 }

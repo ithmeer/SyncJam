@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import syncjam.base.Updatable;
 import syncjam.ui.buttons.NextButton;
 import syncjam.ui.buttons.PlayButton;
 import syncjam.ui.buttons.PrevButton;
@@ -9,7 +8,7 @@ import syncjam.ui.buttons.base.ButtonUI;
 import javax.swing.*;
 import java.awt.*;
 
-public class ControlUI extends JPanel implements Updatable
+public class ControlUI extends JPanel
 {
     private int myW, myH;
     private ButtonUI playButton, prevButton, nexButton;
@@ -36,10 +35,5 @@ public class ControlUI extends JPanel implements Updatable
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-    }
-    @Override
-    public void update()
-    {
-        //playButton.update();
     }
 }
