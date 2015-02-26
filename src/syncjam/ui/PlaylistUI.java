@@ -95,7 +95,6 @@ public class PlaylistUI extends JPanel
         Colors.setFont(g, 14);
         int textHeight = g.getFontMetrics().getHeight();
         int textWidth = g.getFontMetrics().stringWidth(""+(i+1));
-        System.out.println(i+1);
         g.drawString(""+(i+1),
                      xOffset - textWidth+20,
                      curItemYPos + itemHeight/4 + textHeight/2);
