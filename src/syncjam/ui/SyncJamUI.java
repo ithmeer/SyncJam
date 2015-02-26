@@ -2,6 +2,7 @@ package syncjam.ui;
 
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
+import syncjam.ui.buttons.base.VerticalSliderUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,42 @@ public class SyncJamUI extends JPanel
 
     public SyncJamUI()
     {
-        window = new WindowObject(this, 360, 500);
+        window = new WindowObject(360, 500);
+
+        //Window Stuff
+
+        GridBagConstraints w = new GridBagConstraints();
+        window.setLayout(new GridBagLayout());
+
+        w.anchor = GridBagConstraints.PAGE_START;
+        w.fill = GridBagConstraints.BOTH;
+        w.weightx = 1.0;
+        w.weighty = 1.0;
+        w.gridx = 0;
+        w.gridy = 0;
+        window.add(this, w);
+
+        JPanel sidepanel = tempPanel(40,window.getHeight());
+        sidepanel.setLayout(new GridBagLayout());
+        w.fill = GridBagConstraints.NONE;
+        w.weightx = 1.0;
+        w.weighty = 1.0;
+        w.ipadx = 12;
+        w.ipady = 150;
+        //w.insets = new Insets(0,0,window.getHeight()-200,0);
+        sidepanel.add(new VerticalSliderUI(50, 100), w);
+
+        //w.anchor = GridBagConstraints.PAGE_START;
+        w.fill = GridBagConstraints.VERTICAL;
+        w.weightx = 0.0;
+        w.weighty = 1.0;
+        w.gridx = 1;
+        w.gridy = 0;
+        window.add(sidepanel, w);
+
+        window.open();
+
+        //Player Section
 
         this.setBackground(Colors.c_Background1);
 
@@ -27,7 +63,7 @@ public class SyncJamUI extends JPanel
         playerUI = new InfoUI();
         c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(8,8,8,8);
+        c.insets = new Insets(8,8,0,8);
         c.weightx = 1.0;
         c.weighty = 0.0;
         c.ipadx = 0;
@@ -79,7 +115,9 @@ public class SyncJamUI extends JPanel
     {
         JPanel t = new JPanel();
         t.setMinimumSize(new Dimension(w, h));
-        t.setBackground(Colors.c_Background2);
+        t.setBackground(Colors.c_Background1);
+        t.validate();
+        t.repaint();
         return t;
     }
 

@@ -1,7 +1,6 @@
 package syncjam.ui;
 
 import syncjam.NowPlaying;
-import syncjam.base.Updatable;
 
 import javax.swing.*;
 import java.awt.*;

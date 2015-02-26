@@ -28,6 +28,7 @@ public class ButtonUI extends JButton implements ActionListener
         this.setPreferredSize(new Dimension(myW, myH));
         this.setBorderPainted(false);
         this.setFocusPainted(false);
+        this.setFocusable(false);
         background = bg;
 
     }
@@ -53,9 +54,9 @@ public class ButtonUI extends JButton implements ActionListener
         g.fillRect(0,0,getWidth(),getHeight());
 
         if (getModel().isPressed())
-            g.setColor(Colors.c_Foreground1);
-        else if (getModel().isRollover())
             g.setColor(Colors.c_Highlight);
+        else if (getModel().isRollover())
+            g.setColor(Colors.c_Foreground1);
         else
             g.setColor(Colors.c_Foreground2);
     }
