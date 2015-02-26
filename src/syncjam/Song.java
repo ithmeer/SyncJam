@@ -25,16 +25,20 @@ public class Song
 
     // !!!! This is for you, cat !!!!
 
+    public Song(String filePath)
+    {
+        this(new File(filePath));
+    }
+
     /**
      * Read song from file and set song info.
-     * @param fileName path to file
      */
-    public Song(String fileName)
+    public Song(File file)
     {
-        String[] parts = fileName.split("\\.");
+        String[] parts = file.getName().split("\\.");
 
         // not mp3, just set name
-        if (!parts[1].equals("mp3"))
+        if (!parts[parts.length - 1].equals("mp3"))
             songName = parts[0];
         else
         {
@@ -44,12 +48,12 @@ public class Song
             // open file, scanning for errors and fetching length
             try
             {
-                mp3 = new Mp3File(fileName);
+                mp3 = new Mp3File(file);
                 songLength = (int) mp3.getLengthInSeconds();
             }
             catch (Exception e)
             {
-                throw new RuntimeException("can't open file: " + fileName);
+                throw new RuntimeException("can't open file: " + file.getName());
             }
 
             if (mp3.hasId3v2Tag())
@@ -123,12 +127,16 @@ public class Song
         if (tags instanceof ID3v2)
         {
             ID3v2 tags2 = (ID3v2) tags;
-            try
+            byte[] image = tags2.getAlbumImage();
+            if (image != null)
             {
-                albumArt = ImageIO.read(new ByteArrayInputStream(tags2.getAlbumImage()));
-            } catch (IOException e)
-            {
-                // if we can't read, oh well
+                try
+                {
+                    albumArt = ImageIO.read(new ByteArrayInputStream(image));
+                } catch (IOException e)
+                {
+                    // if we can't read, oh well
+                }
             }
         }
     }
