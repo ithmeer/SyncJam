@@ -39,8 +39,8 @@ public class PlaylistUI extends JPanel
 
         //for(int i = 1; i <= 20; i++)
         //    songs.add(new Song("Song " + i, "Artist", "Album", 60));
-        //songs.add(new Song("05 Jam for Jerry.mp3"));
-        //NowPlaying.setSong(songs.get(0));
+        songs.add(new Song("05 Jam for Jerry.mp3"));
+        NowPlaying.setSong(songs.get(0));
 
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override

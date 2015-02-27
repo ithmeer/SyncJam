@@ -39,6 +39,10 @@ public class AudioController
         if (container.open(fileName, IContainer.Type.READ, null) < 0)
             throw new IllegalArgumentException("could not open file: " + fileName);
 
+        //yo
+        //System.out.println("Now Playing: " + song.getArtistName() + " - " + song.getSongName());
+        //hey
+
         int numStreams = container.getNumStreams();
 
         int audioStreamId = -1;
@@ -77,6 +81,9 @@ public class AudioController
                     int bytesDecoded = audioCoder.decodeAudio(samples, packet, offset);
                     if (bytesDecoded < 0)
                         throw new RuntimeException("got error decoding audio in: " + fileName);
+
+                    //NowPlaying.songPosition = (double)packet.getTimeStamp() / ( (double)song_to_play.getSongLength() / packet.getTimeBase().getDouble() );
+
                     offset += bytesDecoded;
                     if (samples.isComplete())
                     {
