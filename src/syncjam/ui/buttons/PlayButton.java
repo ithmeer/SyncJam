@@ -17,7 +17,7 @@ public class PlayButton extends ButtonUI
     public void clicked()
     {
         if(NowPlaying.getSong() != null)
-            NowPlaying.isPlaying = !NowPlaying.isPlaying;
+            NowPlaying.playToggle();
     }
 
     public void paintComponent(Graphics g)

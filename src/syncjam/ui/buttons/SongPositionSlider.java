@@ -24,7 +24,7 @@ public class SongPositionSlider extends SliderUI
 
         if(NowPlaying.isPlaying && getValue() < getMaxValue())
         {
-            setValue(value + 1);
+            setValue((int) (NowPlaying.songPosition * max));
         }
 
         super.paintComponent(g);
