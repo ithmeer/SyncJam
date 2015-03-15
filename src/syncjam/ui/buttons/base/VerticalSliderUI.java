@@ -132,7 +132,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
         if(dragging)
         {
             dragging = false;
-            value = posOnBar;
+            setValue(posOnBar);
         }
 
     }
@@ -147,7 +147,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
             if(posOnBar > max) posOnBar = max;
             else if (posOnBar < 0) posOnBar = 0;
 
-            if(updateWhileDragging) value = posOnBar;
+            if(updateWhileDragging) setValue(posOnBar);
 
             repaint();
         }

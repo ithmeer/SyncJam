@@ -43,4 +43,9 @@ public class NowPlaying
     {
         controller = au;
     }
+
+    public static void setVolume(int value)
+    {
+        controller.setVolume(value);
+    }
 }
