@@ -1,7 +1,6 @@
 package syncjam;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class NowPlaying
 {

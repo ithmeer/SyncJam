@@ -20,12 +20,6 @@ public class SyncJam
     {
         mainWindow = new SyncJamUI();
 
-        /*
-        Ticker t = new Ticker(this, 30);
-        Thread th = new Thread(t);
-        th.start();
-        */
-
         Timer timer = new Timer(1000/60,new ActionListener()
         {
             public void actionPerformed(ActionEvent event)
@@ -36,12 +30,7 @@ public class SyncJam
 
         timer.setRepeats(true);
         timer.start();
-
-
-        //NowPlaying.setSong(new Song("Spectrum", "Shook", "Spectrum", 324));
-        //NowPlaying.setSong(new Song("05 Jam for Jerry.mp3"));
     }
-
     public void update()
     {
         mainWindow.repaint();

@@ -6,9 +6,11 @@ import syncjam.ui.buttons.base.VerticalSliderUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 
-public class SyncJamUI extends JPanel
+public class SyncJamUI extends JPanel implements KeyListener
 {
     public WindowObject window = null;
     private InfoUI playerUI = null;
@@ -21,6 +23,8 @@ public class SyncJamUI extends JPanel
         window = new WindowObject(360, 500);
 
         //Window Stuff
+
+        window.addKeyListener(this);
 
         GridBagConstraints w = new GridBagConstraints();
         window.setLayout(new GridBagLayout());
@@ -126,5 +130,22 @@ public class SyncJamUI extends JPanel
         super.paintComponent(g);
         ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    }
+
+    public void keyTyped(KeyEvent e) {}
+
+    @Override
+    public void keyPressed(KeyEvent e)
+    {
+        /* placeyholder
+        if(e.getKeyCode() == KeyEvent.VK_U)
+        {
+        }
+        */
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 }

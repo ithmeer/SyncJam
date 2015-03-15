@@ -1,9 +1,9 @@
 package syncjam.ui;
 
 import syncjam.NowPlaying;
+import syncjam.Playlist;
 import syncjam.Song;
 import syncjam.ui.buttons.base.ScrollbarUI;
-import syncjam.ui.FileDrop;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -12,7 +12,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
 
 public class PlaylistUI extends JPanel
 {
@@ -23,7 +22,6 @@ public class PlaylistUI extends JPanel
     private int curItemYPos = 0;
 
     private ScrollbarUI scrollbar;
-    private ArrayList<Song> songs = new ArrayList<Song>();
 
     public PlaylistUI()
     {
@@ -36,11 +34,6 @@ public class PlaylistUI extends JPanel
 
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
-
-        //for(int i = 1; i <= 20; i++)
-        //    songs.add(new Song("Song " + i, "Artist", "Album", 60));
-        //songs.add(new Song("05 Jam for Jerry.mp3"));
-        //NowPlaying.setSong(songs.get(0));
 
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
@@ -58,7 +51,9 @@ public class PlaylistUI extends JPanel
             {
                 for(int i = 0; i < files.length; i++)
                 {
-                    songs.add(new Song(files[i]));
+                    int b = Playlist.size();
+                    Playlist.add(new Song(files[i]));
+                    if(b < 1) NowPlaying.setSong(Playlist.getNextSong()); //if adding first song, send to NowPlaying
                 }
             }
         });
@@ -67,12 +62,12 @@ public class PlaylistUI extends JPanel
     {
         super.paintComponent(g);
 
-        scrollbar.setMaxValue(songs.size() * itemHeight + yOffset*2);
+        scrollbar.setMaxValue(Playlist.size() * itemHeight + yOffset*2);
 
-        for(int i = 0; i < songs.size(); i++)
+        for(int i = 0; i < Playlist.size(); i++)
         {
             curItemYPos = (yOffset + (i * itemHeight)) - scrollbar.getValue();
-            if(songs.get(i) != null && (curItemYPos+itemHeight > 0 && curItemYPos < getHeight()))
+            if(Playlist.get(i) != null && (curItemYPos+itemHeight > 0 && curItemYPos < getHeight()))
             {
                 drawSongNum(g,i);
                 drawAlbumArt(g, i);
@@ -80,7 +75,7 @@ public class PlaylistUI extends JPanel
                 drawSongName(g, i);
                 drawSongLength(g, i);
 
-                if(NowPlaying.getSong() == songs.get(i))
+                if(NowPlaying.getSong() == Playlist.get(i))
                 {
                     g.setColor(Colors.c_Highlight);
                     g.drawRect(xOffset,curItemYPos, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight);
@@ -91,82 +86,88 @@ public class PlaylistUI extends JPanel
     }
     private void drawSongNum(Graphics g, int i)
     {
-        g.setColor(Colors.c_Foreground2);
-        Colors.setFont(g, 14);
         int textHeight = g.getFontMetrics().getHeight();
         int textWidth = g.getFontMetrics().stringWidth(""+(i+1));
+
+        int thisItemXPos = xOffset - textWidth + 20;
+        int thisItemYPos = curItemYPos + itemHeight/4 + textHeight/2;
+
+        g.setColor(Colors.c_Foreground2);
+        Colors.setFont(g, 14);
         g.drawString(""+(i+1),
-                     xOffset - textWidth+20,
-                     curItemYPos + itemHeight/4 + textHeight/2);
+                     thisItemXPos,
+                     thisItemYPos);
     }
 
     private void drawAlbumArt(Graphics g, int i)
     {
-        int itemXPos = xOffset + 10;
-
         int ins = 5; //album art inset
-        g.drawRect(xOffset + ins + itemXPos,
-                   curItemYPos + ins,
+
+        int thisItemXPos = xOffset + ins + 18;
+        int thisItemYPos = curItemYPos + ins;
+
+        g.drawRect(thisItemXPos,
+                   thisItemYPos,
                    itemHeight - ins*2,
                    itemHeight - ins*2); //frame
 
         //draw dark color behind art
         g.setColor(Colors.c_Background1);
         int imgsize = itemHeight - ins * 2 - 2;
-        g.fillRect(xOffset + ins + itemXPos+1,
-                   curItemYPos + ins + 1,
+        g.fillRect(thisItemXPos+1,
+                   thisItemYPos + 1,
                    imgsize,
                    imgsize);
 
         //draw art
-        BufferedImage albumImg = songs.get(i).getScaledAlbumArt(imgsize+1, imgsize+1);
+        BufferedImage albumImg = Playlist.get(i).getScaledAlbumArt(imgsize+1, imgsize+1);
         if(albumImg != null)
             g.drawImage(albumImg,
-                        xOffset + ins + itemXPos+1,
-                        curItemYPos + ins + 1, null);
+                        thisItemXPos+1,
+                        thisItemYPos + 1, null);
     }
 
     private void drawArtistName(Graphics g, int i)
     {
-        int itemXPos = xOffset + itemHeight + 20;
+        int textHeight = g.getFontMetrics().getHeight();
+
+        int thisItemXPos = xOffset + itemHeight + 20;
+        int thisItemYPos = curItemYPos + itemHeight / 4 + textHeight / 2 - 2;
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
-        int textHeight = g.getFontMetrics().getHeight();
-        g.drawString(songs.get(i).getArtistName(),
-                itemXPos,
-                curItemYPos + itemHeight / 4 + textHeight / 2);
+        g.drawString(Playlist.get(i).getArtistName(), thisItemXPos, thisItemYPos);
     }
 
     private void drawSongName(Graphics g, int i)
     {
-        int itemXPos = xOffset + itemHeight + 20;
+        int textHeight = g.getFontMetrics().getHeight();
+
+        int thisItemXPos = xOffset + itemHeight + 18;
+        int thisItemYPos = curItemYPos + itemHeight / 2 + textHeight / 2 + 4;
 
         g.setColor(Colors.c_Foreground1);
         Colors.setFont(g, 19);
-        int textHeight = g.getFontMetrics().getHeight();
 
         String songName = cutStringToWidth(
-                songs.get(i).getSongName(),
+                Playlist.get(i).getSongName(),
                 g.getFontMetrics(),
-                getWidth() - itemXPos - scrollbar.getWidth());
-        g.drawString(songName,
-                     itemXPos,
-                     curItemYPos + itemHeight / 2 + textHeight / 2 + 4);
+                getWidth() - thisItemXPos - scrollbar.getWidth());
+
+        g.drawString(songName, thisItemXPos, thisItemYPos);
     }
 
     private void drawSongLength(Graphics g, int i)
     {
-        int itemXPos = getWidth() - scrollbar.getWidth() - 10;
-        curItemYPos = yOffset + i*itemHeight - (scrollbar.getValue());
+        int textHeight = g.getFontMetrics().getHeight();
+        int textWidth = g.getFontMetrics().stringWidth(Playlist.get(i).getSongLengthString());
+
+        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 10;
+        int thisItemYPos = curItemYPos + itemHeight / 4 + textHeight / 2 - 2;
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
-        int textHeight = g.getFontMetrics().getHeight();
-        int textWidth = g.getFontMetrics().stringWidth(songs.get(i).getSongLengthString());
-        g.drawString(songs.get(i).getSongLengthString(),
-                itemXPos - textWidth,
-                curItemYPos + itemHeight / 4 + textHeight / 2);
+        g.drawString(Playlist.get(i).getSongLengthString(), thisItemXPos, thisItemYPos);
     }
 
     private String cutStringToWidth(String str, FontMetrics f, int width)

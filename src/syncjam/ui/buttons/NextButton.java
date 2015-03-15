@@ -1,5 +1,7 @@
 package syncjam.ui.buttons;
 
+import syncjam.NowPlaying;
+import syncjam.Playlist;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
@@ -17,7 +19,10 @@ public class NextButton extends ButtonUI
         setPreferredSize(new Dimension(getW() + 19, getH()));
     }
 
-    public void clicked() {}
+    public void clicked()
+    {
+        NowPlaying.setSong(Playlist.getNextSong());
+    }
 
     public void paintComponent(Graphics g)
     {

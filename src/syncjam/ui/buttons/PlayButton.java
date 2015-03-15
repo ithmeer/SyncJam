@@ -1,6 +1,7 @@
 package syncjam.ui.buttons;
 
 import syncjam.NowPlaying;
+import syncjam.Playlist;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
@@ -18,6 +19,10 @@ public class PlayButton extends ButtonUI
     {
         if(NowPlaying.getSong() != null)
             NowPlaying.playToggle();
+        else
+        {
+            NowPlaying.setSong(Playlist.getNextSong());
+        }
     }
 
     public void paintComponent(Graphics g)
