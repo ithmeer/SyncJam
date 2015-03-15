@@ -13,6 +13,8 @@ public class AudioController
 {
     private SourceDataLine mLine;
 
+    private FloatControl volume;
+
     // block thread if stopped
     private final Semaphore sem = new Semaphore(1);
 
@@ -61,7 +63,11 @@ public class AudioController
      */
     public void setVolume(int level)
     {
-        FloatControl volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
+        if (level < 0)
+            level = 0;
+        else if (level > 100)
+            level = 100;
+
         volume.setValue(-80 + level * 4 / 5.0f);
     }
 
@@ -151,7 +157,8 @@ public class AudioController
             mLine = (SourceDataLine) AudioSystem.getLine(info);
             mLine.open(audioFormat);
             mLine.start();
-            setVolume(75);
+            volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
+            setVolume(50);
         } catch (LineUnavailableException e)
         {
             throw new RuntimeException("could not open audio line");
