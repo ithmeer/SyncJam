@@ -3,6 +3,8 @@ package syncjam;
 import com.xuggle.xuggler.*;
 
 import javax.sound.sampled.*;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Ithmeer on 2/19/2015.
@@ -11,19 +13,50 @@ public class AudioController
 {
     private SourceDataLine mLine;
 
-    /**
-     * Start or stop audio.
-     */
-    public void play(boolean start)
+    // block thread if stopped
+    private final Semaphore sem = new Semaphore(1);
+
+    private AtomicBoolean playing = new AtomicBoolean(true);
+
+    public AudioController()
     {
-        if (start)
+    }
+
+    /**
+     * Play audio and unblock thread.
+     */
+    public void play()
+    {
+        if (!playing.get())
+        {
+            playing.set(true);
             mLine.start();
-        else
+            sem.release();
+        }
+    }
+
+    /**
+     * Stop audio and block thread.
+     */
+    public void stop()
+    {
+        if (playing.get())
+        {
+            playing.set(false);
+            try
+            {
+                sem.acquire();
+            } catch (InterruptedException e)
+            {
+                // interrupted manually, just stop line
+            }
             mLine.stop();
+        }
     }
 
     /**
      * Set the volume.
+     *
      * @param level between 0 and 100
      */
     public void setVolume(int level)
@@ -82,7 +115,8 @@ public class AudioController
                     if (bytesDecoded < 0)
                         throw new RuntimeException("got error decoding audio in: " + fileName);
 
-                    //NowPlaying.songPosition = (double)packet.getTimeStamp() / ( (double)song_to_play.getSongLength() / packet.getTimeBase().getDouble() );
+                    //NowPlaying.songPosition = (double)packet.getTimeStamp() / ( (double)song_to_play.getSongLength
+                    // () / packet.getTimeBase().getDouble() );
 
                     offset += bytesDecoded;
                     if (samples.isComplete())
@@ -97,12 +131,10 @@ public class AudioController
         if (audioCoder != null)
         {
             audioCoder.close();
-            audioCoder = null;
         }
         if (container != null)
         {
             container.close();
-            container = null;
         }
     }
 
@@ -128,8 +160,23 @@ public class AudioController
 
     private void playJavaSound(IAudioSamples aSamples)
     {
-        byte[] rawBytes = aSamples.getData().getByteArray(0, aSamples.getSize());
-        mLine.write(rawBytes, 0, aSamples.getSize());
+        int written;
+        int length = aSamples.getSize();
+        byte[] rawBytes = aSamples.getData().getByteArray(0, length);
+
+        written = mLine.write(rawBytes, 0, length);
+        while (written != length)
+        {
+            try
+            {
+                sem.acquire();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+            written += mLine.write(rawBytes, written, length - written);
+            sem.release();
+        }
     }
 
     private void closeJavaSound()

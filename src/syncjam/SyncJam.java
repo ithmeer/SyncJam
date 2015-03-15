@@ -30,6 +30,12 @@ public class SyncJam
 
         timer.setRepeats(true);
         timer.start();
+
+        AudioController auCon = new AudioController();
+        NowPlaying.setController(auCon);
+
+        NowPlaying.setSong(new Song("song.mp3"));
+        auCon.playSong("song.mp3");
     }
     public void update()
     {

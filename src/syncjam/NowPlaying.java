@@ -4,8 +4,9 @@ import java.awt.image.BufferedImage;
 
 public class NowPlaying
 {
+    private static AudioController controller;
     private static Song np_Song;
-    public static boolean isPlaying = false;
+    public static boolean isPlaying = true;
     public static double songPosition;
 
     public static void setSong(Song song)       { np_Song = song; }
@@ -23,24 +24,23 @@ public class NowPlaying
     {
         if(!isPlaying)
         {
-            /*
-            if(AudioController.song_to_play == null)
-                AudioController.playSong(np_Song);
-            else
-                AudioController.play(true);
-            */
+            controller.play();
             isPlaying = true;
         }
         else
         {
-            //AudioController.play(false);
+            controller.stop();
             isPlaying = false;
         }
     }
 
-
     public static BufferedImage getScaledAlbumArt(int w, int h)
     {
         return np_Song.getScaledAlbumArt(w, h);
+    }
+
+    public static void setController(AudioController au)
+    {
+        controller = au;
     }
 }

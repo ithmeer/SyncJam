@@ -3,9 +3,7 @@ package syncjam;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 
@@ -17,11 +15,12 @@ import javax.imageio.ImageIO;
 
 public class Song
 {
-    private BufferedImage albumArt = null;
-    private String songName = "Untitled";
-    private String artistName = "";
-    private String albumName = "";
-    private int songLength = 0; //In seconds, can change if necessary
+    // effectively final
+    private volatile BufferedImage albumArt = null;
+    private final String songName;
+    private final String artistName;
+    private final String albumName;
+    private final int songLength; //In seconds, can change if necessary
 
     // !!!! This is for you, cat !!!!
 
@@ -36,10 +35,22 @@ public class Song
     public Song(File file)
     {
         String[] parts = file.getName().split("\\.");
+        try
+        {
+            new FileInputStream(file).read(new byte[(int) file.length()]);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
 
         // not mp3, just set name
         if (!parts[parts.length - 1].equals("mp3"))
+        {
             songName = parts[0];
+            artistName = "";
+            albumName = "";
+            songLength = 0;
+        }
         else
         {
             Mp3File mp3;
@@ -62,7 +73,34 @@ public class Song
                 tags = mp3.getId3v1Tag();
 
             if (tags != null)
-                readTags(tags);
+            {
+                songName = tags.getTitle();
+                albumName = tags.getAlbum();
+                artistName = tags.getArtist();
+
+                // read album art
+                if (tags instanceof ID3v2)
+                {
+                    ID3v2 tags2 = (ID3v2) tags;
+                    byte[] image = tags2.getAlbumImage();
+                    if (image != null)
+                    {
+                        try
+                        {
+                            albumArt = ImageIO.read(new ByteArrayInputStream(image));
+                        } catch (IOException e)
+                        {
+                            // if we can't read, oh well
+                        }
+                    }
+                }
+            }
+            else
+            {
+                songName = parts[0];
+                artistName = "";
+                albumName = "";
+            }
         }
     }
 
@@ -114,30 +152,5 @@ public class Song
         return bilinearScaleOp.filter(
                 this.getAlbumArt(),
                 new BufferedImage(width, height, this.getAlbumArt().getType()));
-    }
-
-    // Read tag info and initialize fields
-    private void readTags(ID3v1 tags)
-    {
-        songName = tags.getTitle();
-        albumName = tags.getAlbum();
-        artistName = tags.getArtist();
-
-        // read album art
-        if (tags instanceof ID3v2)
-        {
-            ID3v2 tags2 = (ID3v2) tags;
-            byte[] image = tags2.getAlbumImage();
-            if (image != null)
-            {
-                try
-                {
-                    albumArt = ImageIO.read(new ByteArrayInputStream(image));
-                } catch (IOException e)
-                {
-                    // if we can't read, oh well
-                }
-            }
-        }
     }
 }
