@@ -1,5 +1,6 @@
 package syncjam.ui;
 
+import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
 import syncjam.ui.buttons.base.VerticalSliderUI;
@@ -45,7 +46,7 @@ public class SyncJamUI extends JPanel implements KeyListener
         w.ipadx = 12;
         w.ipady = 150;
         //w.insets = new Insets(0,0,window.getHeight()-200,0);
-        sidepanel.add(new VerticalSliderUI(50, 100), w);
+        sidepanel.add(new VolumeSlider(50, 100), w);
 
         //w.anchor = GridBagConstraints.PAGE_START;
         w.fill = GridBagConstraints.VERTICAL;

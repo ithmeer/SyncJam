@@ -8,6 +8,10 @@ import syncjam.ui.buttons.base.VerticalSliderUI;
  */
 public class VolumeSlider extends VerticalSliderUI
 {
+    public VolumeSlider(int startValue, int maxValue)
+    {
+        super(startValue, maxValue, true);
+    }
     public void setValue(int n)
     {
         super.setValue(n);
