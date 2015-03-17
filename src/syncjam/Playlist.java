@@ -40,6 +40,6 @@ public class Playlist
 
     public int size()
     {
-        return songList.size();
+        return cache.size();
     }
 }

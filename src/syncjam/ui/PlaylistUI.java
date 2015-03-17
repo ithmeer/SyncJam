@@ -71,7 +71,7 @@ public class PlaylistUI extends JPanel
         {
             Song curSong = songIter.next();
             curItemYPos = (yOffset + (i * itemHeight)) - scrollbar.getValue();
-            if(curSong != null && curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
+            if(curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
             {
                 drawSong(g, i, curSong);
 
