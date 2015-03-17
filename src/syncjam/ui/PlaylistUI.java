@@ -69,10 +69,10 @@ public class PlaylistUI extends JPanel
         Iterator<Song> songIter = playlist.iterator();
         while (songIter.hasNext())
         {
+            Song curSong = songIter.next();
             curItemYPos = (yOffset + (i * itemHeight)) - scrollbar.getValue();
-            if(curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
+            if(curSong != null && curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
             {
-                Song curSong = songIter.next();
                 drawSong(g, i, curSong);
 
                 if(NowPlaying.getSong() == curSong)
