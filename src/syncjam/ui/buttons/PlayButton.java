@@ -36,7 +36,7 @@ public class PlayButton extends ButtonUI
     {
         super.paintComponent(g);
 
-        if (!NowPlaying.isPlaying)
+        if (!NowPlaying.isPlaying())
         {
             Polygon playShape = new Polygon(
                     new int[]{0, 0,      getW()},

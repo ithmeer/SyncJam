@@ -80,7 +80,13 @@ public class AudioController
         volume.setValue(-80 + level * 4 / 5.0f);
     }
 
-    public void skip()
+    public void next()
+    {
+        pause();
+        mainThread.interrupt();
+    }
+
+    public void prev()
     {
         pause();
         mainThread.interrupt();
@@ -188,7 +194,10 @@ outer:  while (container.readNextPacket(packet) >= 0)
         {
             mLine = (SourceDataLine) AudioSystem.getLine(info);
             mLine.open(audioFormat);
-            mLine.start();
+            if (playing.get())
+            {
+                mLine.start();
+            }
             volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
             setVolume(50);
         } catch (LineUnavailableException e)
@@ -214,11 +223,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
 
     private void closeJavaSound()
     {
-        if (mLine != null)
-        {
-            mLine.drain();
-            mLine.close();
-            mLine = null;
-        }
+        mLine.drain();
+        mLine.close();
     }
 }

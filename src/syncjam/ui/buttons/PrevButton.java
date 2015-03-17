@@ -25,7 +25,7 @@ public class PrevButton extends ButtonUI
 
     public void clicked()
     {
-        //NowPlaying.setSong(playlist.getPrevSong());
+        NowPlaying.prevSong();
     }
 
     public void paintComponent(Graphics g)

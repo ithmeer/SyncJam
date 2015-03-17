@@ -29,6 +29,10 @@ public class Playlist
 
     public Song take() throws InterruptedException
     {
+        if (songList.isEmpty())
+        {
+            NowPlaying.playToggle();
+        }
         Song next = songList.take();
         return next;
     }

@@ -1,12 +1,13 @@
 package syncjam;
 
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NowPlaying
 {
     private static AudioController controller;
     private volatile static Song np_Song;
-    public static boolean isPlaying = true;
+    private static AtomicBoolean isPlaying = new AtomicBoolean(false);
     public static double songPosition;
 
     public static void setSong(Song song)
@@ -23,23 +24,32 @@ public class NowPlaying
     public static int getSongLength()           { return np_Song.getSongLength(); }
     public static String getSongLengthString()  { return np_Song.getSongLengthString(); }
 
+    public static boolean isPlaying()
+    {
+        return isPlaying.get();
+    }
+
     public static void playToggle()
     {
-        if(!isPlaying)
+        if(!isPlaying.get())
         {
             controller.play();
-            isPlaying = true;
+            isPlaying.set(true);
         }
         else
         {
             controller.pause();
-            isPlaying = false;
+            isPlaying.set(false);
         }
     }
 
     public static void nextSong()
     {
-        controller.skip();
+        controller.next();
+    }
+
+    public static void prevSong()
+    {
     }
 
     public static BufferedImage getScaledAlbumArt(int w, int h)

@@ -22,7 +22,7 @@ public class SongPositionSlider extends SliderUI
             setMaxValue(NowPlaying.getSongLength());
         }
 
-        if(NowPlaying.isPlaying && getValue() < getMaxValue())
+        if(NowPlaying.isPlaying() && getValue() < getMaxValue())
         {
             //setValue((int) (NowPlaying.songPosition * max));
         }
