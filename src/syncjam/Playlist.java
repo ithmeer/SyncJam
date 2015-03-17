@@ -1,6 +1,7 @@
 package syncjam;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -8,13 +9,14 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class Playlist
 {
-    private ArrayList<Song> songList = new ArrayList<Song>();
+    private final LinkedBlockingDeque<Song> songList = new LinkedBlockingDeque<Song>();
+    private final LinkedList<Song> cache = new LinkedList<Song>();
 
     private int currentSong = -1;
 
-    public void add(Song s)
+    public void offer(Song s)
     {
-        songList.add(s);
+        songList.offer(s);
     }
 
     public void remove(int i)
@@ -24,38 +26,16 @@ public class Playlist
             currentSong -= 1;
     }
 
-    public Song get(int i)
+    public Song take() throws InterruptedException
     {
-        return songList.get(i);
+        Song next = songList.take();
+        cache.add(next);
+        return next;
     }
 
-    public Song getSong()
+    public Iterator<Song> iterator()
     {
-        if(songList.size() == 0) return null;
-
-        return songList.get(currentSong);
-    }
-
-    public Song getNextSong()
-    {
-        if(songList.size() == 0) return null;
-
-        if(currentSong < songList.size()-1)
-        {
-            currentSong++;
-        }
-        return songList.get(currentSong);
-    }
-
-    public Song getPrevSong()
-    {
-        if(songList.size() == 0) return null;
-
-        if(currentSong > 0)
-        {
-            currentSong--;
-        }
-        return songList.get(currentSong);
+        return songList.iterator();
     }
 
     public int size()

@@ -28,7 +28,7 @@ public class PlayButton extends ButtonUI
             NowPlaying.playToggle();
         else
         {
-            NowPlaying.setSong(playlist.getNextSong());
+            //NowPlaying.setSong(playlist.getNextSong());
         }
     }
 

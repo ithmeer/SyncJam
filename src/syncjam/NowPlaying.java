@@ -5,11 +5,14 @@ import java.awt.image.BufferedImage;
 public class NowPlaying
 {
     private static AudioController controller;
-    private static Song np_Song;
+    private volatile static Song np_Song;
     public static boolean isPlaying = true;
     public static double songPosition;
 
-    public static void setSong(Song song)       { np_Song = song; }
+    public static void setSong(Song song)
+    {
+        np_Song = song;
+    }
     public static Song getSong()                { return np_Song; }
     public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
 
@@ -29,9 +32,14 @@ public class NowPlaying
         }
         else
         {
-            controller.stop();
+            controller.pause();
             isPlaying = false;
         }
+    }
+
+    public static void nextSong()
+    {
+        controller.skip();
     }
 
     public static BufferedImage getScaledAlbumArt(int w, int h)

@@ -3,25 +3,33 @@ package syncjam;
 import com.xuggle.xuggler.*;
 
 import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Class to control playing of audio.
  * Created by Ithmeer on 2/19/2015.
  */
 public class AudioController
 {
-    private SourceDataLine mLine;
+    private volatile SourceDataLine mLine;
 
-    private FloatControl volume;
+    private volatile FloatControl volume;
+
+    private final Playlist playlist;
+
+    private final Thread mainThread;
 
     // block thread if stopped
     private final Semaphore sem = new Semaphore(1);
 
     private AtomicBoolean playing = new AtomicBoolean(true);
 
-    public AudioController()
+    public AudioController(Playlist pl)
     {
+        playlist = pl;
+        mainThread = Thread.currentThread();
     }
 
     /**
@@ -40,7 +48,7 @@ public class AudioController
     /**
      * Stop audio and block thread.
      */
-    public void stop()
+    public void pause()
     {
         if (playing.get())
         {
@@ -71,16 +79,37 @@ public class AudioController
         volume.setValue(-80 + level * 4 / 5.0f);
     }
 
-    public void playSong(String fileName)
+    public void skip()
+    {
+        pause();
+        mainThread.interrupt();
+    }
+
+    public void start()
+    {
+        while (true)
+        {
+            try
+            {
+                Song next = playlist.take();
+                NowPlaying.setSong(next);
+                playSong(next);
+            } catch (InterruptedException e)
+            {
+                // quit if interrupted
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
+    public void playSong(Song song)
     {
         // Create a Xuggler container object
         IContainer container = IContainer.make();
-        if (container.open(fileName, IContainer.Type.READ, null) < 0)
-            throw new IllegalArgumentException("could not open file: " + fileName);
-
-        //yo
-        //System.out.println("Now Playing: " + song.getArtistName() + " - " + song.getSongName());
-        //hey
+        ByteArrayInputStream source = new ByteArrayInputStream(song.getData());
+        if (container.open(source, null) < 0)
+            throw new IllegalArgumentException("could not open song: " + song.getSongName());
 
         int numStreams = container.getNumStreams();
 
@@ -99,15 +128,15 @@ public class AudioController
             }
         }
         if (audioStreamId == -1)
-            throw new RuntimeException("could not find audio stream in container: " + fileName);
+            throw new RuntimeException("could not find audio stream in container: " + song.getSongName());
 
         if (audioCoder.open(null, null) < 0)
-            throw new RuntimeException("could not open audio decoder for container: " + fileName);
+            throw new RuntimeException("could not open audio decoder for container: " + song.getSongName());
 
         openJavaSound(audioCoder);
 
         IPacket packet = IPacket.make();
-        while (container.readNextPacket(packet) >= 0)
+outer:  while (container.readNextPacket(packet) >= 0)
         {
             if (packet.getStreamIndex() == audioStreamId)
             {
@@ -119,7 +148,7 @@ public class AudioController
                 {
                     int bytesDecoded = audioCoder.decodeAudio(samples, packet, offset);
                     if (bytesDecoded < 0)
-                        throw new RuntimeException("got error decoding audio in: " + fileName);
+                        throw new RuntimeException("got error decoding audio in: " + song.getSongName());
 
                     //NowPlaying.songPosition = (double)packet.getTimeStamp() / ( (double)song_to_play.getSongLength
                     // () / packet.getTimeBase().getDouble() );
@@ -127,21 +156,24 @@ public class AudioController
                     offset += bytesDecoded;
                     if (samples.isComplete())
                     {
-                        playJavaSound(samples);
+                        try
+                        {
+                            playJavaSound(samples);
+                        } catch (InterruptedException e)
+                        {
+                            Thread.interrupted();
+                            play();
+                            // stop playing if interrupted
+                            break outer;
+                        }
                     }
                 }
             }
         }
-        closeJavaSound();
 
-        if (audioCoder != null)
-        {
-            audioCoder.close();
-        }
-        if (container != null)
-        {
-            container.close();
-        }
+        closeJavaSound();
+        audioCoder.close();
+        container.close();
     }
 
     private void openJavaSound(IStreamCoder aAudioCoder)
@@ -165,7 +197,7 @@ public class AudioController
         }
     }
 
-    private void playJavaSound(IAudioSamples aSamples)
+    private void playJavaSound(IAudioSamples aSamples) throws InterruptedException
     {
         int written;
         int length = aSamples.getSize();
@@ -174,13 +206,7 @@ public class AudioController
         written = mLine.write(rawBytes, 0, length);
         while (written != length)
         {
-            try
-            {
-                sem.acquire();
-            } catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
+            sem.acquire();
             written += mLine.write(rawBytes, written, length - written);
             sem.release();
         }

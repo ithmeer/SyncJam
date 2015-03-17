@@ -52,8 +52,7 @@ public class Song
             artistName = "";
             albumName = "";
             songLength = 0;
-        }
-        else
+        } else
         {
             Mp3File mp3;
             ID3v1 tags = null;
@@ -63,8 +62,7 @@ public class Song
             {
                 mp3 = new Mp3File(file);
                 songLength = (int) mp3.getLengthInSeconds();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new RuntimeException("can't open file: " + file.getName());
             }
@@ -96,8 +94,7 @@ public class Song
                         }
                     }
                 }
-            }
-            else
+            } else
             {
                 songName = parts[0];
                 artistName = "";
@@ -122,6 +119,11 @@ public class Song
     public String getArtistName() {return artistName;}
 
     public String getAlbumName() {return albumName; }
+
+    public byte[] getData()
+    {
+        return songData;
+    }
 
     public int getSongLength() {return songLength;}
 
