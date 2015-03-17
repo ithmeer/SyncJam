@@ -58,7 +58,8 @@ public class AudioController
                 sem.acquire();
             } catch (InterruptedException e)
             {
-                // interrupted manually, just stop line
+                // this should be impossible
+                e.printStackTrace();
             }
             mLine.stop();
         }
@@ -97,7 +98,6 @@ public class AudioController
             } catch (InterruptedException e)
             {
                 // quit if interrupted
-                Thread.currentThread().interrupt();
                 return;
             }
         }

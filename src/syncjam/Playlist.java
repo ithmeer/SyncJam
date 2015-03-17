@@ -16,6 +16,7 @@ public class Playlist
 
     public void offer(Song s)
     {
+        cache.add(s);
         songList.offer(s);
     }
 
@@ -29,13 +30,12 @@ public class Playlist
     public Song take() throws InterruptedException
     {
         Song next = songList.take();
-        cache.add(next);
         return next;
     }
 
     public Iterator<Song> iterator()
     {
-        return songList.iterator();
+        return cache.iterator();
     }
 
     public int size()
