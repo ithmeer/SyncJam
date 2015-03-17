@@ -8,11 +8,18 @@ import java.awt.*;
 
 public class PlayButton extends ButtonUI
 {
+    private final Playlist playlist;
 
-    public PlayButton(int w, int h) { super(w, h); }
-    public PlayButton(int w, int h, Color c)
+    public PlayButton(int w, int h, Playlist pl)
+    {
+        super(w, h);
+        playlist = pl;
+    }
+
+    public PlayButton(int w, int h, Color c, Playlist pl)
     {
         super(w, h, c);
+        playlist = pl;
     }
 
     public void clicked()
@@ -21,7 +28,7 @@ public class PlayButton extends ButtonUI
             NowPlaying.playToggle();
         else
         {
-            NowPlaying.setSong(Playlist.getNextSong());
+            NowPlaying.setSong(playlist.getNextSong());
         }
     }
 

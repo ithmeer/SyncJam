@@ -18,7 +18,8 @@ public class SyncJam
 
     public SyncJam()
     {
-        mainWindow = new SyncJamUI();
+        Playlist playlist = new Playlist();
+        mainWindow = new SyncJamUI(playlist);
 
         Timer timer = new Timer(1000/60,new ActionListener()
         {

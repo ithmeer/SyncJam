@@ -8,20 +8,24 @@ import java.awt.*;
 
 public class NextButton extends ButtonUI
 {
-    public NextButton(int w, int h)
+    private final Playlist playlist;
+
+    public NextButton(int w, int h, Playlist pl)
     {
         super(w, h);
         setPreferredSize(new Dimension(getW() + 19, getH()));
+        playlist = pl;
     }
-    public NextButton(int w, int h, Color c)
+    public NextButton(int w, int h, Color c, Playlist pl)
     {
         super(w, h, c);
         setPreferredSize(new Dimension(getW() + 19, getH()));
+        playlist = pl;
     }
 
     public void clicked()
     {
-        NowPlaying.setSong(Playlist.getNextSong());
+        NowPlaying.setSong(playlist.getNextSong());
     }
 
     public void paintComponent(Graphics g)

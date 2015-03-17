@@ -8,20 +8,24 @@ import java.awt.*;
 
 public class PrevButton extends ButtonUI
 {
-    public PrevButton(int w, int h)
+    private final Playlist playlist;
+
+    public PrevButton(int w, int h, Playlist pl)
     {
         super(w, h);
         setPreferredSize(new Dimension(getW() + 20, getH()));
+        playlist = pl;
     }
-    public PrevButton(int w, int h, Color c)
+    public PrevButton(int w, int h, Color c, Playlist pl)
     {
         super(w, h, c);
         setPreferredSize(new Dimension(getW() + 20, getH()));
+        playlist = pl;
     }
 
     public void clicked()
     {
-        NowPlaying.setSong(Playlist.getPrevSong());
+        NowPlaying.setSong(playlist.getPrevSong());
     }
 
     public void paintComponent(Graphics g)

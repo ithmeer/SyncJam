@@ -1,5 +1,6 @@
 package syncjam.ui;
 
+import syncjam.Playlist;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
@@ -19,7 +20,7 @@ public class SyncJamUI extends JPanel implements KeyListener
     private PlaylistUI playlistUI = null;
     private SliderUI songPosition = null;
 
-    public SyncJamUI()
+    public SyncJamUI(Playlist pList)
     {
         window = new WindowObject(360, 500);
 
@@ -77,7 +78,7 @@ public class SyncJamUI extends JPanel implements KeyListener
         c.gridy = 0;
         this.add(playerUI, c);
 
-        controlUI = new ControlUI();
+        controlUI = new ControlUI(pList);
         c.anchor = GridBagConstraints.PAGE_START;
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
@@ -100,7 +101,7 @@ public class SyncJamUI extends JPanel implements KeyListener
         c.gridy = 2;
         this.add(songPosition, c);
 
-        playlistUI = new PlaylistUI();
+        playlistUI = new PlaylistUI(pList);
         c.anchor = GridBagConstraints.PAGE_END;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(8,8,8,8);

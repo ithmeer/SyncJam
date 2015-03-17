@@ -20,6 +20,7 @@ public class Song
     private final String songName;
     private final String artistName;
     private final String albumName;
+    private final byte[] songData;
     private final int songLength; //In seconds, can change if necessary
 
     // !!!! This is for you, cat !!!!
@@ -35,9 +36,10 @@ public class Song
     public Song(File file)
     {
         String[] parts = file.getName().split("\\.");
+        songData = new byte[(int) file.length()];
         try
         {
-            new FileInputStream(file).read(new byte[(int) file.length()]);
+            new FileInputStream(file).read(songData);
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -104,12 +106,13 @@ public class Song
         }
     }
 
-    public Song(String song, String artist, String album, int length)  //for testing
+    public Song(String song, String artist, String album, byte[] data, int length)  //for testing
     {
         songName = song;
         artistName = artist;
         albumName = album;
         songLength = length;
+        songData = data;
     }
 
     public BufferedImage getAlbumArt() {return albumArt; }

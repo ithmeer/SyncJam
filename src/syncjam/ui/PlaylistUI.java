@@ -21,9 +21,10 @@ public class PlaylistUI extends JPanel
 
     private int curItemYPos = 0;
 
-    private ScrollbarUI scrollbar;
+    private final ScrollbarUI scrollbar;
+    private final Playlist playlist;
 
-    public PlaylistUI()
+    public PlaylistUI(Playlist pList)
     {
         myW = 350;
         myH = 0;//440;
@@ -32,6 +33,7 @@ public class PlaylistUI extends JPanel
         setBackground(Colors.c_Background2);
         this.setLayout(new BorderLayout());
 
+        playlist = pList;
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
 
@@ -51,9 +53,9 @@ public class PlaylistUI extends JPanel
             {
                 for(int i = 0; i < files.length; i++)
                 {
-                    int b = Playlist.size();
-                    Playlist.add(new Song(files[i]));
-                    if(b < 1) NowPlaying.setSong(Playlist.getNextSong()); //if adding first song, send to NowPlaying
+                    int b = playlist.size();
+                    playlist.add(new Song(files[i]));
+                    if(b < 1) NowPlaying.setSong(playlist.getNextSong()); //if adding first song, send to NowPlaying
                 }
             }
         });
@@ -62,12 +64,13 @@ public class PlaylistUI extends JPanel
     {
         super.paintComponent(g);
 
-        scrollbar.setMaxValue(Playlist.size() * itemHeight + yOffset*2);
+        scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
 
-        for(int i = 0; i < Playlist.size(); i++)
+        //Iterator<Song>
+        for(int i = 0; i < playlist.size(); i++)
         {
             curItemYPos = (yOffset + (i * itemHeight)) - scrollbar.getValue();
-            if(Playlist.get(i) != null && (curItemYPos+itemHeight > 0 && curItemYPos < getHeight()))
+            if(playlist.get(i) != null && (curItemYPos+itemHeight > 0 && curItemYPos < getHeight()))
             {
                 drawSongNum(g,i);
                 drawAlbumArt(g, i);
@@ -75,7 +78,7 @@ public class PlaylistUI extends JPanel
                 drawSongName(g, i);
                 drawSongLength(g, i);
 
-                if(NowPlaying.getSong() == Playlist.get(i))
+                if(NowPlaying.getSong() == playlist.get(i))
                 {
                     g.setColor(Colors.c_Highlight);
                     g.drawRect(xOffset,curItemYPos, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight);
@@ -120,7 +123,7 @@ public class PlaylistUI extends JPanel
                    imgsize);
 
         //draw art
-        BufferedImage albumImg = Playlist.get(i).getScaledAlbumArt(imgsize+1, imgsize+1);
+        BufferedImage albumImg = playlist.get(i).getScaledAlbumArt(imgsize+1, imgsize+1);
         if(albumImg != null)
             g.drawImage(albumImg,
                         thisItemXPos+1,
@@ -136,7 +139,7 @@ public class PlaylistUI extends JPanel
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
-        g.drawString(Playlist.get(i).getArtistName(), thisItemXPos, thisItemYPos);
+        g.drawString(playlist.get(i).getArtistName(), thisItemXPos, thisItemYPos);
     }
 
     private void drawSongName(Graphics g, int i)
@@ -150,7 +153,7 @@ public class PlaylistUI extends JPanel
         Colors.setFont(g, 19);
 
         String songName = cutStringToWidth(
-                Playlist.get(i).getSongName(),
+                playlist.get(i).getSongName(),
                 g.getFontMetrics(),
                 getWidth() - thisItemXPos - scrollbar.getWidth());
 
@@ -160,14 +163,14 @@ public class PlaylistUI extends JPanel
     private void drawSongLength(Graphics g, int i)
     {
         int textHeight = g.getFontMetrics().getHeight();
-        int textWidth = g.getFontMetrics().stringWidth(Playlist.get(i).getSongLengthString());
+        int textWidth = g.getFontMetrics().stringWidth(playlist.get(i).getSongLengthString());
 
         int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 10;
         int thisItemYPos = curItemYPos + itemHeight / 4 + textHeight / 2 - 2;
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
-        g.drawString(Playlist.get(i).getSongLengthString(), thisItemXPos, thisItemYPos);
+        g.drawString(playlist.get(i).getSongLengthString(), thisItemXPos, thisItemYPos);
     }
 
     private String cutStringToWidth(String str, FontMetrics f, int width)
