@@ -4,7 +4,6 @@ import com.xuggle.xuggler.*;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
-import java.nio.ShortBuffer;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -26,8 +25,6 @@ public class AudioController
     private final Semaphore sem = new Semaphore(1);
 
     private boolean playing;
-
-    private volatile double vol = 0.5;
 
     public AudioController(Playlist pl)
     {
@@ -84,8 +81,7 @@ public class AudioController
         else if (level > 100)
             level = 100;
 
-        //volume.setValue(-80 + level * 4 / 5.0f);
-        vol = level / 100.0;
+        volume.setValue(-80 + level * 4 / 5.0f);
     }
 
     public void next()
@@ -233,7 +229,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
                 }
             }
             volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
-            setVolume(100);
+            setVolume(50);
         } catch (LineUnavailableException e)
         {
             throw new RuntimeException("could not open audio line");
@@ -244,11 +240,6 @@ outer:  while (container.readNextPacket(packet) >= 0)
     {
         int written;
         int length = aSamples.getSize();
-
-        ShortBuffer buffer = aSamples.getByteBuffer().asShortBuffer();
-        for (int i = 0; i < buffer.limit(); ++i)
-            buffer.put(i, (short)(buffer.get(i) * vol));
-
         byte[] rawBytes = aSamples.getData().getByteArray(0, length);
 
         written = mLine.write(rawBytes, 0, length);
