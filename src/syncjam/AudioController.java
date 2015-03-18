@@ -4,8 +4,8 @@ import com.xuggle.xuggler.*;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
+import java.nio.ShortBuffer;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class to control playing of audio.
@@ -19,27 +19,34 @@ public class AudioController
 
     private final Playlist playlist;
 
+    // need handle on the thread that drives this class
     private final Thread mainThread;
 
     // block thread if stopped
     private final Semaphore sem = new Semaphore(1);
 
-    private AtomicBoolean playing = new AtomicBoolean(true);
+    private boolean playing;
+
+    private volatile double vol = 0.5;
 
     public AudioController(Playlist pl)
     {
         playlist = pl;
         mainThread = Thread.currentThread();
+        synchronized (this)
+        {
+            playing = true;
+        }
     }
 
     /**
      * Play audio and unblock thread.
      */
-    public void play()
+    public synchronized void play()
     {
-        if (!playing.get())
+        if (!playing)
         {
-            playing.set(true);
+            playing = true;
             mLine.start();
             sem.release();
         }
@@ -48,11 +55,11 @@ public class AudioController
     /**
      * Stop audio and block thread.
      */
-    public void pause()
+    public synchronized void pause()
     {
-        if (playing.get())
+        if (playing)
         {
-            playing.set(false);
+            playing = false;
             try
             {
                 sem.acquire();
@@ -77,7 +84,8 @@ public class AudioController
         else if (level > 100)
             level = 100;
 
-        volume.setValue(-80 + level * 4 / 5.0f);
+        //volume.setValue(-80 + level * 4 / 5.0f);
+        vol = level / 100.0;
     }
 
     public void next()
@@ -192,14 +200,40 @@ outer:  while (container.readNextPacket(packet) >= 0)
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
         try
         {
+            /*Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+            System.out.println(
+                    "There are " + mixers.length + " mixer info objects");
+            for (Mixer.Info mixerInfo : mixers) {
+                System.out.println("mixer name: " + mixerInfo.getName());
+                Mixer mixer = AudioSystem.getMixer(mixerInfo);
+                Line.Info[] lineInfos = mixer.getSourceLineInfo();
+                for (Line.Info lineInfo : lineInfos) {
+                    System.out.println("  Line.Info: " + lineInfo);
+                    try {
+                        Line line = mixer.getLine(lineInfo);
+                        FloatControl volCtrl = (FloatControl)line.getControl(
+                                FloatControl.Type.VOLUME);
+                        System.out.println(
+                                "    volCtrl.getValue() = " + volCtrl.getValue());
+                    } catch (LineUnavailableException e) {
+                        e.printStackTrace();
+                    } catch (IllegalArgumentException iaEx) {
+                        System.out.println("    " + iaEx);
+                    }
+                }
+            }*/
+
             mLine = (SourceDataLine) AudioSystem.getLine(info);
             mLine.open(audioFormat);
-            if (playing.get())
+            synchronized (this)
             {
-                mLine.start();
+                if (playing)
+                {
+                    mLine.start();
+                }
             }
             volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
-            setVolume(50);
+            setVolume(100);
         } catch (LineUnavailableException e)
         {
             throw new RuntimeException("could not open audio line");
@@ -210,6 +244,11 @@ outer:  while (container.readNextPacket(packet) >= 0)
     {
         int written;
         int length = aSamples.getSize();
+
+        ShortBuffer buffer = aSamples.getByteBuffer().asShortBuffer();
+        for (int i = 0; i < buffer.limit(); ++i)
+            buffer.put(i, (short)(buffer.get(i) * vol));
+
         byte[] rawBytes = aSamples.getData().getByteArray(0, length);
 
         written = mLine.write(rawBytes, 0, length);

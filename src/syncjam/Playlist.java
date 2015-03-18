@@ -29,6 +29,7 @@ public class Playlist
 
     public Song take() throws InterruptedException
     {
+        // if empty, pause
         if (songList.isEmpty())
         {
             NowPlaying.playToggle();
