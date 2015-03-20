@@ -118,6 +118,18 @@ public class AudioController
         // Create a Xuggler container object
         IContainer container = IContainer.make();
         ByteArrayInputStream source = new ByteArrayInputStream(song.getData());
+        /*
+        IContainerFormat format = IContainerFormat.make();
+        for (IContainerFormat form : IContainerFormat.getInstalledInputFormats())
+        {
+            String name = form.getInputFormatLongName();
+            if (name.contains("FLAC"))
+                format = form;
+        }
+        format.setInputFormat("flac");
+        System.err.println(format.getInputFormatLongName());
+        System.err.println(format.isInput());
+        */
         if (container.open(source, null) < 0)
             throw new IllegalArgumentException("could not open song: " + song.getSongName());
 
@@ -160,7 +172,9 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     if (bytesDecoded < 0)
                         throw new RuntimeException("got error decoding audio in: " + song.getSongName());
 
-                    NowPlaying.setSongPosition((double) packet.getTimeStamp() / ((double)song.getSongLength() / packet.getTimeBase().getDouble()));
+                    int durationInSecs = (int) (container.getDuration() / 1000000);
+                    double curPos = packet.getTimeStamp() / (durationInSecs / packet.getTimeBase().getDouble());
+                    NowPlaying.setSongPosition(durationInSecs, curPos);
 
                     offset += bytesDecoded;
                     if (samples.isComplete())

@@ -9,6 +9,7 @@ public class NowPlaying
     private volatile static Song np_Song;
     private static AtomicBoolean isPlaying = new AtomicBoolean(false);
     private volatile static double songPosition = 0;
+    private volatile static int songLength = 0;
 
     public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
 
@@ -18,7 +19,11 @@ public class NowPlaying
 
     public static Song getSong()                { return np_Song; }
 
-    public static int getSongLength()           { return np_Song.getSongLength(); }
+    public static int getSongLength()
+    {
+        int length = np_Song.getSongLength();
+        return (length == 0) ? songLength : length;
+    }
 
     public static String getSongLengthString()  { return np_Song.getSongLengthString(); }
 
@@ -60,8 +65,14 @@ public class NowPlaying
         np_Song = song;
     }
 
-    public static void setSongPosition(double pos)
+    /**
+     * Set the current position in the song and provide length if needed.
+     * @param length
+     * @param pos
+     */
+    public static void setSongPosition(int length, double pos)
     {
+        songLength = length;
         songPosition = pos;
     }
 
