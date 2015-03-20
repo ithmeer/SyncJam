@@ -87,7 +87,7 @@ public class AudioController
 
         volumeLevel.set(level);
         if (volume != null)
-            volume.setValue(-80 + level * 4 / 5.0f);
+            volume.setValue(-60 + Math.round(Math.sqrt(level) * 6.0));
     }
 
     public void updateSong()
@@ -160,8 +160,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     if (bytesDecoded < 0)
                         throw new RuntimeException("got error decoding audio in: " + song.getSongName());
 
-                    //NowPlaying.songPosition = (double)packet.getTimeStamp() / ( (double)song_to_play.getSongLength
-                    // () / packet.getTimeBase().getDouble() );
+                    NowPlaying.setSongPosition((double) packet.getTimeStamp() / ((double)song.getSongLength() / packet.getTimeBase().getDouble()));
 
                     offset += bytesDecoded;
                     if (samples.isComplete())
