@@ -52,10 +52,12 @@ public class PlaylistUI extends JPanel
             @Override
             public void filesDropped(File[] files)
             {
+                Song[] songs = new Song[files.length];
                 for(int i = 0; i < files.length; i++)
                 {
-                    playlist.offer(new Song(files[i]));
+                    songs[i] = new Song(files[i]);
                 }
+                playlist.addAll(songs);
             }
         });
     }

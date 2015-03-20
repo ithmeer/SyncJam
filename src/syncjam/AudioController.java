@@ -4,7 +4,9 @@ import com.xuggle.xuggler.*;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class to control playing of audio.
@@ -15,6 +17,8 @@ public class AudioController
     private volatile SourceDataLine mLine;
 
     private volatile FloatControl volume;
+
+    private final AtomicInteger volumeLevel = new AtomicInteger(50);
 
     private final Playlist playlist;
 
@@ -81,16 +85,12 @@ public class AudioController
         else if (level > 100)
             level = 100;
 
-        volume.setValue(-80 + level * 4 / 5.0f);
+        volumeLevel.set(level);
+        if (volume != null)
+            volume.setValue(-80 + level * 4 / 5.0f);
     }
 
-    public void next()
-    {
-        pause();
-        mainThread.interrupt();
-    }
-
-    public void prev()
+    public void updateSong()
     {
         pause();
         mainThread.interrupt();
@@ -102,7 +102,7 @@ public class AudioController
         {
             try
             {
-                Song next = playlist.take();
+                Song next = playlist.getNextSong();
                 NowPlaying.setSong(next);
                 playSong(next);
             } catch (InterruptedException e)
@@ -229,7 +229,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
                 }
             }
             volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
-            setVolume(50);
+            setVolume(volumeLevel.get());
         } catch (LineUnavailableException e)
         {
             throw new RuntimeException("could not open audio line");

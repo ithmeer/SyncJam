@@ -43,13 +43,10 @@ public class NowPlaying
         }
     }
 
-    public static void nextSong()
+    public static void updateSong()
     {
-        controller.next();
-    }
-
-    public static void prevSong()
-    {
+        isPlaying.set(true);
+        controller.updateSong();
     }
 
     public static BufferedImage getScaledAlbumArt(int w, int h)

@@ -25,7 +25,7 @@ public class NextButton extends ButtonUI
 
     public void clicked()
     {
-        NowPlaying.nextSong();
+        playlist.nextSong();
     }
 
     public void paintComponent(Graphics g)
