@@ -14,10 +14,12 @@ import com.mpatric.mp3agic.Mp3File;
 
 import javax.imageio.ImageIO;
 
+/**
+ * A song to be played. The song data is stored as an array of bytes. Thread-safe.
+ */
 public class Song
 {
-    // effectively final
-    private volatile BufferedImage albumArt = null;
+    private volatile BufferedImage albumArt = null; // effectively final
     private final String songName;
     private final String artistName;
     private final String albumName;
@@ -25,11 +27,6 @@ public class Song
     private final AtomicInteger songLength = new AtomicInteger(0); //In seconds, can change if necessary
 
     // !!!! This is for you, cat !!!!
-
-    public Song(String filePath)
-    {
-        this(new File(filePath));
-    }
 
     /**
      * Read song from file and set song info.
@@ -111,10 +108,7 @@ public class Song
 
     public String getAlbumName() {return albumName; }
 
-    public byte[] getSongData()
-    {
-        return songData;
-    }
+    public byte[] getSongData() { return songData; }
 
     public int getSongLength() {return songLength.get();}
 

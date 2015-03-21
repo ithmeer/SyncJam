@@ -3,8 +3,9 @@ package syncjam;
 import java.util.*;
 
 /**
- * A list of songs to be played. Thread-safe. Assumes only one thread will call
+ * A list of songs to be played. Thread-safe.
  * Created by Marty on 2/26/2015.
+ * Modified by Ithmeer.
  */
 public class Playlist
 {
@@ -126,6 +127,7 @@ public class Playlist
         }
     }
 
+    // no need to synchronize, called from synchronized blocks
     private boolean waitingForSong()
     {
         return currentSong == songList.size();

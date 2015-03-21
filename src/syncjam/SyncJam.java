@@ -7,14 +7,12 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Main class for SyncJam.
+ */
 public class SyncJam
 {
-    private SyncJamUI mainWindow = null;
-
-    public static void main(String[] args)
-    {
-        SyncJam sj = new SyncJam();
-    }
+    private final SyncJamUI mainWindow;
 
     public SyncJam()
     {
@@ -25,7 +23,7 @@ public class SyncJam
         {
             public void actionPerformed(ActionEvent event)
             {
-                update();
+                mainWindow.repaint();
             }
         });
 
@@ -35,12 +33,10 @@ public class SyncJam
         AudioController auCon = new AudioController(playlist);
         NowPlaying.setController(auCon);
         auCon.start();
-
-        //NowPlaying.setSong(new Song("song.mp3"));
-        //auCon.playSong("song.mp3");
     }
-    public void update()
+
+    public static void main(String[] args)
     {
-        mainWindow.repaint();
+        new SyncJam();
     }
 }

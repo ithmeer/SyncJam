@@ -4,9 +4,13 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Static class to provide access to the currently playing song. Thread-safe. Expects that only one thread will ever
+ *     set a new song (the thread that drives AudioController).
+ */
 public class NowPlaying
 {
-    private static AudioController controller;
+    private volatile static AudioController controller;
     private volatile static Song np_Song;
     private static final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private static final AtomicInteger songPosition = new AtomicInteger(0);

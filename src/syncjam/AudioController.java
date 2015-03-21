@@ -9,7 +9,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Class to control playing of audio.
+ * Class to control playing of audio. Thread-safe.
  * Created by Ithmeer on 2/19/2015.
  */
 public class AudioController
