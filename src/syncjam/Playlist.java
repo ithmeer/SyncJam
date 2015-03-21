@@ -78,7 +78,7 @@ public class Playlist
             if (songList.isEmpty())
                 return;
         }
-        NowPlaying.updateSong();
+        setCurrentSong(currentSong);
     }
 
     public void prevSong()
@@ -87,9 +87,8 @@ public class Playlist
         {
             if (songList.isEmpty())
                 return;
-            currentSong -= 2;
         }
-        NowPlaying.updateSong();
+        setCurrentSong(currentSong - 2);
     }
 
     /**
