@@ -92,7 +92,6 @@ public class AudioController
 
     public void updateSong()
     {
-        NowPlaying.setSongPosition(0);
         pause();
         mainThread.interrupt();
     }
@@ -257,6 +256,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
             }
         }
 
+        NowPlaying.setSongPosition(0);
         closeJavaSound();
         audioCoder.close();
         container.close();
