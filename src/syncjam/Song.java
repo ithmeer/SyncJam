@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
@@ -21,7 +22,7 @@ public class Song
     private final String artistName;
     private final String albumName;
     private final byte[] songData;
-    private final int songLength; //In seconds, can change if necessary
+    private final AtomicInteger songLength = new AtomicInteger(0); //In seconds, can change if necessary
 
     // !!!! This is for you, cat !!!!
 
@@ -51,7 +52,6 @@ public class Song
             songName = parts[0];
             artistName = "";
             albumName = "";
-            songLength = 0;
         } else
         {
             Mp3File mp3;
@@ -61,7 +61,7 @@ public class Song
             try
             {
                 mp3 = new Mp3File(file);
-                songLength = (int) mp3.getLengthInSeconds();
+                songLength.set((int) mp3.getLengthInSeconds());
             } catch (Exception e)
             {
                 throw new RuntimeException("can't open file: " + file.getName());
@@ -116,19 +116,20 @@ public class Song
         return songData;
     }
 
-    public int getSongLength() {return songLength;}
+    public int getSongLength() {return songLength.get();}
 
     public String getSongLengthString()
     {
-        String length = "";
+        String lengthStr = "";
+        int length = songLength.get();
 
-        if (songLength > 3600)
-            length += (int) Math.floor(songLength / 3600) + ":"; //if longer or equal to an hour, include hour digit
+        if (length > 3600)
+            lengthStr += (int) Math.floor(length / 3600) + ":"; //if longer or equal to an hour, include hour digit
 
         Format timeFormat = new SimpleDateFormat("m:ss");
-        length += timeFormat.format(songLength * 1000); //format minutes:seconds
+        lengthStr += timeFormat.format(length * 1000); //format minutes:seconds
 
-        return length;
+        return lengthStr;
     }
 
     //snipped this from the internet cause it was a lot better than the stuff i was doing hahahahahaha
@@ -148,5 +149,10 @@ public class Song
         return bilinearScaleOp.filter(
                 this.getAlbumArt(),
                 new BufferedImage(width, height, this.getAlbumArt().getType()));
+    }
+
+    public void setSongLength(int lengthInSecs)
+    {
+        songLength.set(lengthInSecs);
     }
 }

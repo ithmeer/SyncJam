@@ -11,8 +11,6 @@ public class NowPlaying
     private static final AtomicBoolean isPlaying = new AtomicBoolean(false);
     private static final AtomicInteger songPosition = new AtomicInteger(0);
 
-    private volatile static int songLength = 0;
-
     public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
 
     public static String getAlbumName()         { return np_Song.getAlbumName(); }
@@ -21,17 +19,13 @@ public class NowPlaying
 
     public static Song getSong()                { return np_Song; }
 
-    public static int getSongLength()
-    {
-        int length = np_Song.getSongLength();
-        return (length == 0) ? songLength : length;
-    }
+    public static int getSongLength()           { return np_Song.getSongLength(); }
 
     public static String getSongLengthString()  { return np_Song.getSongLengthString(); }
 
     public static String getSongName()          { return np_Song.getSongName(); }
 
-    public static int getSongPosition()             { return songPosition.get(); }
+    public static int getSongPosition()         { return songPosition.get(); }
 
     public static BufferedImage getScaledAlbumArt(int w, int h)
     {
@@ -65,11 +59,6 @@ public class NowPlaying
     public static void setSong(Song song)
     {
         np_Song = song;
-    }
-
-    public static void setSongDuration(int dur)
-    {
-        songLength = dur;
     }
 
     /**

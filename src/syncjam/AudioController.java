@@ -211,7 +211,7 @@ public class AudioController
 
         // container duration in microseconds
         int durationInSecs = (int) (container.getDuration() / 1000000);
-        NowPlaying.setSongDuration(durationInSecs);
+        song.setSongLength(durationInSecs);
 
         IPacket packet = IPacket.make();
 outer:  while (container.readNextPacket(packet) >= 0)
