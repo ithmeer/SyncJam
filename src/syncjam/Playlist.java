@@ -66,7 +66,7 @@ public class Playlist
     {
         synchronized (songList)
         {
-            return songList.iterator();
+            return Collections.unmodifiableList(songList).iterator();
         }
     }
 
@@ -113,6 +113,16 @@ public class Playlist
         synchronized (songList)
         {
             return songList.size();
+        }
+    }
+
+    public void swap(int from, int to)
+    {
+        synchronized (songList)
+        {
+            Song toSwap = songList.get(from);
+            songList.set(from, songList.get(to));
+            songList.set(to, toSwap);
         }
     }
 
