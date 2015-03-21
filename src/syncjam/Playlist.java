@@ -109,6 +109,19 @@ public class Playlist
         }
     }
 
+    /**
+     * Start playing the song at a given index.
+     * @param which
+     */
+    public void setCurrentSong(int which)
+    {
+        synchronized (songList)
+        {
+            currentSong = which;
+        }
+        NowPlaying.updateSong();
+    }
+
     public int size()
     {
         synchronized (songList)
@@ -117,7 +130,7 @@ public class Playlist
         }
     }
 
-    public void swap(int from, int to)
+    public void swapSongs(int from, int to)
     {
         synchronized (songList)
         {
