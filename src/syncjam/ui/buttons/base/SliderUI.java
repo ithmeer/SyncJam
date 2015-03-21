@@ -131,7 +131,8 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
         if(dragging)
         {
             dragging = false;
-            value = posOnBar;
+            setValue(posOnBar);
+            //value = posOnBar;
         }
 
     }

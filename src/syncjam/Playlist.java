@@ -1,8 +1,6 @@
 package syncjam;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.Semaphore;
 
 /**
  * A list of songs to be played. Thread-safe. Assumes only one thread will call

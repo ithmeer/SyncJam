@@ -1,10 +1,10 @@
 package syncjam;
 
 import com.xuggle.xuggler.*;
+import com.xuggle.xuggler.io.IURLProtocolHandler;
+import com.xuggle.xuggler.io.XugglerIO;
 
 import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,6 +92,7 @@ public class AudioController
 
     public void updateSong()
     {
+        NowPlaying.setSongPosition(0);
         pause();
         mainThread.interrupt();
     }
@@ -113,24 +114,76 @@ public class AudioController
         }
     }
 
-    public void playSong(Song song)
+    private class BytesHandler implements IURLProtocolHandler
     {
+        private final byte[] data;
+        private final int dataLength;
+        private int index = 0;
+
+        public BytesHandler(byte[] songData)
+        {
+            data = songData;
+            dataLength = data.length;
+        }
+
+        @Override
+        public int open(String url, int flags)
+        {
+            return 0;
+        }
+
+        @Override
+        public int read(byte[] buf, int size)
+        {
+            // EOF
+            if (index >= dataLength)
+                return 0;
+
+            int bytesRead = 0;
+            while (index + bytesRead < dataLength && bytesRead < size)
+            {
+                buf[bytesRead] = data[index + bytesRead];
+                bytesRead++;
+            }
+            index += bytesRead;
+            return bytesRead;
+        }
+
+        @Override
+        public int write(byte[] buf, int size)
+        {
+            return 0;
+        }
+
+        @Override
+        public long seek(long offset, int whence)
+        {
+            if (whence == IURLProtocolHandler.SEEK_SIZE)
+                return dataLength;
+            index = Math.min((int) (whence + offset), dataLength);
+            return index - whence;
+        }
+
+        @Override
+        public int close()
+        {
+            return 0;
+        }
+
+        @Override
+        public boolean isStreamed(String url, int flags)
+        {
+            return false;
+        }
+    }
+
+    private void playSong(Song song)
+    {
+        String url = XugglerIO.map(song.getSongName(), new BytesHandler(song.getSongData()));
+
         // Create a Xuggler container object
         IContainer container = IContainer.make();
-        ByteArrayInputStream source = new ByteArrayInputStream(song.getData());
-        /*
-        IContainerFormat format = IContainerFormat.make();
-        for (IContainerFormat form : IContainerFormat.getInstalledInputFormats())
-        {
-            String name = form.getInputFormatLongName();
-            if (name.contains("FLAC"))
-                format = form;
-        }
-        format.setInputFormat("flac");
-        System.err.println(format.getInputFormatLongName());
-        System.err.println(format.isInput());
-        */
-        if (container.open(source, null) < 0)
+        if (container.open(url, IContainer.Type.READ, null) < 0)
             throw new IllegalArgumentException("could not open song: " + song.getSongName());
 
         int numStreams = container.getNumStreams();
@@ -157,6 +210,10 @@ public class AudioController
 
         openJavaSound(audioCoder);
 
+        // container duration in microseconds
+        int durationInSecs = (int) (container.getDuration() / 1000000);
+        NowPlaying.setSongDuration(durationInSecs);
+
         IPacket packet = IPacket.make();
 outer:  while (container.readNextPacket(packet) >= 0)
         {
@@ -172,9 +229,15 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     if (bytesDecoded < 0)
                         throw new RuntimeException("got error decoding audio in: " + song.getSongName());
 
-                    int durationInSecs = (int) (container.getDuration() / 1000000);
-                    double curPos = packet.getTimeStamp() / (durationInSecs / packet.getTimeBase().getDouble());
-                    NowPlaying.setSongPosition(durationInSecs, curPos);
+                    int curPos = (int) (packet.getTimeStamp() * packet.getTimeBase().getDouble());
+                    int oldPos = NowPlaying.getSongPosition();
+                    long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
+                    if (oldPos > curPos + 1 || oldPos < curPos - 1)
+                        container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp, IContainer.SEEK_FLAG_BACKWARDS);
+                    else
+                    {
+                        NowPlaying.setSongPosition(curPos);
+                    }
 
                     offset += bytesDecoded;
                     if (samples.isComplete())
@@ -184,9 +247,9 @@ outer:  while (container.readNextPacket(packet) >= 0)
                             playJavaSound(samples);
                         } catch (InterruptedException e)
                         {
+                            // restart playing if interrupted
                             Thread.interrupted();
                             play();
-                            // stop playing if interrupted
                             break outer;
                         }
                     }
@@ -209,29 +272,6 @@ outer:  while (container.readNextPacket(packet) >= 0)
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
         try
         {
-            /*Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-            System.out.println(
-                    "There are " + mixers.length + " mixer info objects");
-            for (Mixer.Info mixerInfo : mixers) {
-                System.out.println("mixer name: " + mixerInfo.getName());
-                Mixer mixer = AudioSystem.getMixer(mixerInfo);
-                Line.Info[] lineInfos = mixer.getSourceLineInfo();
-                for (Line.Info lineInfo : lineInfos) {
-                    System.out.println("  Line.Info: " + lineInfo);
-                    try {
-                        Line line = mixer.getLine(lineInfo);
-                        FloatControl volCtrl = (FloatControl)line.getControl(
-                                FloatControl.Type.VOLUME);
-                        System.out.println(
-                                "    volCtrl.getValue() = " + volCtrl.getValue());
-                    } catch (LineUnavailableException e) {
-                        e.printStackTrace();
-                    } catch (IllegalArgumentException iaEx) {
-                        System.out.println("    " + iaEx);
-                    }
-                }
-            }*/
-
             mLine = (SourceDataLine) AudioSystem.getLine(info);
             mLine.open(audioFormat);
             synchronized (this)

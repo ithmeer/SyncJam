@@ -2,13 +2,15 @@ package syncjam;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NowPlaying
 {
     private static AudioController controller;
     private volatile static Song np_Song;
-    private static AtomicBoolean isPlaying = new AtomicBoolean(false);
-    private volatile static double songPosition = 0;
+    private static final AtomicBoolean isPlaying = new AtomicBoolean(false);
+    private static final AtomicInteger songPosition = new AtomicInteger(0);
+
     private volatile static int songLength = 0;
 
     public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
@@ -29,7 +31,7 @@ public class NowPlaying
 
     public static String getSongName()          { return np_Song.getSongName(); }
 
-    public static double getSongPosition()             { return songPosition; }
+    public static int getSongPosition()             { return songPosition.get(); }
 
     public static BufferedImage getScaledAlbumArt(int w, int h)
     {
@@ -65,15 +67,18 @@ public class NowPlaying
         np_Song = song;
     }
 
+    public static void setSongDuration(int dur)
+    {
+        songLength = dur;
+    }
+
     /**
      * Set the current position in the song and provide length if needed.
-     * @param length
      * @param pos
      */
-    public static void setSongPosition(int length, double pos)
+    public static void setSongPosition(int pos)
     {
-        songLength = length;
-        songPosition = pos;
+        songPosition.set(pos);
     }
 
     public static void setVolume(int value)

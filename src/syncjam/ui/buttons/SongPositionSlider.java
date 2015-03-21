@@ -24,7 +24,7 @@ public class SongPositionSlider extends SliderUI
 
         if(NowPlaying.isPlaying() && getValue() < getMaxValue())
         {
-            setValue((int) (NowPlaying.getSongPosition() * max));
+            setValue((NowPlaying.getSongPosition()));
         }
 
         super.paintComponent(g);
@@ -43,6 +43,12 @@ public class SongPositionSlider extends SliderUI
             int strWidth = g.getFontMetrics().stringWidth(timeToMax);
             g.drawString(timeToMax, barXOffset + getW() - strWidth, barYOffset - 9);
         }
+    }
+    public void setValue(int n)
+    {
+        super.setValue(n);
+        //System.err.println(n);
+        NowPlaying.setSongPosition(n);
     }
     public String getTimeStamp(int seconds)
     {

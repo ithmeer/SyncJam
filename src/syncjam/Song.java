@@ -103,15 +103,6 @@ public class Song
         }
     }
 
-    public Song(String song, String artist, String album, byte[] data, int length)  //for testing
-    {
-        songName = song;
-        artistName = artist;
-        albumName = album;
-        songLength = length;
-        songData = data;
-    }
-
     public BufferedImage getAlbumArt() {return albumArt; }
 
     public String getSongName() {return songName; }
@@ -120,7 +111,7 @@ public class Song
 
     public String getAlbumName() {return albumName; }
 
-    public byte[] getData()
+    public byte[] getSongData()
     {
         return songData;
     }
