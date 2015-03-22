@@ -8,13 +8,12 @@ import syncjam.ui.buttons.base.ScrollbarUI;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Iterator;
 
-public class PlaylistUI extends JPanel
+public class PlaylistUI extends JPanel implements MouseListener, MouseMotionListener
 {
     private int myW, myH;
     private final int xOffset = 8, yOffset = 8;
@@ -22,8 +21,11 @@ public class PlaylistUI extends JPanel
 
     private int curItemYPos = 0;
 
+    private int mouseX = -1, mouseY = -1;
+
     private final ScrollbarUI scrollbar;
     private final Playlist playlist;
+    private int hoverIndex = -1;
 
     public PlaylistUI(Playlist pList)
     {
@@ -45,6 +47,8 @@ public class PlaylistUI extends JPanel
                 scrollbar.scrollEvent(e);
             }
         });
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
 
         Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.c_Highlight);
         new FileDrop(this, fileDropBorder, new FileDrop.Listener()
@@ -91,7 +95,7 @@ public class PlaylistUI extends JPanel
     private void drawSong(Graphics g, int index, Song song)
     {
         drawSongNum(g, index);
-        drawAlbumArt(g, song);
+        drawAlbumArt(g, song, index);
         drawArtistName(g, song);
         drawSongName(g, song);
         drawSongLength(g, song);
@@ -103,7 +107,7 @@ public class PlaylistUI extends JPanel
         int textWidth = g.getFontMetrics().stringWidth(""+(i+1));
 
         int thisItemXPos = xOffset - textWidth + 20;
-        int thisItemYPos = curItemYPos + itemHeight/4 + textHeight/2;
+        int thisItemYPos = curItemYPos + itemHeight/2 + textHeight/4;
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
@@ -112,7 +116,7 @@ public class PlaylistUI extends JPanel
                      thisItemYPos);
     }
 
-    private void drawAlbumArt(Graphics g, Song song)
+    private void drawAlbumArt(Graphics g, Song song, int i)
     {
         int ins = 5; //album art inset
 
@@ -127,7 +131,7 @@ public class PlaylistUI extends JPanel
         //draw dark color behind art
         g.setColor(Colors.c_Background1);
         int imgsize = itemHeight - ins * 2 - 2;
-        g.fillRect(thisItemXPos+1,
+        g.fillRect(thisItemXPos + 1,
                    thisItemYPos + 1,
                    imgsize,
                    imgsize);
@@ -136,8 +140,36 @@ public class PlaylistUI extends JPanel
         BufferedImage albumImg = song.getScaledAlbumArt(imgsize+1, imgsize+1);
         if(albumImg != null)
             g.drawImage(albumImg,
-                        thisItemXPos+1,
+                        thisItemXPos + 1,
                         thisItemYPos + 1, null);
+
+        //Mouse Over Effect
+        Rectangle itemRect = new Rectangle(
+                0,
+                curItemYPos,
+                (getWidth() - scrollbar.getWidth()),
+                itemHeight);
+
+        if(itemRect.contains(mouseX, mouseY))
+        {
+                g.setColor(Colors.c_Background1);
+                Graphics2D g2 = (Graphics2D)g;
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
+                g2.fillRect(thisItemXPos + 1, thisItemYPos + 1, itemHeight - ins*2 - 1, itemHeight - ins*2 - 1);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        }
+
+        Rectangle artRect = new Rectangle(
+                thisItemXPos + 1,
+                thisItemYPos + 1,
+                imgsize,
+                imgsize);
+
+        if(artRect.contains(mouseX, mouseY))
+            hoverIndex = i;
+        else if(hoverIndex == i)
+            hoverIndex = -1;
+
     }
 
     private void drawArtistName(Graphics g, Song song)
@@ -197,5 +229,48 @@ public class PlaylistUI extends JPanel
             }
             return str + "...";
         }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e){
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e)
+    {
+        System.out.println(hoverIndex);
+        if(hoverIndex >= 0)
+            playlist.setCurrentSong(hoverIndex);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e)
+    {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e)
+    {
+        mouseX = -1;
+        mouseY = -1;
+        hoverIndex = -1;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e)
+    {
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 }
