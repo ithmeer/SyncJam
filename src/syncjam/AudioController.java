@@ -23,10 +23,7 @@ public class AudioController
 
     private final AtomicBoolean interrupted = new AtomicBoolean(false);
 
-    private volatile boolean blocked = false;
-
     private final Playlist playlist;
-
 
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);

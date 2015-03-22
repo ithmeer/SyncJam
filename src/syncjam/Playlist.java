@@ -15,6 +15,8 @@ public class Playlist
     // track the index of the currently playing (or to be played) song
     private int currentSong = 0;
 
+    private boolean intermediate = false;
+
     /**
      * Add one song onto the queue.
      * @param s
@@ -42,7 +44,10 @@ public class Playlist
 
     public int getCurrentSongIndex()
     {
-        return waitingForSong() ? currentSong : currentSong - 1;
+        synchronized (songList)
+        {
+            return intermediate || waitingForSong() ? currentSong : currentSong - 1;
+        }
     }
 
     /**
@@ -68,6 +73,7 @@ public class Playlist
             if (!NowPlaying.isPlaying())
                 NowPlaying.playToggle();
 
+            intermediate = false;
             Song next = songList.get(currentSong++);
             return next;
         }
@@ -121,6 +127,7 @@ public class Playlist
             else
             {
                 // playing new song, so currentSong was stepped twice
+                intermediate = true;
                 currentSong -= 2;
                 NowPlaying.updateSong();
             }
