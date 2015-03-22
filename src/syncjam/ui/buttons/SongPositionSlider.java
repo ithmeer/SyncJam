@@ -17,14 +17,14 @@ public class SongPositionSlider extends SliderUI
 
     public void paintComponent(Graphics g)
     {
-        if(NowPlaying.getSong()!= null)
+        if(NowPlaying.getSong() != null)
         {
             setMaxValue(NowPlaying.getSongLength());
         }
 
-        if(NowPlaying.isPlaying() && getValue() < getMaxValue())
+        if(NowPlaying.isPlaying())
         {
-            setValue((NowPlaying.getSongPosition()));
+            setValue(NowPlaying.getSongPosition());
         }
 
         super.paintComponent(g);
@@ -47,7 +47,6 @@ public class SongPositionSlider extends SliderUI
     public void setValue(int n)
     {
         super.setValue(n);
-        //System.err.println(n);
         NowPlaying.setSongPosition(n);
     }
     public String getTimeStamp(int seconds)

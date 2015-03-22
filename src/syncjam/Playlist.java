@@ -9,8 +9,10 @@ import java.util.*;
  */
 public class Playlist
 {
+    // a synchronized ArrayList to store the songs
     private final List<Song> songList = Collections.synchronizedList(new ArrayList<Song>());
 
+    // track the index of the currently playing (or to be played) song
     private int currentSong = 0;
 
     /**
@@ -24,20 +26,23 @@ public class Playlist
 
     /**
      * Add multiple songs to the end of the playlist.
-     * @param songs
+     * @param songs one or more songs to add
      */
     public void addAll(Song... songs)
     {
         synchronized (songList)
         {
-            boolean wasWaiting = waitingForSong();
             for (Song song : songs)
             {
                 songList.add(song);
             }
-            if (wasWaiting)
-                songList.notify();
+            songList.notify();
         }
+    }
+
+    public int getCurrentSongIndex()
+    {
+        return waitingForSong() ? currentSong : currentSong - 1;
     }
 
     /**
@@ -51,18 +56,27 @@ public class Playlist
         synchronized (songList)
         {
             // if empty, pause
-            if (waitingForSong())
+            if (NowPlaying.isPlaying())
                 NowPlaying.playToggle();
-            while (waitingForSong())
+
+            while (currentSong == songList.size())
             {
+                // block until more songs are added or a different song is selected
                 songList.wait();
             }
-            Song next = songList.get(currentSong);
-            currentSong++;
+
+            if (!NowPlaying.isPlaying())
+                NowPlaying.playToggle();
+
+            Song next = songList.get(currentSong++);
             return next;
         }
     }
 
+    /**
+     * Return an unmodifiable iterator, do not try to call remove.
+     * @return the iterator
+     */
     public Iterator<Song> iterator()
     {
         synchronized (songList)
@@ -71,24 +85,46 @@ public class Playlist
         }
     }
 
+    /**
+     * Simply call updateSong, currentSong was already incremented.
+     */
     public void nextSong()
     {
         synchronized (songList)
         {
-            if (songList.isEmpty())
+            if (waitingForSong())
                 return;
         }
-        setCurrentSong(currentSong);
+        NowPlaying.updateSong();
     }
 
+    /**
+     * Go back two songs since currentSong was already stepped.
+     */
     public void prevSong()
     {
         synchronized (songList)
         {
-            if (songList.isEmpty())
+            if (currentSong == 0 || songList.isEmpty())
                 return;
+            else if (waitingForSong())
+            {
+                currentSong--;
+                songList.notify();
+            }
+            else if (currentSong == 1)
+            {
+                // if playing first song, just restart
+                currentSong--;
+                NowPlaying.updateSong();
+            }
+            else
+            {
+                // playing new song, so currentSong was stepped twice
+                currentSong -= 1;
+                NowPlaying.updateSong();
+            }
         }
-        setCurrentSong(currentSong - 2);
     }
 
     /**
@@ -117,10 +153,15 @@ public class Playlist
         synchronized (songList)
         {
             currentSong = which;
+            songList.notify();
         }
         NowPlaying.updateSong();
     }
 
+    /**
+     * Get the size of the list.
+     * @return
+     */
     public int size()
     {
         synchronized (songList)
@@ -129,6 +170,11 @@ public class Playlist
         }
     }
 
+    /**
+     * Swap the songs at the given indices.
+     * @param from
+     * @param to
+     */
     public void swapSongs(int from, int to)
     {
         synchronized (songList)
@@ -142,6 +188,6 @@ public class Playlist
     // no need to synchronize, called from synchronized blocks
     private boolean waitingForSong()
     {
-        return currentSong == songList.size();
+        return currentSong == songList.size() && !NowPlaying.isPlaying();
     }
 }

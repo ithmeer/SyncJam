@@ -77,7 +77,7 @@ public class PlaylistUI extends JPanel
             {
                 drawSong(g, i, curSong);
 
-                if(NowPlaying.getSong() == curSong)
+                if(i == playlist.getCurrentSongIndex())
                 {
                     g.setColor(Colors.c_Highlight);
                     g.drawRect(xOffset,curItemYPos, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight);

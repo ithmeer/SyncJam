@@ -1,6 +1,7 @@
 package syncjam.ui;
 
 import syncjam.NowPlaying;
+import syncjam.Song;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,26 +29,27 @@ public class InfoUI extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        Song curSong = NowPlaying.getSong();
 
-        if(NowPlaying.getSong() != null)
+        if(curSong != null)
         {
-            drawAlbumArt(g);
-            drawSongInfo(g);
+            drawAlbumArt(g, curSong);
+            drawSongInfo(g, curSong);
         }
     }
 
-    private void drawAlbumArt(Graphics g)
+    private void drawAlbumArt(Graphics g, Song song)
     {
         g.setColor(Colors.c_Highlight);
         g.drawRect(0, 0, aaWidth + 3, aaHeight + 3);
         g.drawRect(1, 1, aaWidth + 1, aaHeight + 1);
-        if (NowPlaying.getAlbumArt() != null)
+        if (song.getAlbumArt() != null)
         {
-            g.drawImage(NowPlaying.getScaledAlbumArt(aaWidth, aaHeight), 2, 2, null);
+            g.drawImage(song.getScaledAlbumArt(aaWidth, aaHeight), 2, 2, null);
         }
     }
 
-    private void drawSongInfo(Graphics g)
+    private void drawSongInfo(Graphics g, Song song)
     {
         int hOffset = 12;
         int vOffset = 20;
@@ -55,17 +57,17 @@ public class InfoUI extends JPanel
 
         g.setColor(Colors.c_Foreground1);
         Colors.setFont(g, 24);
-        String songname = NowPlaying.getSongName();
-        if(songname.length() > 16)
+        String songName = song.getSongName();
+        if(songName.length() > 16)
         {
-            songname = songname.substring(0,14) + "...";
+            songName = songName.substring(0,14) + "...";
         }
-        g.drawString(songname, aaWidth + hOffset, vOffset);
+        g.drawString(songName, aaWidth + hOffset, vOffset);
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 23);
-        g.drawString(NowPlaying.getArtistName(), aaWidth + hOffset, vOffset + spacing);
-        g.drawString(NowPlaying.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
-        g.drawString(NowPlaying.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
+        g.drawString(song.getArtistName(), aaWidth + hOffset, vOffset + spacing);
+        g.drawString(song.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
+        g.drawString(song.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
     }
 }

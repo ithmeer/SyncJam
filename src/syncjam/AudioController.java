@@ -26,7 +26,7 @@ public class AudioController
     private final Thread mainThread;
 
     // block thread if stopped
-    private final Semaphore sem = new Semaphore(1);
+    private final Semaphore sem = new Semaphore(0);
 
     private boolean playing;
 
@@ -36,7 +36,7 @@ public class AudioController
         mainThread = Thread.currentThread();
         synchronized (this)
         {
-            playing = true;
+            playing = false;
         }
     }
 
@@ -48,7 +48,8 @@ public class AudioController
         if (!playing)
         {
             playing = true;
-            mLine.start();
+            if (mLine != null)
+                mLine.start();
             sem.release();
         }
     }
@@ -69,7 +70,8 @@ public class AudioController
                 // this should be impossible
                 e.printStackTrace();
             }
-            mLine.stop();
+            if (mLine != null)
+                mLine.stop();
         }
     }
 
@@ -113,77 +115,14 @@ public class AudioController
         }
     }
 
-    private class BytesHandler implements IURLProtocolHandler
-    {
-        private final byte[] data;
-        private final int dataLength;
-        private int index = 0;
-
-        public BytesHandler(byte[] songData)
-        {
-            data = songData;
-            dataLength = data.length;
-        }
-
-        @Override
-        public int open(String url, int flags)
-        {
-            return 0;
-        }
-
-        @Override
-        public int read(byte[] buf, int size)
-        {
-            // EOF
-            if (index >= dataLength)
-                return 0;
-
-            int bytesRead = 0;
-            while (index + bytesRead < dataLength && bytesRead < size)
-            {
-                buf[bytesRead] = data[index + bytesRead];
-                bytesRead++;
-            }
-            index += bytesRead;
-            return bytesRead;
-        }
-
-        @Override
-        public int write(byte[] buf, int size)
-        {
-            return 0;
-        }
-
-        @Override
-        public long seek(long offset, int whence)
-        {
-            if (whence == IURLProtocolHandler.SEEK_SIZE)
-                return dataLength;
-            index = Math.min((int) (whence + offset), dataLength);
-            return index - whence;
-        }
-
-        @Override
-        public int close()
-        {
-            return 0;
-        }
-
-        @Override
-        public boolean isStreamed(String url, int flags)
-        {
-            return false;
-        }
-    }
-
     private void playSong(Song song)
     {
         String url = XugglerIO.map(song.getSongName(), new BytesHandler(song.getSongData()));
+        NowPlaying.setSongPosition(0);
 
         // Create a Xuggler container object
         IContainer container = IContainer.make();
-        if (container.open(url, IContainer.Type.READ, null) < 0)
-            throw new IllegalArgumentException("could not open song: " + song.getSongName());
+        openContainerSafely(container, url);
 
         int numStreams = container.getNumStreams();
 
@@ -226,13 +165,19 @@ outer:  while (container.readNextPacket(packet) >= 0)
                 {
                     int bytesDecoded = audioCoder.decodeAudio(samples, packet, offset);
                     if (bytesDecoded < 0)
-                        throw new RuntimeException("got error decoding audio in: " + song.getSongName());
+                    {
+                        System.err.println("decoding error");
+                        // something wrong decoding? try the next packet...
+                        continue outer;
+                    }
 
                     int curPos = (int) (packet.getTimeStamp() * packet.getTimeBase().getDouble());
                     int oldPos = NowPlaying.getSongPosition();
                     long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
                     if (oldPos > curPos + 1 || oldPos < curPos - 1)
+                    {
                         container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp, IContainer.SEEK_FLAG_BACKWARDS);
+                    }
                     else
                     {
                         NowPlaying.setSongPosition(curPos);
@@ -256,7 +201,6 @@ outer:  while (container.readNextPacket(packet) >= 0)
             }
         }
 
-        NowPlaying.setSongPosition(0);
         closeJavaSound();
         audioCoder.close();
         container.close();
@@ -308,5 +252,98 @@ outer:  while (container.readNextPacket(packet) >= 0)
     {
         mLine.drain();
         mLine.close();
+    }
+
+    // open container and retry if interrupted error occurs
+    private void openContainerSafely(IContainer container, String url)
+    {
+        while (true)
+        {
+            int retVal = container.open(url, IContainer.Type.READ, null);
+            if (retVal >= 0)
+                break;
+            IError err = IError.make(retVal);
+            if (err.getType() != IError.Type.ERROR_INTERRUPTED)
+                throw new IllegalArgumentException("could not open song: " + url);
+        }
+
+    }
+
+    private class BytesHandler implements IURLProtocolHandler
+    {
+        private final byte[] data;
+        private final int dataLength;
+        private int index = 0;
+
+        public BytesHandler(byte[] songData)
+        {
+            data = songData;
+            dataLength = data.length;
+        }
+
+        @Override
+        public int open(String url, int flags)
+        {
+            index = 0;
+            return 0;
+        }
+
+        @Override
+        public int read(byte[] buf, int size)
+        {
+            // EOF
+            if (index >= dataLength)
+                return -1;
+
+            int bytesRead = 0;
+            while (index + bytesRead < dataLength && bytesRead < size)
+            {
+                buf[bytesRead] = data[index + bytesRead];
+                bytesRead++;
+            }
+            index += bytesRead;
+            return bytesRead;
+        }
+
+        @Override
+        public int write(byte[] buf, int size)
+        {
+            return -1;
+        }
+
+        @Override
+        public long seek(long offset, int whence)
+        {
+            int origin = whence;
+            if (whence == SEEK_SIZE)
+                return dataLength;
+            else if (whence == SEEK_SET)
+                origin = 0;
+            else if (whence == SEEK_END)
+                origin = dataLength;
+            else if (whence == SEEK_CUR)
+                origin = index;
+
+            long delta = origin + offset;
+            if (delta < 0)
+                index = 0;
+            else if (delta > dataLength)
+                index = dataLength;
+            else
+                index = (int) delta;
+            return index - whence;
+        }
+
+        @Override
+        public int close()
+        {
+            return 0;
+        }
+
+        @Override
+        public boolean isStreamed(String url, int flags)
+        {
+            return false;
+        }
     }
 }
