@@ -150,20 +150,22 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                 (getWidth() - scrollbar.getWidth()),
                 itemHeight);
 
-        if(itemRect.contains(mouseX, mouseY))
-        {
-                g.setColor(Colors.c_Background1);
-                Graphics2D g2 = (Graphics2D)g;
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
-                g2.fillRect(thisItemXPos + 1, thisItemYPos + 1, itemHeight - ins*2 - 1, itemHeight - ins*2 - 1);
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-        }
-
         Rectangle artRect = new Rectangle(
                 thisItemXPos + 1,
                 thisItemYPos + 1,
                 imgsize,
                 imgsize);
+
+        if(itemRect.contains(mouseX, mouseY))
+        {
+                g.setColor(Colors.c_Background1);
+                Graphics2D g2 = (Graphics2D)g;
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
+                g2.fillRect(artRect.x, artRect.y, artRect.width - 1, artRect.height - 1);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                g.setColor(Colors.c_Highlight);
+                g.fillOval(artRect.x + artRect.width/2 - imgsize/4, artRect.y + artRect.height/2 - imgsize/4, imgsize/2,imgsize/2);
+        }
 
         if(artRect.contains(mouseX, mouseY))
             hoverIndex = i;
