@@ -121,7 +121,7 @@ public class Playlist
             else
             {
                 // playing new song, so currentSong was stepped twice
-                currentSong -= 1;
+                currentSong -= 2;
                 NowPlaying.updateSong();
             }
         }

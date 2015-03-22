@@ -6,6 +6,7 @@ import com.xuggle.xuggler.io.XugglerIO;
 
 import javax.sound.sampled.*;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,10 +21,12 @@ public class AudioController
 
     private final AtomicInteger volumeLevel = new AtomicInteger(50);
 
+    private final AtomicBoolean interrupted = new AtomicBoolean(false);
+
+    private volatile boolean blocked = false;
+
     private final Playlist playlist;
 
-    // need handle on the thread that drives this class
-    private final Thread mainThread;
 
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);
@@ -33,7 +36,6 @@ public class AudioController
     public AudioController(Playlist pl)
     {
         playlist = pl;
-        mainThread = Thread.currentThread();
         synchronized (this)
         {
             playing = false;
@@ -94,8 +96,9 @@ public class AudioController
 
     public void updateSong()
     {
-        pause();
-        mainThread.interrupt();
+        // if already playing, does nothing
+        play();
+        interrupted.set(true);
     }
 
     public void start()
@@ -122,7 +125,15 @@ public class AudioController
 
         // Create a Xuggler container object
         IContainer container = IContainer.make();
-        openContainerSafely(container, url);
+        int openStatus = container.open(url, IContainer.Type.READ, null);
+        if (openStatus < 0)
+        {
+            IError err = IError.make(openStatus);
+            if (err.getType() == IError.Type.ERROR_INTERRUPTED)
+                throw new IllegalArgumentException("open song interrupted for: " + url);
+            else
+                throw new IllegalArgumentException("could not open song: " + url);
+        }
 
         int numStreams = container.getNumStreams();
 
@@ -186,21 +197,15 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     offset += bytesDecoded;
                     if (samples.isComplete())
                     {
-                        try
-                        {
-                            playJavaSound(samples);
-                        } catch (InterruptedException e)
-                        {
-                            // restart playing if interrupted
-                            Thread.interrupted();
-                            play();
+                        playJavaSound(samples);
+                        if (interrupted.get())
                             break outer;
-                        }
                     }
                 }
             }
         }
 
+        interrupted.set(false);
         closeJavaSound();
         audioCoder.close();
         container.close();
@@ -233,7 +238,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
         }
     }
 
-    private void playJavaSound(IAudioSamples aSamples) throws InterruptedException
+    private void playJavaSound(IAudioSamples aSamples)
     {
         int written;
         int length = aSamples.getSize();
@@ -242,9 +247,15 @@ outer:  while (container.readNextPacket(packet) >= 0)
         written = mLine.write(rawBytes, 0, length);
         while (written != length)
         {
-            sem.acquire();
-            written += mLine.write(rawBytes, written, length - written);
+            try
+            {
+                sem.acquire();
+            } catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
             sem.release();
+            written += mLine.write(rawBytes, written, length - written);
         }
     }
 
@@ -252,21 +263,6 @@ outer:  while (container.readNextPacket(packet) >= 0)
     {
         mLine.drain();
         mLine.close();
-    }
-
-    // open container and retry if interrupted error occurs
-    private void openContainerSafely(IContainer container, String url)
-    {
-        while (true)
-        {
-            int retVal = container.open(url, IContainer.Type.READ, null);
-            if (retVal >= 0)
-                break;
-            IError err = IError.make(retVal);
-            if (err.getType() != IError.Type.ERROR_INTERRUPTED)
-                throw new IllegalArgumentException("could not open song: " + url);
-        }
-
     }
 
     private class BytesHandler implements IURLProtocolHandler
