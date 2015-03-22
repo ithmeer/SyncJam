@@ -1,7 +1,6 @@
 package syncjam;
 
 import syncjam.ui.SyncJamUI;
-import syncjam.ui.WindowObject;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

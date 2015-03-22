@@ -67,7 +67,7 @@ public class NowPlaying
 
     /**
      * Set the current position in the song and provide length if needed.
-     * @param pos
+     * @param pos new song position
      */
     public static void setSongPosition(int pos)
     {

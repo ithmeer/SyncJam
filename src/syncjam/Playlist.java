@@ -19,7 +19,7 @@ public class Playlist
 
     /**
      * Add one song onto the queue.
-     * @param s
+     * @param s the song
      */
     public void add(Song s)
     {
@@ -34,10 +34,7 @@ public class Playlist
     {
         synchronized (songList)
         {
-            for (Song song : songs)
-            {
-                songList.add(song);
-            }
+            Collections.addAll(songList, songs);
             songList.notify();
         }
     }
@@ -74,8 +71,7 @@ public class Playlist
                 NowPlaying.playToggle();
 
             intermediate = false;
-            Song next = songList.get(currentSong++);
-            return next;
+            return songList.get(currentSong++);
         }
     }
 
@@ -111,32 +107,33 @@ public class Playlist
     {
         synchronized (songList)
         {
-            if (currentSong == 0 || songList.isEmpty())
-                return;
-            else if (waitingForSong())
+            if (currentSong != 0 && !songList.isEmpty())
             {
-                currentSong--;
-                songList.notify();
-            }
-            else if (currentSong == 1)
-            {
-                // if playing first song, just restart
-                currentSong--;
-                NowPlaying.updateSong();
-            }
-            else
-            {
-                // playing new song, so currentSong was stepped twice
-                intermediate = true;
-                currentSong -= 2;
-                NowPlaying.updateSong();
+                if (waitingForSong())
+                {
+                    currentSong--;
+                    songList.notify();
+                }
+                else if (currentSong == 1)
+                {
+                    // if playing first song, just restart
+                    currentSong--;
+                    NowPlaying.updateSong();
+                }
+                else
+                {
+                    // playing new song, so currentSong was stepped twice
+                    intermediate = true;
+                    currentSong -= 2;
+                    NowPlaying.updateSong();
+                }
             }
         }
     }
 
     /**
      * Remove the song at the given position from the playlist.
-     * @param i
+     * @param i the index to remove
      */
     public void remove(int i)
     {
@@ -153,7 +150,7 @@ public class Playlist
 
     /**
      * Start playing the song at a given index.
-     * @param which
+     * @param which the index to play
      */
     public void setCurrentSong(int which)
     {
@@ -168,7 +165,7 @@ public class Playlist
 
     /**
      * Get the size of the list.
-     * @return
+     * @return list size
      */
     public int size()
     {
@@ -180,8 +177,8 @@ public class Playlist
 
     /**
      * Swap the songs at the given indices.
-     * @param from
-     * @param to
+     * @param from first index
+     * @param to second index
      */
     public void swapSongs(int from, int to)
     {
