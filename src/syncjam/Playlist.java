@@ -159,6 +159,7 @@ public class Playlist
     {
         synchronized (songList)
         {
+            intermediate = true;
             currentSong = which;
             songList.notify();
         }
