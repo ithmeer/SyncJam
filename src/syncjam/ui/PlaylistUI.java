@@ -16,8 +16,8 @@ import java.util.Iterator;
 public class PlaylistUI extends JPanel implements MouseListener, MouseMotionListener
 {
     private int myW, myH;
-    private final int xOffset = 8, yOffset = 8;
-    private final int itemHeight = 50;
+    private final int xOffset = 6, yOffset = 6;
+    private int itemHeight = 55;
 
     private int curItemYPos = 0;
 
@@ -161,10 +161,15 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                 g.setColor(Colors.c_Background1);
                 Graphics2D g2 = (Graphics2D)g;
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
-                g2.fillRect(artRect.x, artRect.y, artRect.width - 1, artRect.height - 1);
+                g2.fillRect(artRect.x, artRect.y, artRect.width + 1, artRect.height + 1);  //shade over art
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
                 g.setColor(Colors.c_Highlight);
-                g.fillOval(artRect.x + artRect.width/2 - imgsize/4, artRect.y + artRect.height/2 - imgsize/4, imgsize/2,imgsize/2);
+                g.fillOval(artRect.x + artRect.width/2 - imgsize/4, artRect.y + artRect.height/2 - imgsize/4, imgsize/2,imgsize/2); //circle
+                g.setColor(Colors.c_Foreground1);
+                Polygon playShape = new Polygon(  //play symbol
+                    new int[]{artRect.x + artRect.width/2 - imgsize/9, artRect.x + artRect.width/2 - imgsize/9, artRect.x + artRect.width/2 + imgsize/5},
+                    new int[]{artRect.y + artRect.height/2- imgsize/7, artRect.y + artRect.height/2+ imgsize/7, artRect.y + artRect.height/2}, 3);
+                g.fillPolygon(playShape);
         }
 
         if(artRect.contains(mouseX, mouseY))
@@ -234,27 +239,20 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mousePressed(MouseEvent e){
-
-    }
+    public void mousePressed(MouseEvent e){}
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        System.out.println(hoverIndex);
         if(hoverIndex >= 0)
             playlist.setCurrentSong(hoverIndex);
     }
 
     @Override
-    public void mouseEntered(MouseEvent e)
-    {
-    }
+    public void mouseEntered(MouseEvent e){}
 
     @Override
     public void mouseExited(MouseEvent e)
@@ -265,9 +263,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-
-    }
+    public void mouseDragged(MouseEvent e) {}
 
     @Override
     public void mouseMoved(MouseEvent e)
