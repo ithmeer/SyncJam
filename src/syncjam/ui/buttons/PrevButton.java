@@ -33,7 +33,7 @@ public class PrevButton extends ButtonUI
         super.paintComponent(g);
 
         g.fillPolygon(arrowShape(0,0));
-        g.fillPolygon(arrowShape(-getW()/7*2,0));
+        g.fillPolygon(arrowShape(-getW()/5*2,0));
     }
 
     public Polygon arrowShape(int x, int y)

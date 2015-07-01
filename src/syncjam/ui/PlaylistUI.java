@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import syncjam.NowPlaying;
 import syncjam.Playlist;
 import syncjam.Song;
 import syncjam.ui.buttons.base.ScrollbarUI;
@@ -17,7 +16,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
 {
     private int myW, myH;
     private final int xOffset = 6, yOffset = 6;
-    private int itemHeight = 55;
+    private int itemHeight = 60;
 
     private int curItemYPos = 0;
 
@@ -25,7 +24,8 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
 
     private final ScrollbarUI scrollbar;
     private final Playlist playlist;
-    private int hoverIndex = -1;
+    private int artHoverIndex = -1;
+    private int removeHoverIndex = -1;
 
     public PlaylistUI(Playlist pList)
     {
@@ -109,11 +109,44 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         int thisItemXPos = xOffset - textWidth + 20;
         int thisItemYPos = curItemYPos + itemHeight/2 + textHeight/4;
 
-        g.setColor(Colors.c_Foreground2);
-        Colors.setFont(g, 14);
-        g.drawString(""+(i+1),
-                     thisItemXPos,
-                     thisItemYPos);
+        //Mouse Over Effect
+        Rectangle itemRect = new Rectangle(
+                0,
+                curItemYPos,
+                (getWidth() - scrollbar.getWidth()),
+                itemHeight);
+
+        int ins = 7;
+        Rectangle xRect = new Rectangle(
+                xOffset + ins - 2,
+                curItemYPos + ins,
+                23 - ins,
+                itemHeight + 1 - ins*2);
+
+        if(itemRect.contains(mouseX,mouseY))
+        {
+            g.setColor(Colors.c_Highlight2);
+            g.fillRect(xRect.x, xRect.y, xRect.width, xRect.height);
+            g.setColor(Colors.c_Foreground1);
+
+            int cX = xOffset+13;   //center xPos
+            int cY = curItemYPos + itemHeight/2; //center yPos
+            int xS = 3;            //size of 'X'
+            g.drawLine(cX - xS, cY - xS, cX + xS, cY + xS);
+            g.drawLine(cX - xS, cY + xS, cX + xS, cY - xS);
+        }
+        else
+        {
+            g.setColor(Colors.c_Foreground2);
+            Colors.setFont(g, 14);
+            g.drawString("" + (i + 1),
+                    thisItemXPos,
+                    thisItemYPos);
+        }
+        if(xRect.contains(mouseX, mouseY))
+            removeHoverIndex = i;
+        else if(removeHoverIndex == i)
+            removeHoverIndex = -1;
     }
 
     private void drawAlbumArt(Graphics g, Song song, int i)
@@ -123,6 +156,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         int thisItemXPos = xOffset + ins + 18;
         int thisItemYPos = curItemYPos + ins;
 
+        g.setColor(Colors.c_Foreground2);
         g.drawRect(thisItemXPos,
                    thisItemYPos,
                    itemHeight - ins*2,
@@ -163,19 +197,24 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
                 g2.fillRect(artRect.x, artRect.y, artRect.width + 1, artRect.height + 1);  //shade over art
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
+                int centerX = artRect.x + artRect.width/2;
+                int centerY = artRect.y + artRect.height/2;
+
                 g.setColor(Colors.c_Highlight);
-                g.fillOval(artRect.x + artRect.width/2 - imgsize/4, artRect.y + artRect.height/2 - imgsize/4, imgsize/2,imgsize/2); //circle
+                g.fillOval(centerX - imgsize/4, centerY - imgsize/4, imgsize/2,imgsize/2); //circle
+
                 g.setColor(Colors.c_Foreground1);
                 Polygon playShape = new Polygon(  //play symbol
-                    new int[]{artRect.x + artRect.width/2 - imgsize/9, artRect.x + artRect.width/2 - imgsize/9, artRect.x + artRect.width/2 + imgsize/5},
-                    new int[]{artRect.y + artRect.height/2- imgsize/7, artRect.y + artRect.height/2+ imgsize/7, artRect.y + artRect.height/2}, 3);
+                    new int[]{centerX - imgsize/9, centerX - imgsize/9, centerX + imgsize/6},
+                    new int[]{centerY - imgsize/7, centerY + imgsize/7, centerY}, 3);
                 g.fillPolygon(playShape);
         }
 
         if(artRect.contains(mouseX, mouseY))
-            hoverIndex = i;
-        else if(hoverIndex == i)
-            hoverIndex = -1;
+            artHoverIndex = i;
+        else if(artHoverIndex == i)
+            artHoverIndex = -1;
 
     }
 
@@ -188,7 +227,13 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
-        g.drawString(song.getArtistName(), thisItemXPos, thisItemYPos);
+
+        String artistName = cutStringToWidth(
+                song.getArtistName(),
+                g.getFontMetrics(),
+                getWidth() - thisItemXPos - scrollbar.getWidth() - 48);
+
+        g.drawString(artistName, thisItemXPos, thisItemYPos);
     }
 
     private void drawSongName(Graphics g, Song song)
@@ -214,8 +259,8 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         int textHeight = g.getFontMetrics().getHeight();
         int textWidth = g.getFontMetrics().stringWidth(song.getSongLengthString());
 
-        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 10;
-        int thisItemYPos = curItemYPos + itemHeight / 4 + textHeight / 2 - 2;
+        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth;
+        int thisItemYPos = curItemYPos + itemHeight / 4 + textHeight / 2 - 6;
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 14);
@@ -230,12 +275,17 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         }
         else
         {
-            while(f.stringWidth(str) + f.stringWidth("...") > width)
+            while(f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' ')
             {
                 str = str.substring(0,str.length()-1);
             }
             return str + "...";
         }
+    }
+
+    public void clear()
+    {
+        //playlist.clear();
     }
 
     @Override
@@ -247,8 +297,10 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if(hoverIndex >= 0)
-            playlist.setCurrentSong(hoverIndex);
+        if(artHoverIndex >= 0)
+            playlist.setCurrentSong(artHoverIndex);
+        else if(removeHoverIndex >= 0)
+            playlist.remove(removeHoverIndex);
     }
 
     @Override
@@ -259,7 +311,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     {
         mouseX = -1;
         mouseY = -1;
-        hoverIndex = -1;
+        artHoverIndex = -1;
     }
 
     @Override

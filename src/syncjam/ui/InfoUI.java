@@ -55,19 +55,39 @@ public class InfoUI extends JPanel
         int vOffset = 20;
         int spacing = 32;
 
+        String songName = cutStringToWidth(
+                song.getSongName(),
+                g.getFontMetrics(),
+                getWidth()/2 - aaWidth/2 - hOffset);
+        String artistName = cutStringToWidth(
+                song.getArtistName(),
+                g.getFontMetrics(),
+                getWidth()/2 - aaWidth/2 - hOffset);
+
         g.setColor(Colors.c_Foreground1);
         Colors.setFont(g, 24);
-        String songName = song.getSongName();
-        if(songName.length() > 16)
-        {
-            songName = songName.substring(0,14) + "...";
-        }
         g.drawString(songName, aaWidth + hOffset, vOffset);
 
         g.setColor(Colors.c_Foreground2);
         Colors.setFont(g, 23);
-        g.drawString(song.getArtistName(), aaWidth + hOffset, vOffset + spacing);
+        g.drawString(artistName,                 aaWidth + hOffset, vOffset + spacing);
         g.drawString(song.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
         g.drawString(song.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
+    }
+
+    private String cutStringToWidth(String str, FontMetrics f, int width)
+    {
+        if(f.stringWidth(str) < width)
+        {
+            return str;
+        }
+        else
+        {
+            while(f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' ')
+            {
+                str = str.substring(0,str.length()-1);
+            }
+            return str + "...";
+        }
     }
 }

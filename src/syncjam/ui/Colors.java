@@ -15,6 +15,7 @@ public class Colors
             new Color(255, 255, 255),//Foreground1
             new Color(188, 188, 188),//Foreground2
             new Color(44, 130, 226), //Highlight
+            new Color(209, 72, 58),  //Highlight2
     };
     public static Color[] lightColors = {
             new Color(238, 238, 238),//Background1
@@ -22,12 +23,14 @@ public class Colors
             new Color(0, 0, 0),      //Foreground1
             new Color(67, 67, 67),   //Foreground2
             new Color(44, 130, 226), //Highlight
+            new Color(226, 82, 61),  //Highlight2
     };
     public static Color c_Background1 = defaultColors[0];
     public static Color c_Background2 = defaultColors[1];
     public static Color c_Foreground1 = defaultColors[2];
     public static Color c_Foreground2 = defaultColors[3];
     public static Color c_Highlight   = defaultColors[4];
+    public static Color c_Highlight2  = defaultColors[5];
 
     public static void setFont(Graphics g, int size)
     {

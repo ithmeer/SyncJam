@@ -33,7 +33,7 @@ public class NextButton extends ButtonUI
         super.paintComponent(g);
 
         g.fillPolygon(arrowShape(getWidth()-getW(),0));
-        g.fillPolygon(arrowShape(getWidth()-getW() + getW()/7*2,0));
+        g.fillPolygon(arrowShape(getWidth()-getW() + getW()/5*2,0));
     }
 
     public Polygon arrowShape(int x, int y)
