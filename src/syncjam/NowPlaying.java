@@ -1,7 +1,8 @@
 package syncjam;
 
 import java.awt.image.BufferedImage;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -10,78 +11,64 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NowPlaying
 {
-    private volatile static AudioController controller;
-    private volatile static Song np_Song;
-    private static final AtomicBoolean isPlaying = new AtomicBoolean(false);
-    private static final AtomicInteger songPosition = new AtomicInteger(0);
+    private volatile AudioController controller;
+    private volatile Song currentSong;
+    private boolean isPlaying = false; // synchronized on this
+    private final AtomicInteger songPosition = new AtomicInteger(0);
 
-    public static BufferedImage getAlbumArt()   { return np_Song.getAlbumArt(); }
-
-    public static String getAlbumName()         { return np_Song.getAlbumName(); }
-
-    public static String getArtistName()        { return np_Song.getArtistName(); }
-
-    public static Song getSong()                { return np_Song; }
-
-    public static int getSongLength()           { return np_Song.getSongLength(); }
-
-    public static String getSongLengthString()  { return np_Song.getSongLengthString(); }
-
-    public static String getSongName()          { return np_Song.getSongName(); }
-
-    public static int getSongPosition()         { return songPosition.get(); }
-
-    public static BufferedImage getScaledAlbumArt(int w, int h)
-    {
-        return np_Song.getScaledAlbumArt(w, h);
-    }
-
-    public static boolean isPlaying()
-    {
-        return isPlaying.get();
-    }
-
-    public static void playToggle()
-    {
-        if(!isPlaying.get())
-        {
-            controller.play();
-            isPlaying.set(true);
-        }
-        else
-        {
-            controller.pause();
-            isPlaying.set(false);
-        }
-    }
-
-    public static void setController(AudioController au)
+    public void setAudioController(AudioController au)
     {
         controller = au;
     }
 
-    public static void setSong(Song song)
+    public BufferedImage getAlbumArt()   { return currentSong.getAlbumArt(); }
+
+    public String getAlbumName()         { return currentSong.getAlbumName(); }
+
+    public String getArtistName()        { return currentSong.getArtistName(); }
+
+    public Song getSong()                { return currentSong; }
+
+    public int getSongLength()           { return currentSong.getSongLength(); }
+
+    public String getSongLengthString()  { return currentSong.getSongLengthString(); }
+
+    public String getSongName()          { return currentSong.getSongName(); }
+
+    public int getSongPosition()         { return songPosition.get(); }
+
+    public BufferedImage getScaledAlbumArt(int w, int h) { return currentSong.getScaledAlbumArt(w, h); }
+
+    public synchronized boolean isPlaying() { return isPlaying; }
+
+    public synchronized void playToggle()
     {
-        np_Song = song;
+        if(!isPlaying)
+            controller.play();
+        else
+            controller.pause();
+
+        setPlaying(!isPlaying);
     }
+
+    public void setSong(Song song) { currentSong = song; }
 
     /**
      * Set the current position in the song and provide length if needed.
      * @param pos new song position
      */
-    public static void setSongPosition(int pos)
-    {
-        songPosition.set(pos);
-    }
+    public void setSongPosition(int pos) { songPosition.set(pos); }
 
-    public static void setVolume(int value)
-    {
-        controller.setVolume(value);
-    }
+    public void setVolume(int value) { controller.setVolume(value); }
 
-    public static void updateSong()
+    public synchronized void updateSong()
     {
-        isPlaying.set(true);
+        isPlaying = true;
         controller.updateSong();
+    }
+
+    private void setPlaying(boolean playing)
+    {
+        isPlaying = playing;
     }
 }

@@ -1,38 +1,33 @@
 package syncjam.ui.buttons;
 
-import syncjam.NowPlaying;
-import syncjam.Playlist;
+import syncjam.SongUtilities;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
 
 public class PlayButton extends ButtonUI
 {
-    private final Playlist playlist;
-
-    public PlayButton(int w, int h, Playlist pl)
+    public PlayButton(int w, int h, SongUtilities songUtils)
     {
-        super(w, h);
-        playlist = pl;
+        super(w, h, songUtils);
     }
 
-    public PlayButton(int w, int h, Color c, Playlist pl)
+    public PlayButton(int w, int h, Color c, SongUtilities songUtils)
     {
-        super(w, h, c);
-        playlist = pl;
+        super(w, h, c, songUtils);
     }
 
-    public void clicked()
+    protected void clicked()
     {
-        if(NowPlaying.getSong() != null)
-            NowPlaying.playToggle();
+        if(songUtilities.getPlayer().getSong() != null)
+            songUtilities.getPlayer().playToggle();
     }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
-        if (!NowPlaying.isPlaying())
+        if (!songUtilities.getPlayer().isPlaying())
         {
             Polygon playShape = new Polygon(
                     new int[]{0, 0,      getW()},

@@ -2,6 +2,7 @@ package syncjam.ui;
 
 import syncjam.Playlist;
 import syncjam.Song;
+import syncjam.SongUtilities;
 import syncjam.ui.buttons.base.ScrollbarUI;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
 
-    public PlaylistUI(Playlist pList)
+    public PlaylistUI(SongUtilities songUtils)
     {
         myW = 350;
         myH = 0;//440;
@@ -36,7 +37,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         setBackground(Colors.c_Background2);
         this.setLayout(new BorderLayout());
 
-        playlist = pList;
+        playlist = songUtils.getPlaylist();
         scrollbar = new ScrollbarUI(Colors.c_Background2);
         this.add(scrollbar, BorderLayout.EAST);
 

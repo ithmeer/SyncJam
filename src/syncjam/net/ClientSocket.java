@@ -1,6 +1,9 @@
 package syncjam.net;
 
-import java.net.Socket;
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 
 /**
  * Send and receive client messages.
@@ -8,15 +11,11 @@ import java.net.Socket;
  */
 public class ClientSocket
 {
-    private final Socket socket;
+    private final SocketChannel channel;
 
-    public ClientSocket(Socket sock)
+    public ClientSocket(Executor exec, SocketChannel sockChan, BlockingQueue<String> commandQueue) throws IOException
     {
-        socket = sock;
-    }
-
-    public void run()
-    {
-
+        channel = sockChan;
+        exec.execute(new SocketProducer(channel, commandQueue));
     }
 }

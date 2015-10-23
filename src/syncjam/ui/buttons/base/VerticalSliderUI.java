@@ -1,5 +1,6 @@
 package syncjam.ui.buttons.base;
 
+import syncjam.SongUtilities;
 import syncjam.ui.Colors;
 
 import javax.swing.*;
@@ -8,6 +9,8 @@ import java.awt.event.*;
 
 public class VerticalSliderUI extends JPanel implements MouseListener, MouseMotionListener
 {
+    protected final SongUtilities songUtilities;
+
     protected int value = 0;
     protected int max = 0;
     protected int posOnBar = 0;
@@ -19,22 +22,22 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     private boolean updateWhileDragging = true;
     private boolean dragging = false;
 
-    public VerticalSliderUI()
+    public VerticalSliderUI(SongUtilities songUtils)
     {
-        this(0, 100, true);
+        this(0, 100, true, songUtils);
     }
 
-    public VerticalSliderUI(int maxValue)
+    public VerticalSliderUI(int maxValue, SongUtilities songUtils)
     {
-        this(0, maxValue, true);
+        this(0, maxValue, true, songUtils);
     }
 
-    public VerticalSliderUI(int startValue, int maxValue)
+    public VerticalSliderUI(int startValue, int maxValue, SongUtilities songUtils)
     {
-        this(startValue, maxValue, true);
+        this(startValue, maxValue, true, songUtils);
     }
 
-    public VerticalSliderUI(int startValue, int maxValue, boolean dragUpdate)
+    public VerticalSliderUI(int startValue, int maxValue, boolean dragUpdate, SongUtilities songUtils)
     {
         myW = 20;
         myH = getHeight() - 50;
@@ -46,6 +49,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
         posOnBar = value;
         max =   maxValue;
 
+        songUtilities = songUtils;
         updateWhileDragging = dragUpdate;
 
         this.setBackground(Colors.c_Background1);

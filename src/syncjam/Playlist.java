@@ -10,12 +10,18 @@ import java.util.*;
 public class Playlist
 {
     // a synchronized ArrayList to store the songs
-    private final List<Song> songList = Collections.synchronizedList(new ArrayList<Song>());
+    private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());
+    private final NowPlaying _playController;
 
     // track the index of the currently playing (or to be played) song
     private int currentSong = 0;
 
     private boolean intermediate = false;
+    
+    public Playlist(NowPlaying playCon)
+    {
+        _playController = playCon;
+    }
 
     /**
      * Add one song onto the queue.
@@ -32,16 +38,29 @@ public class Playlist
      */
     public void addAll(Song... songs)
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            Collections.addAll(songList, songs);
-            songList.notify();
+            Collections.addAll(_songList, songs);
+            _songList.notify();
         }
+    }
+
+    /**
+     * Clear the playlist, keeping it blocked if it's blocked.
+     */
+    public void clear()
+    {
+        synchronized (_songList)
+        {
+            _songList.clear();
+            _playController.updateSong();
+        }
+
     }
 
     public int getCurrentSongIndex()
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
             return intermediate || waitingForSong() ? currentSong : currentSong - 1;
         }
@@ -55,23 +74,24 @@ public class Playlist
      */
     public Song getNextSong() throws InterruptedException
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
             // if empty, pause
-            if (NowPlaying.isPlaying())
-                NowPlaying.playToggle();
+            if (_playController.isPlaying())
+                _playController.playToggle();
 
-            while (currentSong == songList.size())
+            while (currentSong == _songList.size())
             {
                 // block until more songs are added or a different song is selected
-                songList.wait();
+                _songList.wait();
             }
 
-            if (!NowPlaying.isPlaying())
-                NowPlaying.playToggle();
+            // we have a new song, unpause
+            if (!_playController.isPlaying())
+                _playController.playToggle();
 
             intermediate = false;
-            return songList.get(currentSong++);
+            return _songList.get(currentSong++);
         }
     }
 
@@ -81,9 +101,9 @@ public class Playlist
      */
     public Iterator<Song> iterator()
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            return Collections.unmodifiableList(songList).iterator();
+            return Collections.unmodifiableList(_songList).iterator();
         }
     }
 
@@ -92,12 +112,12 @@ public class Playlist
      */
     public void nextSong()
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
             if (waitingForSong())
                 return;
         }
-        NowPlaying.updateSong();
+        _playController.updateSong();
     }
 
     /**
@@ -105,27 +125,27 @@ public class Playlist
      */
     public void prevSong()
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            if (currentSong != 0 && !songList.isEmpty())
+            if (currentSong != 0 && !_songList.isEmpty())
             {
                 if (waitingForSong())
                 {
                     currentSong--;
-                    songList.notify();
+                    _songList.notify();
                 }
                 else if (currentSong == 1)
                 {
                     // if playing first song, just restart
                     currentSong--;
-                    NowPlaying.updateSong();
+                    _playController.updateSong();
                 }
                 else
                 {
                     // playing new song, so currentSong was stepped twice
                     intermediate = true;
                     currentSong -= 2;
-                    NowPlaying.updateSong();
+                    _playController.updateSong();
                 }
             }
         }
@@ -137,12 +157,12 @@ public class Playlist
      */
     public void remove(int i)
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            if (i < 0 || i >= songList.size())
+            if (i < 0 || i >= _songList.size())
                 return;
 
-            songList.remove(i);
+            _songList.remove(i);
             if (currentSong > i)
                 currentSong -= 1;
         }
@@ -154,13 +174,13 @@ public class Playlist
      */
     public void setCurrentSong(int which)
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
             intermediate = true;
             currentSong = which;
-            songList.notify();
+            _songList.notify();
         }
-        NowPlaying.updateSong();
+        _playController.updateSong();
     }
 
     /**
@@ -169,9 +189,9 @@ public class Playlist
      */
     public int size()
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            return songList.size();
+            return _songList.size();
         }
     }
 
@@ -182,17 +202,17 @@ public class Playlist
      */
     public void swapSongs(int from, int to)
     {
-        synchronized (songList)
+        synchronized (_songList)
         {
-            Song toSwap = songList.get(from);
-            songList.set(from, songList.get(to));
-            songList.set(to, toSwap);
+            Song toSwap = _songList.get(from);
+            _songList.set(from, _songList.get(to));
+            _songList.set(to, toSwap);
         }
     }
 
     // no need to synchronize, called from synchronized blocks
     private boolean waitingForSong()
     {
-        return currentSong == songList.size() && !NowPlaying.isPlaying();
+        return currentSong == _songList.size() && !_playController.isPlaying();
     }
 }

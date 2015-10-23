@@ -1,6 +1,7 @@
 package syncjam.ui.buttons;
 
 import syncjam.NowPlaying;
+import syncjam.SongUtilities;
 import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.SliderUI;
 
@@ -10,21 +11,24 @@ import java.text.SimpleDateFormat;
 
 public class SongPositionSlider extends SliderUI
 {
-    public SongPositionSlider()
+    private final NowPlaying _player;
+
+    public SongPositionSlider(SongUtilities songUtils)
     {
-        super(0, 0, false);
+        super(0, 0, false, songUtils);
+        _player = songUtils.getPlayer();
     }
 
     public void paintComponent(Graphics g)
     {
-        if(NowPlaying.getSong() != null)
+        if(_player.getSong() != null)
         {
-            setMaxValue(NowPlaying.getSongLength());
+            setMaxValue(_player.getSongLength());
         }
 
-        if(NowPlaying.isPlaying())
+        if(_player.isPlaying())
         {
-            setValue(NowPlaying.getSongPosition());
+            setValue(_player.getSongPosition());
         }
 
         super.paintComponent(g);
@@ -33,7 +37,7 @@ public class SongPositionSlider extends SliderUI
     @Override
     protected void drawValue(Graphics g)
     {
-        if(NowPlaying.getSong()!= null)
+        if(_player.getSong()!= null)
         {
             g.setColor(Colors.c_Highlight);
             g.drawString(getTimeStamp(this.getPosOnBar()), barXOffset, barYOffset - 9);
@@ -47,7 +51,7 @@ public class SongPositionSlider extends SliderUI
     public void setValue(int n)
     {
         super.setValue(n);
-        NowPlaying.setSongPosition(n);
+        _player.setSongPosition(n);
     }
     public String getTimeStamp(int seconds)
     {

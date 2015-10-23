@@ -1,10 +1,13 @@
 package syncjam;
 
+import syncjam.net.NetworkController;
 import syncjam.ui.SyncJamUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Main class for SyncJam.
@@ -13,12 +16,12 @@ public class SyncJam
 {
     private final SyncJamUI mainWindow;
 
-    public SyncJam()
+    public SyncJam(int port)
     {
-        Playlist playlist = new Playlist();
-        mainWindow = new SyncJamUI(playlist);
+        SongUtilities songUtils = new SongUtilities();
+        mainWindow = new SyncJamUI(songUtils);
 
-        Timer timer = new Timer(1000/60,new ActionListener()
+        Timer timer = new Timer(1000/60, new ActionListener()
         {
             public void actionPerformed(ActionEvent event)
             {
@@ -29,13 +32,12 @@ public class SyncJam
         timer.setRepeats(true);
         timer.start();
 
-        AudioController auCon = new AudioController(playlist);
-        NowPlaying.setController(auCon);
-        auCon.start();
+        songUtils.getAudioController().start();
+        NetworkController netCon = new NetworkController(port, songUtils.getCommandQueue());
     }
 
     public static void main(String[] args)
     {
-        new SyncJam();
+        new SyncJam(25566);
     }
 }

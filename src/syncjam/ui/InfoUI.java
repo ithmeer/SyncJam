@@ -2,6 +2,7 @@ package syncjam.ui;
 
 import syncjam.NowPlaying;
 import syncjam.Song;
+import syncjam.SongUtilities;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,8 +12,9 @@ public class InfoUI extends JPanel
     private int myW, myH;
     private int aaWidth = 120; //album art width
     private int aaHeight = 120; //album art height
+    private final SongUtilities _songUtilities;
 
-    public InfoUI()
+    public InfoUI(SongUtilities songUtils)
     {
         myW = 350;
         myH = 114;
@@ -20,6 +22,7 @@ public class InfoUI extends JPanel
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background1);
+        _songUtilities = songUtils;
     }
 
     public int getW() { return myW; }
@@ -29,7 +32,7 @@ public class InfoUI extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        Song curSong = NowPlaying.getSong();
+        Song curSong = _songUtilities.getPlayer().getSong();
 
         if(curSong != null)
         {

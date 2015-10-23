@@ -1,6 +1,7 @@
 package syncjam.ui;
 
 import syncjam.Playlist;
+import syncjam.SongUtilities;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
@@ -20,7 +21,7 @@ public class SyncJamUI extends JPanel implements KeyListener
     private PlaylistUI playlistUI = null;
     private SliderUI songPosition = null;
 
-    public SyncJamUI(Playlist pList)
+    public SyncJamUI(SongUtilities songUtils)
     {
         window = new WindowObject(360, 500);
 
@@ -28,34 +29,34 @@ public class SyncJamUI extends JPanel implements KeyListener
 
         window.addKeyListener(this);
 
-        GridBagConstraints w = new GridBagConstraints();
+        GridBagConstraints windowConstraints = new GridBagConstraints();
         window.setLayout(new GridBagLayout());
 
-        w.anchor = GridBagConstraints.PAGE_START;
-        w.fill = GridBagConstraints.BOTH;
-        w.weightx = 1.0;
-        w.weighty = 1.0;
-        w.gridx = 0;
-        w.gridy = 0;
-        window.add(this, w);
+        windowConstraints.anchor = GridBagConstraints.PAGE_START;
+        windowConstraints.fill = GridBagConstraints.BOTH;
+        windowConstraints.weightx = 1.0;
+        windowConstraints.weighty = 1.0;
+        windowConstraints.gridx = 0;
+        windowConstraints.gridy = 0;
+        window.add(this, windowConstraints);
 
         JPanel sidepanel = tempPanel(40,window.getHeight());
         sidepanel.setLayout(new GridBagLayout());
-        w.fill = GridBagConstraints.NONE;
-        w.weightx = 1.0;
-        w.weighty = 1.0;
-        w.ipadx = 12;
-        w.ipady = 150;
+        windowConstraints.fill = GridBagConstraints.NONE;
+        windowConstraints.weightx = 1.0;
+        windowConstraints.weighty = 1.0;
+        windowConstraints.ipadx = 12;
+        windowConstraints.ipady = 150;
         //w.insets = new Insets(0,0,window.getHeight()-200,0);
-        sidepanel.add(new VolumeSlider(50, 100), w);
+        sidepanel.add(new VolumeSlider(50, 100, songUtils), windowConstraints);
 
         //w.anchor = GridBagConstraints.PAGE_START;
-        w.fill = GridBagConstraints.VERTICAL;
-        w.weightx = 0.0;
-        w.weighty = 1.0;
-        w.gridx = 1;
-        w.gridy = 0;
-        window.add(sidepanel, w);
+        windowConstraints.fill = GridBagConstraints.VERTICAL;
+        windowConstraints.weightx = 0.0;
+        windowConstraints.weighty = 1.0;
+        windowConstraints.gridx = 1;
+        windowConstraints.gridy = 0;
+        window.add(sidepanel, windowConstraints);
 
         window.open();
 
@@ -64,54 +65,54 @@ public class SyncJamUI extends JPanel implements KeyListener
         this.setBackground(Colors.c_Background1);
 
         this.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
+        GridBagConstraints controlConstraints = new GridBagConstraints();
 
-        playerUI = new InfoUI();
-        c.anchor = GridBagConstraints.PAGE_START;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(8,8,0,8);
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.ipadx = 0;
-        c.ipady = 114;
-        c.gridx = 0;
-        c.gridy = 0;
-        this.add(playerUI, c);
+        playerUI = new InfoUI(songUtils);
+        controlConstraints.anchor = GridBagConstraints.PAGE_START;
+        controlConstraints.fill = GridBagConstraints.HORIZONTAL;
+        controlConstraints.insets = new Insets(8,8,0,8);
+        controlConstraints.weightx = 1.0;
+        controlConstraints.weighty = 0.0;
+        controlConstraints.ipadx = 0;
+        controlConstraints.ipady = 114;
+        controlConstraints.gridx = 0;
+        controlConstraints.gridy = 0;
+        this.add(playerUI, controlConstraints);
 
-        controlUI = new ControlUI(pList);
-        c.anchor = GridBagConstraints.PAGE_START;
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.ipadx = 0;
-        c.ipady = 0;
-        c.gridx = 0;
-        c.gridy = 1;
-        this.add(controlUI, c);
+        controlUI = new ControlUI(songUtils);
+        controlConstraints.anchor = GridBagConstraints.PAGE_START;
+        controlConstraints.fill = GridBagConstraints.BOTH;
+        controlConstraints.weightx = 1.0;
+        controlConstraints.weighty = 0.0;
+        controlConstraints.ipadx = 0;
+        controlConstraints.ipady = 0;
+        controlConstraints.gridx = 0;
+        controlConstraints.gridy = 1;
+        this.add(controlUI, controlConstraints);
 
-        songPosition = new SongPositionSlider();
-        c.anchor = GridBagConstraints.PAGE_START;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new Insets(0,6,0,6);
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.ipadx = 0;
-        c.ipady = 28;
-        c.gridx = 0;
-        c.gridy = 2;
-        this.add(songPosition, c);
+        songPosition = new SongPositionSlider(songUtils);
+        controlConstraints.anchor = GridBagConstraints.PAGE_START;
+        controlConstraints.fill = GridBagConstraints.BOTH;
+        controlConstraints.insets = new Insets(0,6,0,6);
+        controlConstraints.weightx = 1.0;
+        controlConstraints.weighty = 0.0;
+        controlConstraints.ipadx = 0;
+        controlConstraints.ipady = 28;
+        controlConstraints.gridx = 0;
+        controlConstraints.gridy = 2;
+        this.add(songPosition, controlConstraints);
 
-        playlistUI = new PlaylistUI(pList);
-        c.anchor = GridBagConstraints.PAGE_END;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new Insets(8,8,8,8);
-        c.weightx = 1.0;
-        c.weighty = 1.0;
-        c.ipadx = 0;
-        c.ipady = 0;
-        c.gridx = 0;
-        c.gridy = 3;
-        this.add(playlistUI, c);
+        playlistUI = new PlaylistUI(songUtils);
+        controlConstraints.anchor = GridBagConstraints.PAGE_END;
+        controlConstraints.fill = GridBagConstraints.BOTH;
+        controlConstraints.insets = new Insets(8,8,8,8);
+        controlConstraints.weightx = 1.0;
+        controlConstraints.weighty = 1.0;
+        controlConstraints.ipadx = 0;
+        controlConstraints.ipady = 0;
+        controlConstraints.gridx = 0;
+        controlConstraints.gridy = 3;
+        this.add(playlistUI, controlConstraints);
 
         validate();
         repaint();

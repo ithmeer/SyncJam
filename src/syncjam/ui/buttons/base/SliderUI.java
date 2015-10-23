@@ -1,5 +1,6 @@
 package syncjam.ui.buttons.base;
 
+import syncjam.SongUtilities;
 import syncjam.ui.Colors;
 
 import javax.swing.*;
@@ -8,8 +9,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-public class SliderUI extends JPanel implements MouseListener, MouseMotionListener
+public abstract class SliderUI extends JPanel implements MouseListener, MouseMotionListener
 {
+    protected final SongUtilities songUtilities;
+
     protected int value = 0;
     protected int max = 0;
     protected int posOnBar = 0;
@@ -21,22 +24,22 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
     private boolean updateWhileDragging = true;
     private boolean dragging = false;
 
-    public SliderUI()
+    public SliderUI(SongUtilities songUtils)
     {
-        this(0, 100, true);
+        this(0, 100, true, songUtils);
     }
 
-    public SliderUI(int maxValue)
+    public SliderUI(int maxValue, SongUtilities songUtils)
     {
-        this(0, maxValue, true);
+        this(0, maxValue, true, songUtils);
     }
 
-    public SliderUI(int startValue, int maxValue)
+    public SliderUI(int startValue, int maxValue, SongUtilities songUtils)
     {
-        this(startValue, maxValue, true);
+        this(startValue, maxValue, true, songUtils);
     }
 
-    public SliderUI(int startValue, int maxValue, boolean dragUpdate)
+    public SliderUI(int startValue, int maxValue, boolean dragUpdate, SongUtilities songUtils)
     {
         myW = getWidth() - 50;
         myH = 20;
@@ -48,6 +51,7 @@ public class SliderUI extends JPanel implements MouseListener, MouseMotionListen
         max =   maxValue;
 
         updateWhileDragging = dragUpdate;
+        songUtilities = songUtils;
 
         this.setBackground(Colors.c_Background1);
         this.addMouseListener(this);

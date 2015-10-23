@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,11 +17,13 @@ public class NetworkController
 {
     private final AtomicBoolean terminated = new AtomicBoolean(false);
     private final ExecutorService exec = Executors.newCachedThreadPool();
+    private final BlockingQueue<String> commandQueue;
     private final int port;
 
-    public NetworkController(final int port)
+    public NetworkController(int port, BlockingQueue<String> queue)
     {
         this.port = port;
+        this.commandQueue = queue;
     }
 
     public void startServer() throws IOException
@@ -40,28 +43,19 @@ public class NetworkController
                         InetAddress info = clientSock.getInetAddress();
                         System.out.printf("Connection from %s (%s)%n",
                                           info.getHostName(), info.getHostAddress());
-                        exec.execute(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                try
-                                {
-                                    new ClientSocket(clientSock).run();
-                                } catch (Exception e)
-                                {
-                                    System.out.println("Error in socket client: "
-                                                               + e.getMessage());
-                                }
-                            }
-                        });
-                    } catch (SocketTimeoutException to)
+
+                        // start up the socket producer task
+                        exec.execute(new SocketProducer(clientSock.getChannel(), commandQueue));
+                    }
+                    catch (SocketTimeoutException to)
                     {
-                    } catch (IOException e)
+                        break;
+                    }
+                    catch (IOException e)
                     {
                         System.out.println("Cannot create socket: "
                                                    + e.getMessage());
-                        return;
+                        break;
                     }
                 }
             }

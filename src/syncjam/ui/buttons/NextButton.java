@@ -1,42 +1,38 @@
 package syncjam.ui.buttons;
 
-import syncjam.NowPlaying;
-import syncjam.Playlist;
+import syncjam.SongUtilities;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
 
 public class NextButton extends ButtonUI
 {
-    private final Playlist playlist;
-
-    public NextButton(int w, int h, Playlist pl)
+    public NextButton(int w, int h, SongUtilities songUtils)
     {
-        super(w, h);
+        super(w, h, songUtils);
         setPreferredSize(new Dimension(getW() + 19, getH()));
-        playlist = pl;
-    }
-    public NextButton(int w, int h, Color c, Playlist pl)
-    {
-        super(w, h, c);
-        setPreferredSize(new Dimension(getW() + 19, getH()));
-        playlist = pl;
     }
 
-    public void clicked()
+    public NextButton(int w, int h, Color c, SongUtilities songUtils)
     {
-        playlist.nextSong();
+        super(w, h, c, songUtils);
+        setPreferredSize(new Dimension(getW() + 19, getH()));
+    }
+
+    protected void clicked()
+    {
+        songUtilities.getPlaylist().nextSong();
     }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
 
-        g.fillPolygon(arrowShape(getWidth()-getW(),0));
-        g.fillPolygon(arrowShape(getWidth()-getW() + getW()/5*2,0));
+        g.fillPolygon(makeArrow(getWidth() - getW(), 0));
+        g.fillPolygon(makeArrow(getWidth() - getW() + getW() / 5 * 2, 0));
     }
 
-    public Polygon arrowShape(int x, int y)
+    public Polygon makeArrow(int x, int y)
     {
         return new Polygon(
                 new int[]{x,            x,                  x + getW()/2},

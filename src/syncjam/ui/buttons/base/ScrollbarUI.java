@@ -18,6 +18,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     protected boolean dragging = false, scrolling = false;
 
     public ScrollbarUI() { this(Colors.c_Background1); }
+
     public ScrollbarUI(Color bg)
     {
         myW = 8;
@@ -35,15 +36,18 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     {
         target = v;
     }
+
     public void setValue(int v)
     {
         value = v;
         target = v;
     }
-    public int  getValue()      { return value; }
+
+    public int getValue() { return value; }
 
     public void setMaxValue(int n) { max = n - getHeight(); }
-    public int  getMaxValue()      { return max; }
+
+    public int getMaxValue() { return max; }
 
     public void paintComponent(Graphics g)
     {

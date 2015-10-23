@@ -25,13 +25,16 @@ public class AudioController
 
     private final Playlist playlist;
 
+    private final NowPlaying playController;
+
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);
 
     private boolean playing;
 
-    public AudioController(Playlist pl)
+    public AudioController(Playlist pl, NowPlaying np)
     {
+        playController = np;
         playlist = pl;
         synchronized (this)
         {
@@ -105,7 +108,7 @@ public class AudioController
             try
             {
                 Song next = playlist.getNextSong();
-                NowPlaying.setSong(next);
+                playController.setSong(next);
                 playSong(next);
             } catch (InterruptedException e)
             {
@@ -118,7 +121,7 @@ public class AudioController
     private void playSong(Song song)
     {
         String url = XugglerIO.map(song.getSongName(), new BytesHandler(song.getSongData()));
-        NowPlaying.setSongPosition(0);
+        playController.setSongPosition(0);
 
         // Create a Xuggler container object
         IContainer container = IContainer.make();
@@ -180,7 +183,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     }
 
                     int curPos = (int) (packet.getTimeStamp() * packet.getTimeBase().getDouble());
-                    int oldPos = NowPlaying.getSongPosition();
+                    int oldPos = playController.getSongPosition();
                     long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
                     if (oldPos > curPos + 1 || oldPos < curPos - 1)
                     {
@@ -188,7 +191,7 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     }
                     else
                     {
-                        NowPlaying.setSongPosition(curPos);
+                        playController.setSongPosition(curPos);
                     }
 
                     offset += bytesDecoded;
