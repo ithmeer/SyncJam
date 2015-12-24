@@ -1,10 +1,10 @@
 package syncjam.net;
 
+import syncjam.SongUtilities;
+
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.InputStream;
 import java.net.*;
-import java.util.Scanner;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,27 +15,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NetworkController
 {
-    private final AtomicBoolean terminated = new AtomicBoolean(false);
-    private final ExecutorService exec = Executors.newCachedThreadPool();
-    private final BlockingQueue<String> commandQueue;
-    private final int port;
+    private final AtomicBoolean _terminated = new AtomicBoolean(false);
+    private final ExecutorService _exec = Executors.newCachedThreadPool();
+    private final SongUtilities _songUtilities;
+    private final int _port;
 
-    public NetworkController(int port, BlockingQueue<String> queue)
+    public NetworkController(int port, SongUtilities songUtils)
     {
-        this.port = port;
-        this.commandQueue = queue;
+        _port = port;
+        _songUtilities = songUtils;
     }
 
     public void startServer() throws IOException
     {
-        exec.execute(new Runnable()
+        _exec.execute(new Runnable()
         {
-            final ServerSocket serv = new ServerSocket(port);
+            final ServerSocket serv = new ServerSocket(_port);
 
             @Override
             public void run()
             {
-                while (!terminated.get())
+                while (!_terminated.get())
                 {
                     try
                     {
@@ -44,8 +44,10 @@ public class NetworkController
                         System.out.printf("Connection from %s (%s)%n",
                                           info.getHostName(), info.getHostAddress());
 
-                        // start up the socket producer task
-                        exec.execute(new SocketProducer(clientSock.getChannel(), commandQueue));
+                        // start up the socket producer and consumer tasks
+                        ClientSocket cs = new ClientSocket(_exec, clientSock.getInputStream(),
+                                                           clientSock.getOutputStream(),
+                                                           _songUtilities);
                     }
                     catch (SocketTimeoutException to)
                     {
@@ -53,8 +55,7 @@ public class NetworkController
                     }
                     catch (IOException e)
                     {
-                        System.out.println("Cannot create socket: "
-                                                   + e.getMessage());
+                        System.out.println("Cannot create socket: " + e.getMessage());
                         break;
                     }
                 }

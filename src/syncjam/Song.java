@@ -26,8 +26,6 @@ public class Song
     private final byte[] songData;
     private final AtomicInteger songLength = new AtomicInteger(0); //In seconds, can change if necessary
 
-    // !!!! This is for you, cat !!!!
-
     /**
      * Read song from file and set song info.
      */

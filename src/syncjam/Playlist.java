@@ -196,17 +196,20 @@ public class Playlist
     }
 
     /**
-     * Swap the songs at the given indices.
+     * Move a song between the given indices.
      * @param from first index
      * @param to second index
      */
-    public void swapSongs(int from, int to)
+    public void moveSong(int from, int to)
     {
         synchronized (_songList)
         {
-            Song toSwap = _songList.get(from);
-            _songList.set(from, _songList.get(to));
-            _songList.set(to, toSwap);
+            Song toSwap = _songList.remove(from);
+
+            if (to > from)
+                to--;
+
+            _songList.add(to, toSwap);
         }
     }
 

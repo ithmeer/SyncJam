@@ -1,5 +1,7 @@
 package syncjam;
 
+import syncjam.net.CommandQueue;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -12,13 +14,13 @@ public class SongUtilities
     private final NowPlaying _player;
     private final AudioController _audioController;
 
-    private final BlockingQueue<String> _commandQueue;
+    private final CommandQueue _commandQueue;
 
     public SongUtilities()
     {
         _player = new NowPlaying();
         _playlist = new Playlist(_player);
-        _commandQueue = new LinkedBlockingQueue<String>();
+        _commandQueue = new CommandQueue();
         _audioController = new AudioController(_playlist, _player);
         _player.setAudioController(_audioController);
     }
@@ -28,7 +30,7 @@ public class SongUtilities
         return _audioController;
     }
 
-    public BlockingQueue<String> getCommandQueue()
+    public CommandQueue getCommandQueue()
     {
         return _commandQueue;
     }
