@@ -68,11 +68,11 @@ public class InfoUI extends JPanel
                 getWidth()/2 - aaWidth/2 - hOffset);
 
         g.setColor(Colors.c_Foreground1);
-        Colors.setFont(g, 24);
+        Colors.setFont(g, 22);
         g.drawString(songName, aaWidth + hOffset, vOffset);
 
         g.setColor(Colors.c_Foreground2);
-        Colors.setFont(g, 23);
+        Colors.setFont(g, 18);
         g.drawString(artistName,                 aaWidth + hOffset, vOffset + spacing);
         g.drawString(song.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
         g.drawString(song.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);

@@ -35,6 +35,9 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     public VerticalSliderUI(int startValue, int maxValue, SongUtilities songUtils)
     {
         this(startValue, maxValue, true, songUtils);
+        /*
+        startValue is the default value the slider starts on
+         */
     }
 
     public VerticalSliderUI(int startValue, int maxValue, boolean dragUpdate, SongUtilities songUtils)
@@ -110,7 +113,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     protected void drawValue(Graphics g)
     {
         g.setColor(Colors.c_Highlight);
-        g.drawString("" + (int) posOnBar,
+        g.drawString("" + posOnBar,
                      barXOffset + 1 - g.getFontMetrics().stringWidth(""+value)/2,
                      barYOffset - 8);
     }

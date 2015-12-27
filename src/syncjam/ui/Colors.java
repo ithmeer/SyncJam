@@ -34,12 +34,12 @@ public class Colors
 
     public static void setFont(Graphics g, int size)
     {
-        Font font = new Font("Calibri", Font.PLAIN, size);
+        Font font = new Font(Font.SANS_SERIF, Font.PLAIN, size);
 
         Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
         attributes.put(TextAttribute.TRACKING, 0.075);
-        attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-        attributes.put(TextAttribute.TRANSFORM, new TransformAttribute(AffineTransform.getScaleInstance(1, 1.04)));
+        //attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        attributes.put(TextAttribute.TRANSFORM, new TransformAttribute(AffineTransform.getScaleInstance(1, 1.02)));
         Font font2 = font.deriveFont(attributes);
 
         g.setFont(font2);
