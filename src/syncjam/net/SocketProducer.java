@@ -1,36 +1,39 @@
 package syncjam.net;
 
+import syncjam.SongUtilities;
+
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.ReadableByteChannel;
-import java.util.concurrent.BlockingQueue;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Listen on a socket for commands.
- * Created by Ithmeer on 7/6/2015.
+ * Created by Ithmeer on 11/12/2015.
  */
 public class SocketProducer extends InterruptableRunnable implements Runnable
 {
-    private final ReadableByteChannel socketInputChannel;
-    private final BlockingQueue<String> commandQueue;
+    private final CommandQueue commandQueue;
+    private final OutputStream _socketOutputStream;
 
-    public SocketProducer(ReadableByteChannel sockChan, BlockingQueue<String> queue)
+    public SocketProducer(OutputStream outStream, SongUtilities songUtils)
     {
-        socketInputChannel = sockChan;
-        commandQueue = queue;
+        _socketOutputStream = outStream;
+        commandQueue = songUtils.getCommandQueue();
     }
 
     public void run()
     {
-        ByteBuffer commandBuffer = ByteBuffer.allocate(2);
         while (!terminated)
         {
             try
             {
-                socketInputChannel.read(commandBuffer);
-                commandQueue.add(commandBuffer.toString());
+                String command = commandQueue.take();
+                _socketOutputStream.write(command.getBytes());
+            }
+            catch (InterruptedException e)
+            {
+                break;
             }
             catch (IOException e)
             {

@@ -33,7 +33,7 @@ public class SyncJam
         timer.start();
 
         songUtils.getAudioController().start();
-        NetworkController netCon = new NetworkController(port, songUtils.getCommandQueue());
+        NetworkController netCon = new NetworkController(port, songUtils);
     }
 
     public static void main(String[] args)
