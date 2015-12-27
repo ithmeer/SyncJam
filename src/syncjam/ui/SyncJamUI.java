@@ -2,6 +2,7 @@ package syncjam.ui;
 
 import syncjam.Playlist;
 import syncjam.SongUtilities;
+import syncjam.ui.buttons.NetworkButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
@@ -49,6 +50,8 @@ public class SyncJamUI extends JPanel implements KeyListener
         windowConstraints.ipady = 150;
         //w.insets = new Insets(0,0,window.getHeight()-200,0);
         sidepanel.add(new VolumeSlider(50, 100, songUtils), windowConstraints);
+        windowConstraints.gridy = 1;
+        sidepanel.add(new NetworkButton(36, 36, songUtils), windowConstraints);
 
         //w.anchor = GridBagConstraints.PAGE_START;
         windowConstraints.fill = GridBagConstraints.VERTICAL;
