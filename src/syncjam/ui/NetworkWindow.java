@@ -10,9 +10,9 @@ import java.awt.*;
 
 public class NetworkWindow extends WindowObject
 {
-    String address = "0.0.0.0";
-    String port = "9982";
-    String password = "password";
+    private String defaultPort = "9982";
+    private final NetTextField addressField, portField, passField;
+
     public NetworkWindow(int width, int height, final SongUtilities songUtils)
     {
         super(width, height);
@@ -28,21 +28,29 @@ public class NetworkWindow extends WindowObject
         GridLayout gl = new GridLayout(4, 2);
         networkPanel.setLayout(gl);
 
+        addressField = new NetTextField(15, "");
+        portField = new NetTextField(5, defaultPort);
+        passField = new NetTextField(15, "");
+
         networkPanel.add(new NetLabel("IP Address"));
-        networkPanel.add(new NetTextField(15, address));
+        networkPanel.add(addressField);
         networkPanel.add(new NetLabel("Port"));
-        networkPanel.add(new NetTextField(5, port));
+        networkPanel.add(portField);
         networkPanel.add(new NetLabel("Password"));
-        networkPanel.add(new NetTextField(15, password));
+        networkPanel.add(passField);
 
         networkPanel.add(new NetButton("Host", songUtils) {
             @Override
             protected void clicked()
             {
+                String address = addressField.getText();
+                int port = Integer.parseInt(portField.getText());
+                String password = passField.getText();
+
                 System.out.println(address+"\n"+port+"\n"+password);
                 try
                 {
-                    songUtils.getNetworkController().startServer(Integer.parseInt(port), password);
+                    songUtils.getNetworkController().startServer(port, password);
                 }
                 catch (SyncJamException e)
                 {
@@ -55,12 +63,14 @@ public class NetworkWindow extends WindowObject
             @Override
             protected void clicked()
             {
+                String address = addressField.getText();
+                int port = Integer.parseInt(portField.getText());
+                String password = passField.getText();
+
                 System.out.println(address+"\n"+port+"\n"+password);
                 try
                 {
-                    songUtils.getNetworkController().connectToServer(address,
-                                                                     Integer.parseInt(port),
-                                                                     password);
+                    songUtils.getNetworkController().connectToServer(address, port, password);
                 }
                 catch (SyncJamException e)
                 {
