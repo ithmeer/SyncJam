@@ -1,17 +1,20 @@
 package syncjam;
 
+import syncjam.net.CommandQueue;
+
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Static class to provide access to the currently playing song. Thread-safe. Expects that only one thread will ever
- *     set a new song (the thread that drives AudioController).
+ * Class to provide access to the currently playing song. Thread-safe.
+ *  Expects that only one thread will ever set a new song (the thread that drives AudioController).
  */
 public class NowPlaying
 {
     private volatile AudioController controller;
+    private volatile CommandQueue queue;
     private volatile Song currentSong;
     private boolean isPlaying = false; // synchronized on this
     private final AtomicInteger songPosition = new AtomicInteger(0);
@@ -19,6 +22,11 @@ public class NowPlaying
     public void setAudioController(AudioController au)
     {
         controller = au;
+    }
+
+    public void setCommandQueue(CommandQueue cq)
+    {
+        queue = cq;
     }
 
     public BufferedImage getAlbumArt()   { return currentSong.getAlbumArt(); }
@@ -41,14 +49,24 @@ public class NowPlaying
 
     public synchronized boolean isPlaying() { return isPlaying; }
 
-    public synchronized void playToggle()
+    public synchronized void playToggle(boolean state)
     {
-        if(!isPlaying)
+        if(state)
+        {
             controller.play();
+        }
         else
+        {
             controller.pause();
+        }
+        queue.playToggle(state);
 
-        setPlaying(!isPlaying);
+        setPlaying(state);
+    }
+
+    public void playToggle()
+    {
+        playToggle(!isPlaying);
     }
 
     public void setSong(Song song) { currentSong = song; }

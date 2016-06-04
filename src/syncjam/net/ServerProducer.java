@@ -20,6 +20,8 @@ public class ServerProducer extends SocketProducer
     @Override
     public void run()
     {
+        _queue.toggleEnabled(true);
+
         while (!terminated)
         {
             try

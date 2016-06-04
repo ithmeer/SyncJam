@@ -57,9 +57,13 @@ public class NetworkController
             String ack = cs.readNext();
 
             if (ack == ackMessage)
+            {
                 System.out.println("password accepted");
+            }
             else
+            {
                 System.out.println("password accepted");
+            }
         }
         catch (IOException e)
         {
@@ -89,6 +93,7 @@ public class NetworkController
             try
             {
                 _serv = new ServerSocket(port);
+                System.out.println("Server started\n");
             }
             catch (IOException e)
             {
@@ -121,6 +126,7 @@ public class NetworkController
                     else
                     {
                         System.out.println("password rejected");
+                        cs.sendCommand("bad password");
                         clientSock.close();
                     }
                 }

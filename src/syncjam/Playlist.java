@@ -1,5 +1,7 @@
 package syncjam;
 
+import syncjam.net.CommandQueue;
+
 import java.util.*;
 
 /**
@@ -13,14 +15,21 @@ public class Playlist
     private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());
     private final NowPlaying _playController;
 
-    // track the index of the currently playing (or to be played) song
-    private int currentSong = 0;
+    private volatile CommandQueue _queue;
 
-    private boolean intermediate = false;
+    // track the index of the currently playing (or to be played) song
+    private int _currentSong = 0;
+
+    private boolean _intermediate = false;
     
     public Playlist(NowPlaying playCon)
     {
         _playController = playCon;
+    }
+
+    public void setCommandQueue(CommandQueue cq)
+    {
+        _queue = cq;
     }
 
     /**
@@ -62,7 +71,7 @@ public class Playlist
     {
         synchronized (_songList)
         {
-            return intermediate || waitingForSong() ? currentSong : currentSong - 1;
+            return _intermediate || waitingForSong() ? _currentSong : _currentSong - 1;
         }
     }
 
@@ -77,21 +86,19 @@ public class Playlist
         synchronized (_songList)
         {
             // if empty, pause
-            if (_playController.isPlaying())
-                _playController.playToggle();
+            _playController.playToggle(false);
 
-            while (currentSong == _songList.size())
+            while (_currentSong == _songList.size())
             {
                 // block until more songs are added or a different song is selected
                 _songList.wait();
             }
 
             // we have a new song, unpause
-            if (!_playController.isPlaying())
-                _playController.playToggle();
+            _playController.playToggle(true);
 
-            intermediate = false;
-            return _songList.get(currentSong++);
+            _intermediate = false;
+            return _songList.get(_currentSong++);
         }
     }
 
@@ -117,6 +124,7 @@ public class Playlist
             if (waitingForSong())
                 return;
         }
+        _queue.nextSong();
         _playController.updateSong();
     }
 
@@ -127,26 +135,27 @@ public class Playlist
     {
         synchronized (_songList)
         {
-            if (currentSong != 0 && !_songList.isEmpty())
+            if (_currentSong != 0 && !_songList.isEmpty())
             {
                 if (waitingForSong())
                 {
-                    currentSong--;
+                    _currentSong--;
                     _songList.notify();
                 }
-                else if (currentSong == 1)
+                else if (_currentSong == 1)
                 {
                     // if playing first song, just restart
-                    currentSong--;
+                    _currentSong--;
                     _playController.updateSong();
                 }
                 else
                 {
                     // playing new song, so currentSong was stepped twice
-                    intermediate = true;
-                    currentSong -= 2;
+                    _intermediate = true;
+                    _currentSong -= 2;
                     _playController.updateSong();
                 }
+                _queue.prevSong();
             }
         }
     }
@@ -163,8 +172,8 @@ public class Playlist
                 return;
 
             _songList.remove(i);
-            if (currentSong > i)
-                currentSong -= 1;
+            if (_currentSong > i)
+                _currentSong -= 1;
         }
     }
 
@@ -176,10 +185,11 @@ public class Playlist
     {
         synchronized (_songList)
         {
-            intermediate = true;
-            currentSong = which;
+            _intermediate = true;
+            _currentSong = which;
             _songList.notify();
         }
+        _queue.gotoSong(which);
         _playController.updateSong();
     }
 
@@ -210,12 +220,13 @@ public class Playlist
                 to--;
 
             _songList.add(to, toSwap);
+            _queue.moveSong(from, to);
         }
     }
 
     // no need to synchronize, called from synchronized blocks
     private boolean waitingForSong()
     {
-        return currentSong == _songList.size() && !_playController.isPlaying();
+        return _currentSong == _songList.size() && !_playController.isPlaying();
     }
 }

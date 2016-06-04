@@ -24,6 +24,8 @@ public class SocketProducer extends InterruptableRunnable implements Runnable
 
     public void run()
     {
+        _queue.toggleEnabled(true);
+
         while (!terminated)
         {
             try

@@ -5,10 +5,10 @@ package syncjam.net;
  */
 public abstract class InterruptableRunnable implements Runnable
 {
-    protected volatile boolean terminated = true;
+    protected volatile boolean terminated = false;
 
     public void terminate()
     {
-        terminated = false;
+        terminated = true;
     }
 }

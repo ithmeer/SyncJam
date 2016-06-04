@@ -16,55 +16,109 @@ public class CommandQueue
     private final NowPlaying _player;
     private final Playlist _playlist;
 
+    // synchronized on this
+    private boolean _enabled;
+
     public CommandQueue(NowPlaying player, Playlist playlist)
     {
         _queue = new LinkedBlockingQueue<String>();
         _player = player;
         _playlist = playlist;
-    }
 
-    public void executeCommand(byte[] cmdBuffer)
-    {
-        byte first = cmdBuffer[0];
-        if (first == 'G')
+        synchronized (this)
         {
-            _playlist.setCurrentSong(cmdBuffer[1]);
-        }
-        else if (first == 'M')
-        {
-            _playlist.moveSong(cmdBuffer[1], cmdBuffer[2]);
-        }
-        else if (first == 'P')
-        {
-            _player.playToggle();
-        }
-        else if (first == 'S')
-        {
-            _player.setSongPosition(cmdBuffer[1]);
+            _enabled = false;
         }
     }
 
-    public void gotoSong(int song)
+    public synchronized void toggleEnabled(boolean state)
     {
-        if (song >= 0)
+        _enabled = state;
+    }
+
+    public synchronized void executeCommand(byte[] cmdBuffer)
+    {
+        byte second = cmdBuffer[1];
+        _enabled = false;
+
+        switch (cmdBuffer[0])
+        {
+            case 'G':
+                _playlist.setCurrentSong(cmdBuffer[1]);
+                break;
+            case 'M':
+                _playlist.moveSong(cmdBuffer[1], cmdBuffer[2]);
+                break;
+            case 'N':
+                _playlist.nextSong();
+                break;
+            case 'P':
+                _player.playToggle(true);
+                if (second == 'L')
+                    _player.playToggle(true);
+                else if (second == 'S')
+                    _playlist.prevSong();
+                break;
+            case 'S':
+                if (second == 'T')
+                    _player.playToggle(false);
+                else
+                    _player.setSongPosition(cmdBuffer[1]);
+                break;
+        }
+
+        _enabled = true;
+    }
+
+    public synchronized void gotoSong(int song)
+    {
+        if (_enabled)
+        {
             _queue.add("G" + (byte) song);
+        }
     }
 
-    public void moveSong(int from, int to)
+    public synchronized void nextSong()
     {
-        if (from > 0 && to > 0)
+        if (_enabled)
+        {
+            _queue.add("NS");
+        }
+    }
+
+    public synchronized void prevSong()
+    {
+        if (_enabled)
+        {
+            _queue.add("PS");
+        }
+    }
+
+    public synchronized void moveSong(int from, int to)
+    {
+        if (_enabled)
+        {
             _queue.add("M" + (byte) from + (byte) to);
+        }
     }
 
-    public void playToggle()
+    public synchronized void playToggle(boolean state)
     {
-        _queue.add("PL");
+        if (_enabled)
+        {
+            if (state)
+                _queue.add("PL");
+            else
+                _queue.add("ST");
+        }
     }
 
-    public void seek(int percent)
+    public synchronized void seek(int percent)
     {
-        if (percent >= 0 && percent <= 100)
+        if (_enabled)
+        {
             _queue.add("S" + (byte) percent);
+        }
     }
 
     /**

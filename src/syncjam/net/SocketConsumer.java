@@ -14,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
  * Listen on a socket for commands.
  * Created by Ithmeer on 7/6/2015.
  */
-public class SocketConsumer extends InterruptableRunnable implements Runnable
+public class SocketConsumer extends InterruptableRunnable
 {
     protected final InputStream _socketInputStream;
     protected final CommandQueue _queue;
