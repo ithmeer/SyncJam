@@ -2,44 +2,41 @@ package syncjam.ui;
 
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
-import syncjam.ui.buttons.NetworkButton;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class NetworkWindow extends WindowObject
+public class NetworkWindow extends JPanel
 {
     private String defaultPort = "9982";
     private final NetTextField addressField, portField, passField;
 
     public NetworkWindow(int width, int height, final SongUtilities songUtils)
     {
-        super(width, height);
+        super();
 
-        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        //this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel networkPanel = new JPanel();
-        networkPanel.setPreferredSize(new Dimension(200,400));
-        networkPanel.setBackground(Colors.c_Background1);
-
-        add(networkPanel);
+        //JPanel networkPanel = new JPanel();
+        this.setPreferredSize(new Dimension(200,400));
+        this.setBackground(Colors.c_Background1);
 
         GridLayout gl = new GridLayout(4, 2);
-        networkPanel.setLayout(gl);
+        this.setLayout(gl);
 
         addressField = new NetTextField(15, "");
         portField = new NetTextField(5, defaultPort);
         passField = new NetTextField(15, "");
 
-        networkPanel.add(new NetLabel("IP Address"));
-        networkPanel.add(addressField);
-        networkPanel.add(new NetLabel("Port"));
-        networkPanel.add(portField);
-        networkPanel.add(new NetLabel("Password"));
-        networkPanel.add(passField);
+        this.add(new NetLabel("IP Address"));
+        this.add(addressField);
+        this.add(new NetLabel("Port"));
+        this.add(portField);
+        this.add(new NetLabel("Password"));
+        this.add(passField);
 
-        networkPanel.add(new NetButton("Host", songUtils) {
+        this.add(new NetButton("Host", songUtils) {
             @Override
             protected void clicked()
             {
@@ -59,7 +56,7 @@ public class NetworkWindow extends WindowObject
             }
         });
 
-        networkPanel.add(new NetButton("Connect", songUtils) {
+        this.add(new NetButton("Connect", songUtils) {
             @Override
             protected void clicked()
             {
