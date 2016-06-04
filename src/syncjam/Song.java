@@ -8,18 +8,20 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mpatric.mp3agic.ID3v1;
-import com.mpatric.mp3agic.ID3v2;
-import com.mpatric.mp3agic.Mp3File;
-
-import javax.imageio.ImageIO;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.AudioHeader;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.KeyNotFoundException;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
 
 /**
  * A song to be played. The song data is stored as an array of bytes. Thread-safe.
  */
 public class Song
 {
-    private volatile BufferedImage albumArt = null; // effectively final
+    private final BufferedImage albumArt;
     private final String songName;
     private final String artistName;
     private final String albumName;
@@ -29,72 +31,45 @@ public class Song
     /**
      * Read song from file and set song info.
      */
-    public Song(File file)
+    public Song(File file) throws SyncJamException
     {
         String[] parts = file.getName().split("\\.");
+        AudioFile song = null;
         songData = new byte[(int) file.length()];
+
         try
         {
             new FileInputStream(file).read(songData);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
-            e.printStackTrace();
+            throw new SyncJamException("Cannot read file: " + file.getName());
         }
 
-        // not mp3, just set name
-        if (!parts[parts.length - 1].equals("mp3"))
+        try
+        {
+            song = AudioFileIO.read(file);
+        }
+        catch (Exception e)
+        {
+            // can't read metadata, not fatal
+        }
+
+        if (song == null)
         {
             songName = parts[0];
             artistName = "";
             albumName = "";
-        } else
+            albumArt = null;
+        }
+        else
         {
-            Mp3File mp3;
-            ID3v1 tags = null;
-
-            // open file, scanning for errors and fetching length
-            try
-            {
-                mp3 = new Mp3File(file);
-                songLength.set((int) mp3.getLengthInSeconds());
-            } catch (Exception e)
-            {
-                throw new RuntimeException("can't open file: " + file.getName());
-            }
-
-            if (mp3.hasId3v2Tag())
-                tags = mp3.getId3v2Tag();
-            else if (mp3.hasId3v1Tag())
-                tags = mp3.getId3v1Tag();
-
-            if (tags != null)
-            {
-                songName = tags.getTitle();
-                albumName = tags.getAlbum();
-                artistName = tags.getArtist();
-
-                // read album art
-                if (tags instanceof ID3v2)
-                {
-                    ID3v2 tags2 = (ID3v2) tags;
-                    byte[] image = tags2.getAlbumImage();
-                    if (image != null)
-                    {
-                        try
-                        {
-                            albumArt = ImageIO.read(new ByteArrayInputStream(image));
-                        } catch (IOException e)
-                        {
-                            // if we can't read, oh well
-                        }
-                    }
-                }
-            } else
-            {
-                songName = parts[0];
-                artistName = "";
-                albumName = "";
-            }
+            Tag metadata = song.getTag();
+            songLength.set(TryGetSongLength(song));
+            songName = TryReadTag(metadata, FieldKey.TITLE);
+            artistName = TryReadTag(metadata, FieldKey.ARTIST);
+            albumName = TryReadTag(metadata, FieldKey.ALBUM);
+            albumArt = TryReadCover(metadata);
         }
     }
 
@@ -146,5 +121,60 @@ public class Song
     public void setSongLength(int lengthInSecs)
     {
         songLength.set(lengthInSecs);
+    }
+
+    private BufferedImage TryReadCover(Tag metadata)
+    {
+        BufferedImage cover = null;
+
+        if (metadata != null)
+        {
+            Artwork coverArt = metadata.getFirstArtwork();
+            if (coverArt != null)
+            {
+                try
+                {
+                    cover = (BufferedImage) coverArt.getImage();
+                }
+                catch (IOException e)
+                {
+                    // if we can't read, oh well :(
+                }
+            }
+        }
+
+        return cover;
+    }
+
+    private String TryReadTag(Tag metadata, FieldKey tag)
+    {
+        String value = "";
+
+        if (metadata != null)
+        {
+            try
+            {
+                value = metadata.getFirst(tag);
+            }
+            catch (KeyNotFoundException e)
+            {
+                // use default
+            }
+        }
+
+        return value;
+    }
+
+    private int TryGetSongLength(AudioFile song)
+    {
+        int length = 0;
+
+        AudioHeader hdr = song.getAudioHeader();
+        if (hdr != null)
+        {
+            length = hdr.getTrackLength();
+        }
+
+        return length;
     }
 }

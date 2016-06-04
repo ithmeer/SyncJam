@@ -13,13 +13,13 @@ import java.nio.channels.WritableByteChannel;
  */
 public class SocketProducer extends InterruptableRunnable implements Runnable
 {
-    private final CommandQueue commandQueue;
-    private final OutputStream _socketOutputStream;
+    protected final CommandQueue _queue;
+    protected final OutputStream _socketOutputStream;
 
-    public SocketProducer(OutputStream outStream, SongUtilities songUtils)
+    public SocketProducer(OutputStream outStream, CommandQueue queue)
     {
         _socketOutputStream = outStream;
-        commandQueue = songUtils.getCommandQueue();
+        _queue = queue;
     }
 
     public void run()
@@ -28,7 +28,7 @@ public class SocketProducer extends InterruptableRunnable implements Runnable
         {
             try
             {
-                String command = commandQueue.take();
+                String command = _queue.take();
                 _socketOutputStream.write(command.getBytes());
             }
             catch (InterruptedException e)

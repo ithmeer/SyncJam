@@ -7,36 +7,40 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Class to handle the commands to send to the socket.
+ * Class to handle the commands to send to the socket. Thread-safe.
  * Created by Ithmeer on 10/23/2015.
  */
 public class CommandQueue
 {
     private final LinkedBlockingQueue<String> _queue;
+    private final NowPlaying _player;
+    private final Playlist _playlist;
 
-    public CommandQueue()
+    public CommandQueue(NowPlaying player, Playlist playlist)
     {
         _queue = new LinkedBlockingQueue<String>();
+        _player = player;
+        _playlist = playlist;
     }
 
-    public void executeCommand(byte[] cmdBuffer, NowPlaying player, Playlist playlist)
+    public void executeCommand(byte[] cmdBuffer)
     {
         byte first = cmdBuffer[0];
         if (first == 'G')
         {
-            playlist.setCurrentSong(cmdBuffer[1]);
+            _playlist.setCurrentSong(cmdBuffer[1]);
         }
         else if (first == 'M')
         {
-            playlist.moveSong(cmdBuffer[1], cmdBuffer[2]);
+            _playlist.moveSong(cmdBuffer[1], cmdBuffer[2]);
         }
         else if (first == 'P')
         {
-            player.playToggle();
+            _player.playToggle();
         }
         else if (first == 'S')
         {
-            player.setSongPosition(cmdBuffer[1]);
+            _player.setSongPosition(cmdBuffer[1]);
         }
     }
 
@@ -46,9 +50,15 @@ public class CommandQueue
             _queue.add("G" + (byte) song);
     }
 
+    public void moveSong(int from, int to)
+    {
+        if (from > 0 && to > 0)
+            _queue.add("M" + (byte) from + (byte) to);
+    }
+
     public void playToggle()
     {
-        _queue.add("P");
+        _queue.add("PL");
     }
 
     public void seek(int percent)

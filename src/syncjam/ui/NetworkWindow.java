@@ -1,6 +1,7 @@
 package syncjam.ui;
 
 import syncjam.SongUtilities;
+import syncjam.SyncJamException;
 import syncjam.ui.buttons.NetworkButton;
 import syncjam.ui.buttons.base.ButtonUI;
 
@@ -12,7 +13,7 @@ public class NetworkWindow extends WindowObject
     String address = "0.0.0.0";
     String port = "9982";
     String password = "password";
-    public NetworkWindow(int width, int height, SongUtilities songUtils)
+    public NetworkWindow(int width, int height, final SongUtilities songUtils)
     {
         super(width, height);
 
@@ -39,6 +40,14 @@ public class NetworkWindow extends WindowObject
             protected void clicked()
             {
                 System.out.println(address+"\n"+port+"\n"+password);
+                try
+                {
+                    songUtils.getNetworkController().startServer(Integer.parseInt(port), password);
+                }
+                catch (SyncJamException e)
+                {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -47,11 +56,22 @@ public class NetworkWindow extends WindowObject
             protected void clicked()
             {
                 System.out.println(address+"\n"+port+"\n"+password);
+                try
+                {
+                    songUtils.getNetworkController().connectToServer(address,
+                                                                     Integer.parseInt(port),
+                                                                     password);
+                }
+                catch (SyncJamException e)
+                {
+                    e.printStackTrace();
+                }
             }
         });
         repaint();
     }
 }
+
 class NetTextField extends TextField
 {
     protected NetTextField(int length, String default_text)

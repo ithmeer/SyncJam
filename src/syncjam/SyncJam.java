@@ -16,7 +16,7 @@ public class SyncJam
 {
     private final SyncJamUI mainWindow;
 
-    public SyncJam(int port)
+    public SyncJam()
     {
         SongUtilities songUtils = new SongUtilities();
         mainWindow = new SyncJamUI(songUtils);
@@ -33,11 +33,10 @@ public class SyncJam
         timer.start();
 
         songUtils.getAudioController().start();
-        NetworkController netCon = new NetworkController(port, songUtils);
     }
 
     public static void main(String[] args)
     {
-        new SyncJam(25566);
+        new SyncJam();
     }
 }

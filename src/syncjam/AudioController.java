@@ -6,6 +6,7 @@ import com.xuggle.xuggler.io.XugglerIO;
 
 import javax.sound.sampled.*;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +31,7 @@ public class AudioController
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);
 
+    // synchronized on this
     private boolean playing;
 
     public AudioController(Playlist pl, NowPlaying np)
@@ -160,7 +162,7 @@ public class AudioController
         openJavaSound(audioCoder);
 
         // container duration in microseconds
-        int durationInSecs = (int) (container.getDuration() / 1000000);
+        int durationInSecs = (int) (TimeUnit.SECONDS.convert(container.getDuration(), TimeUnit.MICROSECONDS));
         song.setSongLength(durationInSecs);
 
         IPacket packet = IPacket.make();
@@ -187,7 +189,9 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
                     if (oldPos > curPos + 1 || oldPos < curPos - 1)
                     {
-                        container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp, IContainer.SEEK_FLAG_BACKWARDS);
+                        mLine.flush();
+                        container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp,
+                                               IContainer.SEEK_FLAG_BACKWARDS);
                     }
                     else
                     {

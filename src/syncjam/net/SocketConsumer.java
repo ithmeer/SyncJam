@@ -16,13 +16,13 @@ import java.util.concurrent.BlockingQueue;
  */
 public class SocketConsumer extends InterruptableRunnable implements Runnable
 {
-    private final InputStream _socketInputStream;
-    private final SongUtilities _utils;
+    protected final InputStream _socketInputStream;
+    protected final CommandQueue _queue;
 
-    public SocketConsumer(InputStream inStream, SongUtilities utils)
+    public SocketConsumer(InputStream inStream, CommandQueue queue)
     {
         _socketInputStream = inStream;
-        _utils = utils;
+        _queue = queue;
     }
 
     public void run()
@@ -33,13 +33,12 @@ public class SocketConsumer extends InterruptableRunnable implements Runnable
             try
             {
                 _socketInputStream.read(commandBuffer);
-                _utils.getCommandQueue().executeCommand(commandBuffer, _utils.getPlayer(), _utils.getPlaylist());
+                _queue.executeCommand(commandBuffer);
             }
             catch (IOException e)
             {
                 break;
             }
         }
-
     }
 }

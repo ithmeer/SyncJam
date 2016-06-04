@@ -3,6 +3,7 @@ package syncjam.ui;
 import syncjam.Playlist;
 import syncjam.Song;
 import syncjam.SongUtilities;
+import syncjam.SyncJamException;
 import syncjam.ui.buttons.base.ScrollbarUI;
 
 import javax.swing.*;
@@ -58,7 +59,15 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                 Song[] songs = new Song[files.length];
                 for(int i = 0; i < files.length; i++)
                 {
-                    songs[i] = new Song(files[i]);
+                    try
+                    {
+                        songs[i] = new Song(files[i]);
+                    }
+                    catch (SyncJamException e)
+                    {
+                        // TODO: update to show an error
+                        e.printStackTrace();
+                    }
                 }
                 playlist.addAll(songs);
             }
