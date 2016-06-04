@@ -53,6 +53,13 @@ public class NetworkController
                                                        serverSock.getOutputStream(), _queue);
 
             cs.sendCommand(password);
+
+            String ack = cs.readNext();
+
+            if (ack == ackMessage)
+                System.out.println("password accepted");
+            else
+                System.out.println("password accepted");
         }
         catch (IOException e)
         {
@@ -107,11 +114,13 @@ public class NetworkController
                                                                _queue, _clients);
                     if (_password.isEmpty() || cs.readNext().equals(_password))
                     {
+                        System.out.println("password accepted");
                         _clients.add(cs);
                         cs.sendCommand(ackMessage);
                     }
                     else
                     {
+                        System.out.println("password rejected");
                         clientSock.close();
                     }
                 }

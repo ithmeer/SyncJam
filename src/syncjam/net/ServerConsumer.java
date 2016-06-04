@@ -26,6 +26,7 @@ public class ServerConsumer extends SocketConsumer
             try
             {
                 _socketInputStream.read(commandBuffer);
+                System.out.println("consumed command: " + commandBuffer.toString());
                 _queue.executeCommand(commandBuffer);
                 for (ServerSideSocket client : _clients)
                 {

@@ -25,6 +25,7 @@ public class ServerProducer extends SocketProducer
             try
             {
                 String command = _queue.take();
+                System.out.println("produced command: " + command);
                 for (ServerSideSocket client : _clients)
                 {
                     client.sendCommand(command);

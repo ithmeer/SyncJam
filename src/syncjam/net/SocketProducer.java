@@ -29,6 +29,7 @@ public class SocketProducer extends InterruptableRunnable implements Runnable
             try
             {
                 String command = _queue.take();
+                System.out.println("produced command: " + command);
                 _socketOutputStream.write(command.getBytes());
             }
             catch (InterruptedException e)
