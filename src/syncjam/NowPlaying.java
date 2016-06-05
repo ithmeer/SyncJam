@@ -15,6 +15,8 @@ public class NowPlaying
 {
     private volatile AudioController controller;
     private volatile CommandQueue queue;
+    private volatile Playlist _playlist;
+
     private volatile Song currentSong;
     private boolean isPlaying = false; // synchronized on this
     private final AtomicInteger songPosition = new AtomicInteger(0);
@@ -27,6 +29,11 @@ public class NowPlaying
     public void setCommandQueue(CommandQueue cq)
     {
         queue = cq;
+    }
+
+    public void setPlaylist(Playlist pl)
+    {
+        _playlist = pl;
     }
 
     public BufferedImage getAlbumArt()   { return currentSong.getAlbumArt(); }
@@ -54,6 +61,7 @@ public class NowPlaying
         if(state)
         {
             controller.play();
+            _playlist.wakeUp();
         }
         else
         {

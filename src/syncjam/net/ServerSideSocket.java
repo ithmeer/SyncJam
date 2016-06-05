@@ -12,14 +12,16 @@ import java.util.concurrent.Executor;
 public class ServerSideSocket extends NetworkSocket
 {
     private final ServerConsumer _consumer;
-    private final ServerProducer _producer;
+    private static volatile ServerProducer _producer;
 
     public ServerSideSocket(Executor exec, InputStream inStream, OutputStream outStream,
                             CommandQueue queue, Iterable<ServerSideSocket> clients) throws IOException
     {
         super(exec, inStream, outStream);
         _consumer = new ServerConsumer(_inputStream, queue, clients);
-        _producer = new ServerProducer(_outputStream, queue, clients);
+
+        if (_producer != null)
+            _producer = new ServerProducer(_outputStream, queue, clients);
     }
 
     @Override
