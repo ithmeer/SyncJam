@@ -38,33 +38,38 @@ public class CommandQueue
 
     public synchronized void executeCommand(String cmdBuffer)
     {
-        String second = cmdBuffer.substring(1, 2);
+        char second = cmdBuffer.charAt(1);
         _enabled = false;
 
         switch (cmdBuffer.charAt(0))
         {
             case 'G':
-                _playlist.setCurrentSong(Integer.parseInt(second));
+                _playlist.setCurrentSong(second);
                 break;
             case 'M':
-                _playlist.moveSong(Integer.parseInt(second),
-                                   Integer.parseInt(cmdBuffer.substring(2, 3)));
+                _playlist.moveSong(second, cmdBuffer.charAt(2));
                 break;
             case 'N':
                 _playlist.nextSong();
                 break;
             case 'P':
                 _player.playToggle(true);
-                if (second.equals("L"))
+                if (second == 'L')
                     _player.playToggle(true);
-                else if (second.equals("S"))
+                else if (second == 'S')
                     _playlist.prevSong();
                 break;
             case 'S':
-                if (second.equals("T"))
+                if (second == 'T')
+                {
                     _player.playToggle(false);
+                }
                 else
-                    _player.setSongPosition(Integer.parseInt(second));
+                {
+                    int pos = Math.round(
+                            (cmdBuffer.charAt(1) / 100.0f) * (float) _player.getSongLength());
+                    _player.setSongPosition(pos);
+                }
                 break;
         }
 
@@ -75,7 +80,7 @@ public class CommandQueue
     {
         if (_enabled)
         {
-            _queue.add("G" + (byte) song);
+            _queue.add(String.format("G%c", song));
         }
     }
 
@@ -99,7 +104,7 @@ public class CommandQueue
     {
         if (_enabled)
         {
-            _queue.add("M" + (byte) from + (byte) to);
+            _queue.add(String.format("M%c%c", from, to));
         }
     }
 
@@ -118,7 +123,7 @@ public class CommandQueue
     {
         if (_enabled)
         {
-            _queue.add("S" + (byte) percent);
+            _queue.add(String.format("S%c", percent));
         }
     }
 
