@@ -15,11 +15,22 @@ import java.util.concurrent.Executor;
  */
 public class ClientSideSocket extends NetworkSocket
 {
+    private final SocketConsumer _consumer;
+    private final SocketProducer _producer;
+
     public ClientSideSocket(Executor exec, InputStream inStream, OutputStream outStream,
                             CommandQueue queue) throws IOException
     {
-        super(inStream, outStream);
-        exec.execute(new SocketConsumer(_inputStream, queue));
-        exec.execute(new SocketProducer(_outputStream, queue));
+        super(exec, inStream, outStream);
+
+        _consumer = new SocketConsumer(_inputStream, queue);
+        _producer = new SocketProducer(_outputStream, queue);
+    }
+
+    @Override
+    public void start()
+    {
+        _exec.execute(_consumer);
+        _exec.execute(_producer);
     }
 }

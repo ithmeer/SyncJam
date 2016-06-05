@@ -75,7 +75,10 @@ public class NowPlaying
      * Set the current position in the song and provide length if needed.
      * @param pos new song position
      */
-    public void setSongPosition(int pos) { songPosition.set(pos); }
+    public void setSongPosition(int pos)
+    {
+        songPosition.set(pos);
+    }
 
     public void setVolume(int value) { controller.setVolume(value); }
 

@@ -36,34 +36,35 @@ public class CommandQueue
         _enabled = state;
     }
 
-    public synchronized void executeCommand(byte[] cmdBuffer)
+    public synchronized void executeCommand(String cmdBuffer)
     {
-        byte second = cmdBuffer[1];
+        String second = cmdBuffer.substring(1, 2);
         _enabled = false;
 
-        switch (cmdBuffer[0])
+        switch (cmdBuffer.charAt(0))
         {
             case 'G':
-                _playlist.setCurrentSong(cmdBuffer[1]);
+                _playlist.setCurrentSong(Integer.parseInt(second));
                 break;
             case 'M':
-                _playlist.moveSong(cmdBuffer[1], cmdBuffer[2]);
+                _playlist.moveSong(Integer.parseInt(second),
+                                   Integer.parseInt(cmdBuffer.substring(2, 3)));
                 break;
             case 'N':
                 _playlist.nextSong();
                 break;
             case 'P':
                 _player.playToggle(true);
-                if (second == 'L')
+                if (second.equals("L"))
                     _player.playToggle(true);
-                else if (second == 'S')
+                else if (second.equals("S"))
                     _playlist.prevSong();
                 break;
             case 'S':
-                if (second == 'T')
+                if (second.equals("T"))
                     _player.playToggle(false);
                 else
-                    _player.setSongPosition(cmdBuffer[1]);
+                    _player.setSongPosition(Integer.parseInt(second));
                 break;
         }
 

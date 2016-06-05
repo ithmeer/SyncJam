@@ -26,13 +26,14 @@ public class ServerConsumer extends SocketConsumer
             try
             {
                 _socketInputStream.read(commandBuffer);
-                System.out.println("consumed command: " + commandBuffer.toString());
-                _queue.executeCommand(commandBuffer);
+                String command = new String(commandBuffer);
+                System.out.println("consumed command: " + command);
+                _queue.executeCommand(command);
                 for (ServerSideSocket client : _clients)
                 {
                     if (_socketInputStream != client.getInputStream())
                     {
-                        client.sendCommand(commandBuffer.toString());
+                        client.sendCommand(commandBuffer);
                     }
                 }
             }

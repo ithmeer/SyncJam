@@ -33,8 +33,9 @@ public class SocketConsumer extends InterruptableRunnable
             try
             {
                 _socketInputStream.read(commandBuffer);
-                System.out.println("consumed command: " + commandBuffer.toString());
-                _queue.executeCommand(commandBuffer);
+                String command = new String(commandBuffer);
+                System.out.println("consumed command: " + command);
+                _queue.executeCommand(command);
             }
             catch (IOException e)
             {

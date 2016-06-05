@@ -3,6 +3,7 @@ package syncjam;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
 import com.xuggle.xuggler.io.XugglerIO;
+import syncjam.net.CommandQueue;
 
 import javax.sound.sampled.*;
 import java.util.concurrent.Semaphore;
@@ -28,16 +29,20 @@ public class AudioController
 
     private final NowPlaying playController;
 
+    private final CommandQueue queue;
+
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);
 
     // synchronized on this
     private boolean playing;
 
-    public AudioController(Playlist pl, NowPlaying np)
+    public AudioController(Playlist pl, NowPlaying np, CommandQueue cq)
     {
         playController = np;
         playlist = pl;
+        queue = cq;
+
         synchronized (this)
         {
             playing = false;
@@ -122,7 +127,7 @@ public class AudioController
 
     private void playSong(Song song)
     {
-        String url = XugglerIO.map(song.getSongName(), new BytesHandler(song.getSongData()));
+        String url = XugglerIO.map("xxxxx"/*song.getSongName()*/, new BytesHandler(song.getSongData()));
         playController.setSongPosition(0);
 
         // Create a Xuggler container object
@@ -154,15 +159,18 @@ public class AudioController
             }
         }
         if (audioStreamId == -1)
-            throw new RuntimeException("could not find audio stream in container: " + song.getSongName());
+            throw new RuntimeException("could not find audio stream in container: " +
+                                               song.getSongName());
 
         if (audioCoder.open(null, null) < 0)
-            throw new RuntimeException("could not open audio decoder for container: " + song.getSongName());
+            throw new RuntimeException("could not open audio decoder for container: " +
+                                               song.getSongName());
 
         openJavaSound(audioCoder);
 
         // container duration in microseconds
-        int durationInSecs = (int) (TimeUnit.SECONDS.convert(container.getDuration(), TimeUnit.MICROSECONDS));
+        int durationInSecs = (int) (TimeUnit.SECONDS.convert(container.getDuration(),
+                                                             TimeUnit.MICROSECONDS));
         song.setSongLength(durationInSecs);
 
         IPacket packet = IPacket.make();
@@ -189,6 +197,8 @@ outer:  while (container.readNextPacket(packet) >= 0)
                     long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
                     if (oldPos > curPos + 1 || oldPos < curPos - 1)
                     {
+                        int length = playController.getSongLength();
+                        queue.seek(Math.round((oldPos / (float) length) * 100.0f));
                         mLine.flush();
                         container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp,
                                                IContainer.SEEK_FLAG_BACKWARDS);

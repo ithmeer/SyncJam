@@ -21,9 +21,9 @@ public class SongUtilities
     {
         _player = new NowPlaying();
         _playlist = new Playlist(_player);
-        _audioController = new AudioController(_playlist, _player);
-        _player.setAudioController(_audioController);
         _commandQueue = new CommandQueue(_player, _playlist);
+        _audioController = new AudioController(_playlist, _player, _commandQueue);
+        _player.setAudioController(_audioController);
         _player.setCommandQueue(_commandQueue);
         _playlist.setCommandQueue(_commandQueue);
         _networkController = new NetworkController(_commandQueue);
@@ -32,11 +32,6 @@ public class SongUtilities
     public AudioController getAudioController()
     {
         return _audioController;
-    }
-
-    public CommandQueue getCommandQueue()
-    {
-        return _commandQueue;
     }
 
     public NetworkController getNetworkController()
