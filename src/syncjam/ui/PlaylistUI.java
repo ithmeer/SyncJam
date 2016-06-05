@@ -65,7 +65,6 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                     }
                     catch (SyncJamException e)
                     {
-                        // TODO: update to show an error
                         e.printStackTrace();
                     }
                 }

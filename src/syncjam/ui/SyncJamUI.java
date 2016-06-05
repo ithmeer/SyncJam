@@ -33,6 +33,7 @@ public class SyncJamUI implements KeyListener
         GridBagConstraints constraints;
         window.setLayout(new GridBagLayout());
         window.setBackground(Colors.c_Background1);
+        //window.setUndecorated(true);
 
 
         //= = = = = = = = = = Player = = = = = = = = = =//
@@ -115,7 +116,7 @@ public class SyncJamUI implements KeyListener
         constraints = setGrid(0, 0, 1.0f, 1.0f, 12, 150);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.NONE;
-        sideBar.add(new VolumeSlider(40, 100, songUtils), constraints);
+        sideBar.add(new VolumeSlider(50, 100, songUtils), constraints);
         constraints.gridy = 1;
         TextButton networkButton = new TextButton("C", 36, 36, null){
             protected void clicked()
