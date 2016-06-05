@@ -59,6 +59,9 @@ public class CommandQueue
                 else if (second == 'S')
                     _playlist.prevSong();
                 break;
+            case 'R':
+                _playlist.remove(second);
+                break;
             case 'S':
                 if (second == 'T')
                 {
@@ -105,6 +108,14 @@ public class CommandQueue
         if (_enabled)
         {
             _queue.add(String.format("M%c%c", from, to));
+        }
+    }
+
+    public synchronized void removeSong(int song)
+    {
+        if (_enabled)
+        {
+            _queue.add(String.format("R%c", song));
         }
     }
 

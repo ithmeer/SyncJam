@@ -171,6 +171,7 @@ public class Playlist
             if (i < 0 || i >= _songList.size())
                 return;
 
+            _queue.removeSong(i);
             _songList.remove(i);
             if (_currentSong > i)
                 _currentSong -= 1;
