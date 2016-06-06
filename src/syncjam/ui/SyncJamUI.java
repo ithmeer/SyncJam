@@ -110,41 +110,44 @@ public class SyncJamUI implements KeyListener
 
         //= = = = = = = = = = Side Bar = = = = = = = = = =//
 
-        JPanel sideBar = tempPanel(40,window.getHeight());
-        sideBar.setLayout(new GridBagLayout());
-
-        constraints = setGrid(0, 0, 1.0f, 1.0f, 12, 150);
-        constraints.anchor = GridBagConstraints.PAGE_START;
-        constraints.fill = GridBagConstraints.NONE;
-        sideBar.add(new VolumeSlider(50, 100, songUtils), constraints);
-        constraints.gridy = 1;
-        TextButton networkButton = new TextButton("C", 36, 36, null){
-            protected void clicked()
-            {
-                togglePanel(networkPanel);
-            }
-        };
-        sideBar.add(networkButton, constraints);
+        JPanel sideBar = new JPanel(new GridBagLayout());
+        sideBar.setBackground(Colors.c_Background1);
 
         constraints = setGrid(1, 0, 0.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
-        constraints.fill = GridBagConstraints.VERTICAL;
+        constraints.fill = GridBagConstraints.BOTH;
         window.add(sideBar, constraints);
+
+        JPanel sideBarItems = new JPanel(new GridBagLayout());
+        sideBarItems.setBackground(Colors.c_Background1);
+
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.insets = new Insets(12,0,12,0);
+        sideBar.add(sideBarItems, constraints);
+
+
+        //Components
+
+        //Network Button
+        constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
+        constraints.anchor = GridBagConstraints.PAGE_START;
+        TextButton networkButton = new TextButton("C", 12, 12, null){
+            protected void clicked() { togglePanel(networkPanel); }
+        };
+
+        sideBarItems.add(networkButton, constraints);
+
+        //Volume Slider
+        constraints = setGrid(0, 1, 0.0f, 0.0f, 12, 150);
+        constraints.anchor = GridBagConstraints.PAGE_START;
+        constraints.fill = GridBagConstraints.NONE;
+
+        sideBarItems.add(new VolumeSlider(50, 100, songUtils), constraints);
 
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
         window.open();
         togglePanel(networkPanel);
-    }
-
-    public JPanel tempPanel(int w, int h)
-    {
-        JPanel t = new JPanel();
-        t.setMinimumSize(new Dimension(w, h));
-        t.setBackground(Colors.c_Background1);
-        t.validate();
-        t.repaint();
-        return t;
     }
 
     public void keyTyped(KeyEvent e) {}
@@ -181,7 +184,7 @@ public class SyncJamUI implements KeyListener
         return gbc;
     }
 
-    public void togglePanel(JPanel panel)
+    public boolean togglePanel(JPanel panel)
     {
         int pWidth = networkPanel.getWidth();
         Dimension min = window.getMinimumSize();
@@ -197,6 +200,7 @@ public class SyncJamUI implements KeyListener
             //window.setMinimumSize(new Dimension((int)min.getWidth() + pWidth, (int)min.getHeight()));
             networkPanel.setVisible(true);
         }
+        return networkPanel.isVisible();
     }
 
     public void repaint()

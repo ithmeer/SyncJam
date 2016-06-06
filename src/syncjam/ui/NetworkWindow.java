@@ -63,17 +63,13 @@ public class NetworkWindow extends JPanel
         makeCompactGrid(p1,
                 numPairs, 2, //rows, cols
                 6, 6,        //initX, initY
-                6, 6);       //xPad, yPad
+                6, 10);       //xPad, yPad
 
         this.add(p1);
 
 
         JPanel p2 = new JPanel(new SpringLayout());
         p2.setBackground(Colors.c_Background1);
-        GridLayout g2 = new GridLayout(2, 1);
-        p2.setLayout(g2);
-        g2.setHgap(6);
-        g2.setVgap(6);
 
         p2.add(new NetButton("Host", songUtils) {
             @Override
@@ -106,6 +102,10 @@ public class NetworkWindow extends JPanel
                 }
             }
         });
+        makeCompactGrid(p2,
+                2, 1, //rows, cols
+                6, 6,        //initX, initY
+                6, 8);       //xPad, yPad
         this.add(p2);
         repaint();
     }
