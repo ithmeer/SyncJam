@@ -25,6 +25,7 @@ public class SongUtilities
         _audioController = new AudioController(_playlist, _player, _commandQueue);
         _player.setAudioController(_audioController);
         _player.setCommandQueue(_commandQueue);
+        _player.setPlaylist(_playlist);
         _playlist.setCommandQueue(_commandQueue);
         _networkController = new NetworkController(_commandQueue);
     }

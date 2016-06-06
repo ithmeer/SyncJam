@@ -88,11 +88,14 @@ public class Playlist
             // if empty, pause
             _playController.playToggle(false);
 
-            while (_currentSong == _songList.size())
+            while (waitingForSong())
             {
                 // block until more songs are added or a different song is selected
                 _songList.wait();
             }
+
+            if (_currentSong == _songList.size())
+                _currentSong = 0;
 
             // we have a new song, unpause
             _playController.playToggle(true);
@@ -111,6 +114,25 @@ public class Playlist
         synchronized (_songList)
         {
             return Collections.unmodifiableList(_songList).iterator();
+        }
+    }
+
+    /**
+     * Move a song between the given indices.
+     * @param from first index
+     * @param to second index
+     */
+    public void moveSong(int from, int to)
+    {
+        synchronized (_songList)
+        {
+            Song toSwap = _songList.remove(from);
+
+            if (to > from)
+                to--;
+
+            _songList.add(to, toSwap);
+            _queue.moveSong(from, to);
         }
     }
 
@@ -171,6 +193,7 @@ public class Playlist
             if (i < 0 || i >= _songList.size())
                 return;
 
+            _queue.removeSong(i);
             _songList.remove(i);
             if (_currentSong > i)
                 _currentSong -= 1;
@@ -205,22 +228,11 @@ public class Playlist
         }
     }
 
-    /**
-     * Move a song between the given indices.
-     * @param from first index
-     * @param to second index
-     */
-    public void moveSong(int from, int to)
+    public void wakeUp()
     {
         synchronized (_songList)
         {
-            Song toSwap = _songList.remove(from);
-
-            if (to > from)
-                to--;
-
-            _songList.add(to, toSwap);
-            _queue.moveSong(from, to);
+            _songList.notify();
         }
     }
 

@@ -1,13 +1,10 @@
 package syncjam;
 
-import syncjam.net.NetworkController;
 import syncjam.ui.SyncJamUI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Main class for SyncJam.
