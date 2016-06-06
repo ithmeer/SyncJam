@@ -131,8 +131,8 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                 lastDropIndex = itemDropIndex;
             }
         }
-        g.setColor(Colors.c_Highlight);
-        if(itemHoverIndex != -1)g.drawString(""+splits[itemHoverIndex], mouseX, mouseY-4);
+        //g.setColor(Colors.c_Highlight);
+        //if(itemHoverIndex != -1)g.drawString(""+splits[itemHoverIndex], mouseX, mouseY-4);
     }
     private int getVertPosInUI(int i)
     {
