@@ -139,15 +139,12 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         int yValue = yOffset + (i * itemHeight) - scrollbar.getValue();
 
         if (itemDragIndex != -1 && i >= itemDragIndex)
-            splits[i] = slerp(splits[i], -itemHeight, 3);
-        if (itemDropIndex != -1 && i >= itemDropIndex) {
-            if(splits[i] == 0) splits[i] = itemHeight;
-            else
-                splits[i] = slerp(splits[i], itemHeight, 3);
-        }
-        if (itemDropIndex != i && splits[i] > 0) {
-            splits[i] = slerp(splits[i], 0, 3);
-        }
+            yValue -= itemHeight;
+
+        if (itemDropIndex != -1 && i >= itemDropIndex)
+            splits[i] = slerp(splits[i], itemHeight);
+        else
+            splits[i] = slerp(splits[i], 0);
 
         return yValue + splits[i];
     }
@@ -367,11 +364,12 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         splits = new int[playlist.size()+1];
     }
 
-    private int slerp(int start, int target, int time)
+    private int slerp(int start, int target)
     {
-        float value = start + (target-start)/time;
+        int t = 6;
+        float value = start + (target-start)/t;
         value = Math.round(value);
-        if(value > -2 && value < 2) return target;
+        if(value > -3 && value < 3) return target;
         return (int)value;
     }
 
@@ -389,7 +387,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         {
             playlist.moveSong(itemDragIndex, itemDropIndex);
             buildSplitArray();
-            //splits[itemDragIndex] = mouseX-getVertPosInUI(itemDragIndex);
+            splits[itemDragIndex] = 0;//mouseX-getVertPosInUI(itemDragIndex);
             itemDragIndex = -1;
             itemDropIndex = -1;
         }
@@ -424,6 +422,10 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
            itemHoverIndex != removeHoverIndex)
         {
             itemDragIndex = itemHoverIndex;
+            for(int i = itemDragIndex; i < splits.length-1; i++)
+            {
+                splits[i] = itemHeight+6;
+            }
         }
     }
 

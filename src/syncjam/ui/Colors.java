@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Colors
 {
-    public static Color[] defaultColors = {
+    public static final Color[] defaultColors = {
             new Color(27, 27, 27),   //Background1
             new Color(49, 49, 49),   //Background2
             new Color(255, 255, 255),//Foreground1
@@ -17,7 +17,7 @@ public class Colors
             new Color(44, 130, 226), //Highlight
             new Color(209, 72, 58),  //Highlight2
     };
-    public static Color[] lightColors = {
+    public static final Color[] lightColors = {
             new Color(238, 238, 238),//Background1
             new Color(217, 217, 217),//Background2
             new Color(0, 0, 0),      //Foreground1

@@ -27,18 +27,7 @@ public class NetworkWindow extends JPanel
         GridLayout gl = new GridLayout(3, 1);
         this.setLayout(gl);
 
-        /*addressField = new NetTextField(15, "");
-        portField = new NetTextField(5, defaultPort);
-        passField = new NetTextField(15, "");
-
-        this.add(new NetLabel("IP Address"));
-        this.add(addressField);
-        this.add(new NetLabel("Port"));
-        this.add(portField);
-        this.add(new NetLabel("Password"));
-        this.add(passField);*/
-
-        NetLabel title = new NetLabel("Server Connect/Host", JLabel.CENTER);
+        NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
         this.add(title);
 
         String[] labels = {"IP Address", "Port", "Password"};
@@ -47,7 +36,7 @@ public class NetworkWindow extends JPanel
 
         //Create and populate the panel.
         JPanel p1 = new JPanel(new SpringLayout());
-        p1.setBackground(Colors.c_Background1);
+        p1.setBackground(Colors.c_Background2);
         for (int i = 0; i < numPairs; i++) {
             NetLabel l = new NetLabel(labels[i], JLabel.TRAILING);
             p1.add(l);
@@ -179,7 +168,7 @@ class NetTextField extends TextField
 {
     protected NetTextField(int length, String default_text)
     {
-        setBackground(Colors.c_Background2);
+        setBackground(Colors.c_Background1);
         setForeground(Colors.c_Foreground1);
         setColumns(length);
         setText(default_text);
