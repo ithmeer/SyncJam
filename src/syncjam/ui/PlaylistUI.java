@@ -125,9 +125,6 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
                     itemDropIndex = itemHoverIndex;
                 else if(mouseY >= hoverItemYPos - itemHeight/2)
                     itemDropIndex = itemHoverIndex+1;
-
-                //g.setColor(Colors.c_Highlight);
-                //g.drawLine(xOffset, hoverItemYPos + itemHeight/2, getWidth()-scrollbar.getWidth()-xOffset, hoverItemYPos + itemHeight/2);
             }
             if(lastDropIndex != itemDropIndex)
             {
