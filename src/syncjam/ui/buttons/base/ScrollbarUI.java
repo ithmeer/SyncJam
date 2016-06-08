@@ -57,7 +57,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
         if(viewRatio < 1)
         {
-            int SNAPSPEED = 4;
+            int SNAPSPEED = 5;
             //System.out.println("" + myH + " - " + max + " - " + length);
 
             //only turn off scrolling when half a scroll off the edge of list

@@ -158,7 +158,7 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
         drawSongName(  g, x, y, song);
         drawSongLength(g, x, y, song);
 
-        if(index == playlist.getCurrentSongIndex() && itemDragIndex != 0)
+        if(index == playlist.getCurrentSongIndex())
         {
             g.setColor(Colors.c_Highlight);
             g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight);
@@ -382,10 +382,13 @@ public class PlaylistUI extends JPanel implements MouseListener, MouseMotionList
     @Override
     public void mouseReleased(MouseEvent e)
     {
-
         if(itemDragIndex >= 0)
         {
-            playlist.moveSong(itemDragIndex, itemDropIndex);
+            if(itemDropIndex == -1)
+                itemDropIndex = itemDragIndex;
+
+            if(itemDragIndex != itemDropIndex-1)
+                playlist.moveSong(itemDragIndex, itemDropIndex);
             buildSplitArray();
             splits[itemDragIndex] = 0;//mouseX-getVertPosInUI(itemDragIndex);
             itemDragIndex = -1;

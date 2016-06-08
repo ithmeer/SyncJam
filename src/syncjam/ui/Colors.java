@@ -38,7 +38,7 @@ public class Colors
 
         Map<TextAttribute, Object> attributes = new HashMap<TextAttribute, Object>();
         attributes.put(TextAttribute.TRACKING, 0.075);
-        //attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
         attributes.put(TextAttribute.TRANSFORM, new TransformAttribute(AffineTransform.getScaleInstance(1, 1.02)));
         Font font2 = font.deriveFont(attributes);
 

@@ -128,11 +128,25 @@ public class Playlist
         {
             Song toSwap = _songList.remove(from);
 
+            _queue.moveSong(from, to);
+
+            //=========experimental==========
+            if(from+1 == _currentSong)
+            {
+                if(to > from)
+                    _currentSong = to;
+                else
+                    _currentSong = to+1;
+            }
+            else if(to < _currentSong && from >= _currentSong)
+                _currentSong += 1;
+            else if(to >= _currentSong && from < _currentSong)
+                _currentSong -= 1;
+            //=========experimental==========
+
             if (to > from)
                 to--;
-
             _songList.add(to, toSwap);
-            _queue.moveSong(from, to);
         }
     }
 
