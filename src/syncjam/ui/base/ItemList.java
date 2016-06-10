@@ -96,7 +96,7 @@ public class ItemList extends JPanel implements MouseListener, MouseMotionListen
 
         if(itemDragIndex >= 0)
         {
-            if(mouseY > getHeight() && i < items.size())
+            if(mouseY > getHeight() && i < items.size()-1)
                 itemHoverIndex = items.size()-1;
             else if(mouseY < 0 && i > 0)
                 itemHoverIndex = 0;

@@ -99,8 +99,12 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
             length = Math.max(20, (int)(myH * viewRatio));
 
-            pos = (int) (((float) value / (float) max) * (myH - length));   //to get the scrool bar length and pos
+            pos = (int) (((float) value / (float) max) * (myH - length));   //to get the scroll bar length and pos
             g.fillRect(inset, inset + pos, myW, length);
+        }
+        else
+        {
+            value = 0;
         }
     }
 
