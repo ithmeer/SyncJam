@@ -204,7 +204,7 @@ public class PlaylistUI extends ItemList
                    imgsize);
 
         //draw art
-        BufferedImage albumImg = song.getScaledAlbumArt(imgsize+1, imgsize+1);
+        BufferedImage albumImg = song.getScaledAlbumArtFast(imgsize+1, imgsize+1);
         if(albumImg != null)
             g.drawImage(albumImg,
                         thisItemXPos + 1,

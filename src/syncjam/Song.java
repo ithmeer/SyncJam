@@ -1,5 +1,6 @@
 package syncjam;
 
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -105,17 +106,33 @@ public class Song
         if(albumArt == null)
             return null;
 
-        int imageWidth  = this.getAlbumArt().getWidth();
-        int imageHeight = this.getAlbumArt().getHeight();
+        BufferedImage albumArt = getAlbumArt();
+        Image tempImg = albumArt.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        BufferedImage resizedImg = new BufferedImage(width, height, albumArt.getType());
+        Graphics2D g = resizedImg.createGraphics();
+        g.drawImage(tempImg, 0, 0, null);
+        g.dispose();
+
+        return resizedImg;
+    }
+
+    public BufferedImage getScaledAlbumArtFast(int width, int height)
+    {
+        if(albumArt == null)
+            return null;
+
+        BufferedImage albumArt = getAlbumArt();
+        int imageWidth  = albumArt.getWidth();
+        int imageHeight = albumArt.getHeight();
 
         double scaleX = (double)width/imageWidth;
         double scaleY = (double)height/imageHeight;
         AffineTransform scaleTransform = AffineTransform.getScaleInstance(scaleX, scaleY);
-        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BICUBIC);
+        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform,
+                                                                  AffineTransformOp.TYPE_BICUBIC);
 
-        return bilinearScaleOp.filter(
-                this.getAlbumArt(),
-                new BufferedImage(width, height, this.getAlbumArt().getType()));
+        return bilinearScaleOp.filter(albumArt,
+                                      new BufferedImage(width, height, albumArt.getType()));
     }
 
     public void setSongLength(int lengthInSecs)
