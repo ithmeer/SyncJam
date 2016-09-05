@@ -20,7 +20,7 @@ public class ServerSideSocket extends NetworkSocket
         super(exec, inStream, outStream);
         _consumer = new ServerConsumer(_inputStream, queue, clients);
 
-        if (_producer != null)
+        if (_producer == null)
             _producer = new ServerProducer(_outputStream, queue, clients);
     }
 

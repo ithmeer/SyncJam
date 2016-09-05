@@ -25,6 +25,8 @@ public class PlaylistUI extends ItemList
     public PlaylistUI(SongUtilities songUtils)
     {
         playlist = songUtils.getPlaylist();
+        super.setBackground(Colors.c_Background2);
+        this.setEnableCustomDrawing(true);
 
         Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.c_Highlight);
         new FileDrop(this, fileDropBorder, new FileDrop.Listener()
@@ -45,6 +47,8 @@ public class PlaylistUI extends ItemList
                     }
                 }
                 playlist.addAll(songs);
+
+                scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
                 buildSplitArray();
             }
         });
@@ -53,10 +57,6 @@ public class PlaylistUI extends ItemList
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-
-        scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
-        if(itemDragIndex >= 0)
-            scrollNearEdges();
 
         int i = 0;
         Iterator<Song> songIter = playlist.iterator();
@@ -106,8 +106,6 @@ public class PlaylistUI extends ItemList
                 lastDropIndex = itemDropIndex;
             }
         }
-        //g.setColor(Colors.c_Highlight);
-        //if(itemHoverIndex != -1)g.drawString(""+splits[itemHoverIndex], mouseX, mouseY-4);
     }
 
     //====    DRAW SONG     ====
@@ -147,7 +145,6 @@ public class PlaylistUI extends ItemList
             23 - ins,
             itemHeight + 1 - ins*2);
 
-        int imgsize = itemHeight - ins * 2 - 2;
         Rectangle itemRect = new Rectangle(
                 0,
                 getYPosInUI(i),
@@ -304,7 +301,7 @@ public class PlaylistUI extends ItemList
         int textHeight = g.getFontMetrics().getHeight();
         int textWidth = g.getFontMetrics().stringWidth(song.getSongLengthString());
 
-        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth;
+        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 4;
         int thisItemYPos = y + itemHeight / 4 + textHeight / 2 - 3;
 
         g.setColor(Colors.c_Foreground2);

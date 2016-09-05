@@ -5,6 +5,7 @@ import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
+import syncjam.ui.net.NetworkPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +21,7 @@ public class SyncJamUI implements KeyListener
     private PlaylistUI playlistUI = null;
     private SliderUI songPosition = null;
 
-    private NetworkWindow networkPanel = null;
+    private NetworkPanel networkPanel = null;
 
     public SyncJamUI(SongUtilities songUtils)
     {
@@ -98,7 +99,7 @@ public class SyncJamUI implements KeyListener
         tray.setBackground(Colors.c_Background1);
 
 
-        networkPanel = new NetworkWindow(300,500, songUtils);
+        networkPanel = new NetworkPanel(songUtils);
         tray.add(networkPanel);
         networkPanel.validate();
 

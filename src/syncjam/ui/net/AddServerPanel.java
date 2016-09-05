@@ -1,27 +1,25 @@
-package syncjam.ui;
+package syncjam.ui.net;
 
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.ui.Colors;
+import syncjam.ui.base.ItemList;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
-public class NetworkWindow extends JPanel
+public class AddServerPanel extends JPanel
 {
     private final String defaultPort = "9982";
     //private final NetTextField addressField, portField, passField;
     private final NetTextField[] fields;
 
 
-    public NetworkWindow(int width, int height, final SongUtilities songUtils) {
+    public AddServerPanel(final NetworkPanel networkPanel) {
         super();
+        System.out.println("help");
 
-        //this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        //JPanel networkPanel = new JPanel();
-        //this.setPreferredSize(new Dimension(200, 400));
         this.setBackground(Colors.c_Background1);
 
         GridLayout gl = new GridLayout(3, 1);
@@ -60,7 +58,7 @@ public class NetworkWindow extends JPanel
         JPanel p2 = new JPanel(new SpringLayout());
         p2.setBackground(Colors.c_Background1);
 
-        p2.add(new NetButton("Host", songUtils) {
+        p2.add(new NetButton("Add") {
             @Override
             protected void clicked() {
                 String address = fields[0].getText();//addressField.getText();
@@ -68,27 +66,15 @@ public class NetworkWindow extends JPanel
                 String password = fields[2].getText();//passField.getText();
 
                 System.out.println(address + "\n" + port + "\n" + password);
-                try {
-                    songUtils.getNetworkController().startServer(port, password);
-                } catch (SyncJamException e) {
-                    e.printStackTrace();
-                }
+                networkPanel.addServer(address, port, password);
+                networkPanel.back();
             }
         });
 
-        p2.add(new NetButton("Connect", songUtils) {
+        p2.add(new NetButton("Cancel") {
             @Override
             protected void clicked() {
-                String address = fields[0].getText();//addressField.getText();
-                int port = Integer.parseInt(fields[1].getText());//portField.getText());
-                String password = fields[2].getText();//passField.getText();
-
-                System.out.println(address + "\n" + port + "\n" + password);
-                try {
-                    songUtils.getNetworkController().connectToServer(address, port, password);
-                } catch (SyncJamException e) {
-                    e.printStackTrace();
-                }
+                networkPanel.back();
             }
         });
         makeCompactGrid(p2,
@@ -189,9 +175,9 @@ class NetLabel extends JLabel
 }
 class NetButton extends ButtonUI
 {
-    protected NetButton(String text, SongUtilities songUtils)
+    protected NetButton(String text)
     {
-        super(0, 0, Colors.c_Background2, songUtils);
+        super(0, 0, Colors.c_Background2, null);
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }
