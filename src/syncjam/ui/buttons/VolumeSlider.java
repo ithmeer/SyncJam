@@ -1,7 +1,7 @@
 package syncjam.ui.buttons;
 
-import syncjam.NowPlaying;
 import syncjam.SongUtilities;
+import syncjam.interfaces.PlayController;
 import syncjam.ui.buttons.base.VerticalSliderUI;
 
 /**
@@ -9,13 +9,17 @@ import syncjam.ui.buttons.base.VerticalSliderUI;
  */
 public class VolumeSlider extends VerticalSliderUI
 {
+    private final PlayController _player;
+
     public VolumeSlider(int startValue, int maxValue, SongUtilities songUtils)
     {
         super(startValue, maxValue, true, songUtils);
+        _player = songUtils.getPlayController();
     }
+
     public void setValue(int n)
     {
         super.setValue(n);
-        songUtilities.getPlayer().setVolume(getValue());
+        _player.setVolume(getValue());
     }
 }

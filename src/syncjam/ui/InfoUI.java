@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import syncjam.NowPlaying;
 import syncjam.Song;
 import syncjam.SongUtilities;
 
@@ -32,7 +31,7 @@ public class InfoUI extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        Song curSong = _songUtilities.getPlayer().getSong();
+        Song curSong = _songUtilities.getPlayController().getSong();
 
         if(curSong != null)
         {
@@ -59,7 +58,7 @@ public class InfoUI extends JPanel
         int spacing = 32;
 
         String songName = cutStringToWidth(
-                song.getSongName(),
+                song.getSongTitle(),
                 g.getFontMetrics(),
                 getWidth()/2 - aaWidth/2 - hOffset);
         String artistName = cutStringToWidth(

@@ -3,6 +3,9 @@ package syncjam.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -11,28 +14,40 @@ import java.util.concurrent.Executor;
 public abstract class NetworkSocket
 {
     protected final Executor _exec;
-    protected final InputStream _inputStream;
-    protected final OutputStream _outputStream;
+    protected final List<InputStream> _inputStreams;
+    protected final List<OutputStream> _outputStreams;
 
-    public NetworkSocket(Executor exec, InputStream inStream, OutputStream outStream)
+    public NetworkSocket(Executor exec, List<Socket> sockets) throws IOException
     {
-        _inputStream = inStream;
-        _outputStream = outStream;
         _exec = exec;
+
+        _inputStreams = new LinkedList<InputStream>();
+        _outputStreams = new LinkedList<OutputStream>();
+
+        for (Socket sock : sockets)
+        {
+            _inputStreams.add(sock.getInputStream());
+            _outputStreams.add(sock.getOutputStream());
+        }
     }
 
-    public InputStream getInputStream()
+    public InputStream getInputStream(int i)
     {
-        return _inputStream;
+        return _inputStreams.get(i);
     }
 
-    public String readNext()
+    public OutputStream getOutputStream(int i)
+    {
+        return _outputStreams.get(i);
+    }
+
+    public String readNextCommand()
     {
         byte[] next = new byte[20];
 
         try
         {
-            _inputStream.read(next);
+            getInputStream(0).read(next);
         }
         catch (IOException e)
         {
@@ -51,7 +66,7 @@ public abstract class NetworkSocket
     {
         try
         {
-            _outputStream.write(cmd);
+            getOutputStream(0).write(cmd);
         }
         catch (IOException e)
         {

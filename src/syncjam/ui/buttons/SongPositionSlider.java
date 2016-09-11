@@ -1,7 +1,7 @@
 package syncjam.ui.buttons;
 
-import syncjam.NowPlaying;
 import syncjam.SongUtilities;
+import syncjam.interfaces.PlayController;
 import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.SliderUI;
 
@@ -11,12 +11,12 @@ import java.text.SimpleDateFormat;
 
 public class SongPositionSlider extends SliderUI
 {
-    private final NowPlaying _player;
+    private final PlayController _player;
 
     public SongPositionSlider(SongUtilities songUtils)
     {
         super(0, 0, false, songUtils);
-        _player = songUtils.getPlayer();
+        _player = songUtils.getPlayController();
     }
 
     public void paintComponent(Graphics g)

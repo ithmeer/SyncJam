@@ -1,25 +1,27 @@
 package syncjam.net;
 
-import syncjam.NowPlaying;
-import syncjam.Playlist;
+import syncjam.ConcurrentPlayController;
+import syncjam.ConcurrentPlaylist;
+import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.PlayController;
+import syncjam.interfaces.Playlist;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Class to handle the commands to send to the socket. Thread-safe.
  * Created by Ithmeer on 10/23/2015.
  */
-public class CommandQueue
+public class ConcurrentCommandQueue implements CommandQueue
 {
     private final LinkedBlockingQueue<String> _queue;
-    private final NowPlaying _player;
+    private final PlayController _player;
     private final Playlist _playlist;
 
     // synchronized on this
     private boolean _enabled;
 
-    public CommandQueue(NowPlaying player, Playlist playlist)
+    public ConcurrentCommandQueue(PlayController player, Playlist playlist)
     {
         _queue = new LinkedBlockingQueue<String>();
         _player = player;
@@ -31,11 +33,13 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void toggleEnabled(boolean state)
     {
         _enabled = state;
     }
 
+    @Override
     public synchronized void executeCommand(String cmdBuffer)
     {
         char second = cmdBuffer.charAt(1);
@@ -79,6 +83,7 @@ public class CommandQueue
         _enabled = true;
     }
 
+    @Override
     public synchronized void gotoSong(int song)
     {
         if (_enabled)
@@ -87,6 +92,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void nextSong()
     {
         if (_enabled)
@@ -95,6 +101,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void prevSong()
     {
         if (_enabled)
@@ -103,6 +110,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void moveSong(int from, int to)
     {
         if (_enabled)
@@ -111,6 +119,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void removeSong(int song)
     {
         if (_enabled)
@@ -119,6 +128,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void playToggle(boolean state)
     {
         if (_enabled)
@@ -130,6 +140,7 @@ public class CommandQueue
         }
     }
 
+    @Override
     public synchronized void seek(int percent)
     {
         if (_enabled)
@@ -143,6 +154,7 @@ public class CommandQueue
      * @return the String at the front of the queue
      * @throws InterruptedException
      */
+    @Override
     public String take() throws InterruptedException
     {
         return _queue.take();

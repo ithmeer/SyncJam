@@ -20,14 +20,10 @@ import org.jaudiotagger.tag.images.Artwork;
 /**
  * A song to be played. The song data is stored as an array of bytes. Thread-safe.
  */
-public class Song
+public class Song implements Externalizable
 {
-    private final BufferedImage albumArt;
-    private final String songName;
-    private final String artistName;
-    private final String albumName;
-    private final byte[] songData;
-    private final AtomicInteger songLength = new AtomicInteger(0); //In seconds, can change if necessary
+    private volatile byte[] _songData;
+    private volatile SongMetadata _metadata;
 
     /**
      * Read song from file and set song info.
@@ -36,11 +32,11 @@ public class Song
     {
         String[] parts = file.getName().split("\\.");
         AudioFile song = null;
-        songData = new byte[(int) file.length()];
+        _songData = new byte[(int) file.length()];
 
         try
         {
-            new FileInputStream(file).read(songData);
+            new FileInputStream(file).read(_songData);
         }
         catch (IOException e)
         {
@@ -56,40 +52,48 @@ public class Song
             // can't read metadata, not fatal
         }
 
-        if (song == null)
-        {
-            songName = parts[0];
-            artistName = "";
-            albumName = "";
-            albumArt = null;
-        }
-        else
+
+        String songTitle = parts[0];
+        BufferedImage albumArt = null;
+        String artistName = "";
+        String albumName = "";
+        int songLength = 0;
+
+        if (song != null)
         {
             Tag metadata = song.getTag();
-            songLength.set(TryGetSongLength(song));
-            songName = TryReadTag(metadata, FieldKey.TITLE);
+            songLength = TryGetSongLength(song);
+            songTitle = TryReadTag(metadata, FieldKey.TITLE);
             artistName = TryReadTag(metadata, FieldKey.ARTIST);
             albumName = TryReadTag(metadata, FieldKey.ALBUM);
             albumArt = TryReadCover(metadata);
         }
+
+        _metadata = new SongMetadata(artistName, albumName, songTitle, albumArt, songLength);
     }
 
-    public BufferedImage getAlbumArt() {return albumArt; }
+    public Song(byte[] songData, SongMetadata metadata)
+    {
+        _songData = songData;
+        _metadata = metadata;
+    }
 
-    public String getSongName() {return songName; }
+    public BufferedImage getAlbumArt() {return _metadata.getAlbumArt(); }
 
-    public String getArtistName() {return artistName;}
+    public String getSongTitle() {return _metadata.getSongTitle(); }
 
-    public String getAlbumName() {return albumName; }
+    public String getArtistName() {return _metadata.getArtistName();}
 
-    public byte[] getSongData() { return songData; }
+    public String getAlbumName() {return _metadata.getAlbumName(); }
 
-    public int getSongLength() {return songLength.get();}
+    public byte[] getSongData() { return _songData; }
+
+    public int getSongLength() { return _metadata.getSongLength(); }
 
     public String getSongLengthString()
     {
         String lengthStr = "";
-        int length = songLength.get();
+        int length = getSongLength();
 
         if (length > 3600)
             lengthStr += (int) Math.floor(length / 3600) + ":"; //if longer or equal to an hour, include hour digit
@@ -100,44 +104,19 @@ public class Song
         return lengthStr;
     }
 
-    //snipped this from the internet cause it was a lot better than the stuff i was doing hahahahahaha
     public BufferedImage getScaledAlbumArt(int width, int height)
     {
-        if(albumArt == null)
-            return null;
-
-        BufferedImage albumArt = getAlbumArt();
-        Image tempImg = albumArt.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        BufferedImage resizedImg = new BufferedImage(width, height, albumArt.getType());
-        Graphics2D g = resizedImg.createGraphics();
-        g.drawImage(tempImg, 0, 0, null);
-        g.dispose();
-
-        return resizedImg;
+        return _metadata.getScaledAlbumArt(width, height);
     }
 
     public BufferedImage getScaledAlbumArtFast(int width, int height)
     {
-        if(albumArt == null)
-            return null;
-
-        BufferedImage albumArt = getAlbumArt();
-        int imageWidth  = albumArt.getWidth();
-        int imageHeight = albumArt.getHeight();
-
-        double scaleX = (double)width/imageWidth;
-        double scaleY = (double)height/imageHeight;
-        AffineTransform scaleTransform = AffineTransform.getScaleInstance(scaleX, scaleY);
-        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform,
-                                                                  AffineTransformOp.TYPE_BICUBIC);
-
-        return bilinearScaleOp.filter(albumArt,
-                                      new BufferedImage(width, height, albumArt.getType()));
+        return _metadata.getScaledAlbumArtFast(width, height);
     }
 
     public void setSongLength(int lengthInSecs)
     {
-        songLength.set(lengthInSecs);
+        _metadata.setSongLength(lengthInSecs);
     }
 
     private BufferedImage TryReadCover(Tag metadata)
@@ -193,5 +172,24 @@ public class Song
         }
 
         return length;
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException
+    {
+        out.writeInt(_songData.length);
+        out.write(_songData);
+
+        out.writeObject(_metadata);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
+    {
+        int dataSize = in.readInt();
+        _songData = new byte[dataSize];
+
+        in.readFully(_songData);
+        _metadata = (SongMetadata) in.readObject();
     }
 }

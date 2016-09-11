@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import syncjam.Playlist;
 import syncjam.SongUtilities;
 import syncjam.ui.buttons.NextButton;
 import syncjam.ui.buttons.PlayButton;

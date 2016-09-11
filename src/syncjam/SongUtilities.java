@@ -1,10 +1,12 @@
 package syncjam;
 
-import syncjam.net.CommandQueue;
-import syncjam.net.NetworkController;
+import syncjam.interfaces.AudioController;
+import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.PlayController;
+import syncjam.interfaces.Playlist;
+import syncjam.net.SocketNetworkController;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by Ithmeer on 10/1/2015.
@@ -12,22 +14,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class SongUtilities
 {
     private final Playlist _playlist;
-    private final NowPlaying _player;
+    private final PlayController _player;
     private final AudioController _audioController;
     private final CommandQueue _commandQueue;
-    private final NetworkController _networkController;
+    private final BlockingQueue<Song> _songQueue;
 
-    public SongUtilities()
+    public SongUtilities(AudioController audioCon, BlockingQueue<Song> songQueue,
+                         CommandQueue cmdQueue, PlayController playCon, Playlist playlist)
     {
-        _player = new NowPlaying();
-        _playlist = new Playlist(_player);
-        _commandQueue = new CommandQueue(_player, _playlist);
-        _audioController = new AudioController(_playlist, _player, _commandQueue);
-        _player.setAudioController(_audioController);
-        _player.setCommandQueue(_commandQueue);
-        _player.setPlaylist(_playlist);
-        _playlist.setCommandQueue(_commandQueue);
-        _networkController = new NetworkController(_commandQueue);
+        _audioController = audioCon;
+        _commandQueue = cmdQueue;
+        _player = playCon;
+        _playlist = playlist;
+        _songQueue = songQueue;
     }
 
     public AudioController getAudioController()
@@ -35,9 +34,9 @@ public class SongUtilities
         return _audioController;
     }
 
-    public NetworkController getNetworkController()
+    public CommandQueue getCommandQueue()
     {
-        return _networkController;
+        return _commandQueue;
     }
 
     public Playlist getPlaylist()
@@ -45,8 +44,13 @@ public class SongUtilities
         return _playlist;
     }
 
-    public NowPlaying getPlayer()
+    public PlayController getPlayController()
     {
         return _player;
+    }
+
+    public BlockingQueue<Song> getSongQueue()
+    {
+        return _songQueue;
     }
 }

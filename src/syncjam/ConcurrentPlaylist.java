@@ -1,6 +1,7 @@
 package syncjam;
 
-import syncjam.net.CommandQueue;
+import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.PlayController;
 
 import java.util.*;
 
@@ -9,33 +10,29 @@ import java.util.*;
  * Created by Marty on 2/26/2015.
  * Modified by Ithmeer.
  */
-public class Playlist
+public class ConcurrentPlaylist implements syncjam.interfaces.Playlist
 {
     // a synchronized ArrayList to store the songs
     private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());
-    private final NowPlaying _playController;
+    private final PlayController _playController;
 
-    private volatile CommandQueue _queue;
+    private volatile CommandQueue _cmdQueue;
 
     // track the index of the currently playing (or to be played) song
     private int _currentSong = 0;
 
     private boolean _intermediate = false;
     
-    public Playlist(NowPlaying playCon)
+    public ConcurrentPlaylist(PlayController playCon)
     {
         _playController = playCon;
-    }
-
-    public void setCommandQueue(CommandQueue cq)
-    {
-        _queue = cq;
     }
 
     /**
      * Add one song onto the queue.
      * @param s the song
      */
+    @Override
     public void add(Song s)
     {
         addAll(s);
@@ -45,6 +42,7 @@ public class Playlist
      * Add multiple songs to the end of the playlist.
      * @param songs one or more songs to add
      */
+    @Override
     public void addAll(Song... songs)
     {
         synchronized (_songList)
@@ -57,6 +55,7 @@ public class Playlist
     /**
      * Clear the playlist, keeping it blocked if it's blocked.
      */
+    @Override
     public void clear()
     {
         synchronized (_songList)
@@ -67,6 +66,7 @@ public class Playlist
 
     }
 
+    @Override
     public int getCurrentSongIndex()
     {
         synchronized (_songList)
@@ -81,6 +81,7 @@ public class Playlist
      * @return the next song to play
      * @throws InterruptedException
      */
+    @Override
     public Song getNextSong() throws InterruptedException
     {
         synchronized (_songList)
@@ -109,6 +110,7 @@ public class Playlist
      * Return an unmodifiable iterator, do not try to call remove.
      * @return the iterator
      */
+    @Override
     public Iterator<Song> iterator()
     {
         synchronized (_songList)
@@ -122,30 +124,30 @@ public class Playlist
      * @param from first index
      * @param to second index
      */
+    @Override
     public void moveSong(int from, int to)
     {
+        _cmdQueue.moveSong(from, to);
+
         synchronized (_songList)
         {
             Song toSwap = _songList.remove(from);
 
-            _queue.moveSong(from, to);
-
-            //=========experimental==========
-            if(from+1 == _currentSong)
+            if(from + 1 == _currentSong)
             {
                 if(to > from)
                     _currentSong = to;
                 else
-                    _currentSong = to+1;
+                    _currentSong = to + 1;
             }
             else if(to < _currentSong && from >= _currentSong)
                 _currentSong += 1;
             else if(to >= _currentSong && from < _currentSong)
                 _currentSong -= 1;
-            //=========experimental==========
 
             if (to > from)
                 to--;
+
             _songList.add(to, toSwap);
         }
     }
@@ -153,6 +155,7 @@ public class Playlist
     /**
      * Simply call updateSong, currentSong was already incremented.
      */
+    @Override
     public void nextSong()
     {
         synchronized (_songList)
@@ -160,13 +163,14 @@ public class Playlist
             if (waitingForSong())
                 return;
         }
-        _queue.nextSong();
+        _cmdQueue.nextSong();
         _playController.updateSong();
     }
 
     /**
      * Go back two songs since currentSong was already stepped.
      */
+    @Override
     public void prevSong()
     {
         synchronized (_songList)
@@ -191,7 +195,7 @@ public class Playlist
                     _currentSong -= 2;
                     _playController.updateSong();
                 }
-                _queue.prevSong();
+                _cmdQueue.prevSong();
             }
         }
     }
@@ -200,6 +204,7 @@ public class Playlist
      * Remove the song at the given position from the playlist.
      * @param i the index to remove
      */
+    @Override
     public void remove(int i)
     {
         synchronized (_songList)
@@ -207,7 +212,7 @@ public class Playlist
             if (i < 0 || i >= _songList.size())
                 return;
 
-            _queue.removeSong(i);
+            _cmdQueue.removeSong(i);
             _songList.remove(i);
             if (_currentSong > i)
                 _currentSong -= 1;
@@ -218,6 +223,7 @@ public class Playlist
      * Start playing the song at a given index.
      * @param which the index to play
      */
+    @Override
     public void setCurrentSong(int which)
     {
         synchronized (_songList)
@@ -226,7 +232,7 @@ public class Playlist
             _currentSong = which;
             _songList.notify();
         }
-        _queue.gotoSong(which);
+        _cmdQueue.gotoSong(which);
         _playController.updateSong();
     }
 
@@ -234,6 +240,7 @@ public class Playlist
      * Get the size of the list.
      * @return list size
      */
+    @Override
     public int size()
     {
         synchronized (_songList)
@@ -242,12 +249,18 @@ public class Playlist
         }
     }
 
+    @Override
     public void wakeUp()
     {
         synchronized (_songList)
         {
             _songList.notify();
         }
+    }
+
+    public void setCommandQueue(CommandQueue cq)
+    {
+        _cmdQueue = cq;
     }
 
     // no need to synchronize, called from synchronized blocks

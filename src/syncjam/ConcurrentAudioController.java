@@ -3,7 +3,10 @@ package syncjam;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
 import com.xuggle.xuggler.io.XugglerIO;
-import syncjam.net.CommandQueue;
+import syncjam.interfaces.AudioController;
+import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.PlayController;
+import syncjam.interfaces.Playlist;
 
 import javax.sound.sampled.*;
 import java.util.concurrent.Semaphore;
@@ -15,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class to control playing of audio. Thread-safe.
  * Created by Ithmeer on 2/19/2015.
  */
-public class AudioController
+public class ConcurrentAudioController implements AudioController
 {
     private volatile SourceDataLine mLine;
 
@@ -27,7 +30,7 @@ public class AudioController
 
     private final Playlist playlist;
 
-    private final NowPlaying playController;
+    private final PlayController playController;
 
     private final CommandQueue queue;
 
@@ -37,7 +40,7 @@ public class AudioController
     // synchronized on this
     private boolean playing;
 
-    public AudioController(Playlist pl, NowPlaying np, CommandQueue cq)
+    public ConcurrentAudioController(Playlist pl, PlayController np, CommandQueue cq)
     {
         playController = np;
         playlist = pl;
@@ -52,6 +55,7 @@ public class AudioController
     /**
      * Play audio and unblock thread.
      */
+    @Override
     public synchronized void play()
     {
         if (!playing)
@@ -66,6 +70,7 @@ public class AudioController
     /**
      * Stop audio and block thread.
      */
+    @Override
     public synchronized void pause()
     {
         if (playing)
@@ -89,6 +94,7 @@ public class AudioController
      *
      * @param level between 0 and 100
      */
+    @Override
     public void setVolume(int level)
     {
         if (level < 0)
@@ -101,6 +107,7 @@ public class AudioController
             volume.setValue(-60 + Math.round(Math.sqrt(level) * 6.0));
     }
 
+    @Override
     public void updateSong()
     {
         // if already playing, does nothing
@@ -108,6 +115,7 @@ public class AudioController
         interrupted.set(true);
     }
 
+    @Override
     public void start()
     {
         while (true)
@@ -127,7 +135,7 @@ public class AudioController
 
     private void playSong(Song song)
     {
-        String url = XugglerIO.map("xxxxx"/*song.getSongName()*/, new BytesHandler(song.getSongData()));
+        String url = XugglerIO.map(song.getSongTitle(), new BytesHandler(song.getSongData()));
         playController.setSongPosition(0);
 
         // Create a Xuggler container object
@@ -160,11 +168,11 @@ public class AudioController
         }
         if (audioStreamId == -1)
             throw new RuntimeException("could not find audio stream in container: " +
-                                               song.getSongName());
+                                               song.getSongTitle());
 
         if (audioCoder.open(null, null) < 0)
             throw new RuntimeException("could not open audio decoder for container: " +
-                                               song.getSongName());
+                                               song.getSongTitle());
 
         openJavaSound(audioCoder);
 

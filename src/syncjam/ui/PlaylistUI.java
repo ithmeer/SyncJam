@@ -1,11 +1,11 @@
 package syncjam.ui;
 
-import syncjam.Playlist;
+import syncjam.ConcurrentPlaylist;
 import syncjam.Song;
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.Playlist;
 import syncjam.ui.base.ItemList;
-import syncjam.ui.buttons.base.ScrollbarUI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class PlaylistUI extends ItemList
@@ -22,7 +23,7 @@ public class PlaylistUI extends ItemList
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
 
-    public PlaylistUI(SongUtilities songUtils)
+    public PlaylistUI(final SongUtilities songUtils)
     {
         playlist = songUtils.getPlaylist();
         super.setBackground(Colors.c_Background2);
@@ -46,6 +47,8 @@ public class PlaylistUI extends ItemList
                         e.printStackTrace();
                     }
                 }
+
+                songUtils.getSongQueue().addAll(Arrays.asList(songs));
                 playlist.addAll(songs);
 
                 scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
@@ -285,7 +288,7 @@ public class PlaylistUI extends ItemList
         g.setColor(Colors.c_Foreground1);
 
         String songName = cutStringToWidth(
-                song.getSongName(),
+                song.getSongTitle(),
                 g.getFontMetrics(),
                 getWidth() - thisItemXPos - scrollbar.getWidth());
 
