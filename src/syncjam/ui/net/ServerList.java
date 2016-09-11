@@ -5,12 +5,15 @@ import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 
 /**
  * Created by Marty on 6/9/2016. lol
  */
 public class ServerList extends ItemList<ServerList.ServerItem>
 {
+    private ServerItem selectedItem = null;
+
     public ServerList()
     {
         super();
@@ -31,7 +34,39 @@ public class ServerList extends ItemList<ServerList.ServerItem>
 
         Colors.setFont(g, 14);
         g.setColor(Colors.c_Foreground1);
-        g.drawString(item.getServerName(), x + 8, y + itemHeight/2);
+        if(item == selectedItem)
+            g.setColor(Colors.c_Highlight);
+        g.drawString(item.getServerName(), x + 8, y + itemHeight/2 - 8);
+
+        Colors.setFont(g, 12);
+        g.setColor(Colors.c_Foreground2);
+        if(item == selectedItem)
+            g.setColor(Colors.c_Highlight);
+        g.drawString(item.getIpAddress(),  x + 8, y + itemHeight/2 + 8);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e)
+    {
+        if(itemHoverIndex > -1)
+            selectedItem  = getItem(itemHoverIndex);
+    }
+
+    public int getSelectedItemIndex()
+    {
+        if(selectedItem != null)
+            return items.indexOf(selectedItem);
+        return -1;
+    }
+
+    public void removeSelected()
+    {
+        int index = getSelectedItemIndex();
+        if(index > -1)
+        {
+            remove(index);
+            selectedItem = null;
+        }
     }
 
     //=====================================

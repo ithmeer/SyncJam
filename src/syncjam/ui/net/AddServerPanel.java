@@ -18,7 +18,6 @@ public class AddServerPanel extends JPanel
 
     public AddServerPanel(final NetworkPanel networkPanel) {
         super();
-        System.out.println("help");
 
         this.setBackground(Colors.c_Background1);
 
@@ -28,7 +27,7 @@ public class AddServerPanel extends JPanel
         NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
         this.add(title);
 
-        String[] labels = {"IP Address", "Port", "Password"};
+        String[] labels = {"Name", "IP Address", "Port", "Password"};
         int numPairs = labels.length;
         fields = new NetTextField[numPairs];
 
@@ -44,7 +43,7 @@ public class AddServerPanel extends JPanel
             fields[i] = textField;
         }
 
-        fields[1].setText(defaultPort);
+        fields[2].setText(defaultPort);
 
         //Lay out the panel.
         makeCompactGrid(p1,
@@ -61,12 +60,13 @@ public class AddServerPanel extends JPanel
         p2.add(new NetButton("Add") {
             @Override
             protected void clicked() {
-                String address = fields[0].getText();//addressField.getText();
-                int port = Integer.parseInt(fields[1].getText());//portField.getText());
-                String password = fields[2].getText();//passField.getText();
+                String name = fields[0].getText();
+                String address = fields[1].getText();
+                int port = Integer.parseInt(fields[2].getText());
+                String password = fields[3].getText();
 
                 System.out.println(address + "\n" + port + "\n" + password);
-                networkPanel.addServer(address, port, password);
+                networkPanel.addServer(name, address, port, password);
                 networkPanel.back();
             }
         });
@@ -78,7 +78,7 @@ public class AddServerPanel extends JPanel
             }
         });
         makeCompactGrid(p2,
-                2, 1, //rows, cols
+                2, 1,        //rows, cols
                 6, 6,        //initX, initY
                 6, 8);       //xPad, yPad
         this.add(p2);
@@ -86,23 +86,21 @@ public class AddServerPanel extends JPanel
     }
 
 
-    private SpringLayout.Constraints getConstraintsForCell(
-            int row, int col,
-            Container parent,
-            int cols) {
+    private SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
+    {
         SpringLayout layout = (SpringLayout) parent.getLayout();
         Component c = parent.getComponent(row * cols + col);
         return layout.getConstraints(c);
     }
-    private void makeCompactGrid(Container parent,
-                                 int rows, int cols,
-                                 int initialX, int initialY,
+
+    private void makeCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
                                  int xPad, int yPad)
     {
         SpringLayout layout;
         try {
             layout = (SpringLayout)parent.getLayout();
-        } catch (ClassCastException exc) {
+        }
+        catch (ClassCastException exc) {
             System.err.println("The first argument to makeCompactGrid must use SpringLayout.");
             return;
         }

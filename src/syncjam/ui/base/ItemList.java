@@ -90,7 +90,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
                 }
             }
 
-            //Draw Dragged Song & Determine Drop Position
+            //Draw Dragged Item & Determine Drop Position
             if(itemDragIndex != -1)
             {
                 int dragY = mouseY-itemHeight/2;
@@ -272,7 +272,6 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
                 {
                     splits[i] = itemHeight+6;
                 }
-                System.out.println(itemDragIndex);
             }
         }
     }
