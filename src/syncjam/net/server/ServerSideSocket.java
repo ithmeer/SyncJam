@@ -27,13 +27,13 @@ public class ServerSideSocket extends NetworkSocket
     {
         super(exec, sockets);
 
-        _consumer = new ServerConsumer(getInputStream(0), songUtils, clients);
+        _consumer = new ServerConsumer(getInputStream(SocketType.Command), songUtils, clients);
 
         if (_producer == null)
-            _producer = new ServerProducer(getOutputStream(0), songUtils, clients);
+            _producer = new ServerProducer(getOutputStream(SocketType.Command), songUtils, clients);
 
-        _dataConsumer = new ServerDataSocketConsumer(getInputStream(1), songUtils);
-        _dataProducer = new ServerDataSocketProducer(getOutputStream(1), songUtils);
+        _dataConsumer = new ServerDataSocketConsumer(getInputStream(SocketType.Data), songUtils, clients);
+        _dataProducer = new ServerDataSocketProducer(getOutputStream(SocketType.Data), songUtils);
     }
 
     @Override

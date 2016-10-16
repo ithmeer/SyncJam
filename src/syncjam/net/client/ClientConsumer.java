@@ -1,14 +1,11 @@
 package syncjam.net.client;
 
-import syncjam.Song;
 import syncjam.SongUtilities;
 import syncjam.interfaces.CommandQueue;
-import syncjam.net.InterruptableRunnable;
 import syncjam.net.SocketConsumer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Listen on a socket for commands.

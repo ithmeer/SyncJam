@@ -3,12 +3,12 @@ package syncjam;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
 import com.xuggle.xuggler.io.XugglerIO;
-import syncjam.interfaces.AudioController;
-import syncjam.interfaces.CommandQueue;
-import syncjam.interfaces.PlayController;
-import syncjam.interfaces.Playlist;
+import syncjam.interfaces.*;
 
 import javax.sound.sampled.*;
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.net.Socket;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -124,8 +124,14 @@ public class ConcurrentAudioController implements AudioController
             {
                 Song next = playlist.getNextSong();
                 playController.setSong(next);
-                playSong(next);
-            } catch (InterruptedException e)
+                if (next instanceof SocketSong)
+                    playSong((SocketSong) next);
+                else if (next instanceof BytesSong)
+                    playSong((BytesSong) next);
+                else
+                    return;
+            }
+            catch (InterruptedException e)
             {
                 // quit if interrupted
                 return;
@@ -133,9 +139,38 @@ public class ConcurrentAudioController implements AudioController
         }
     }
 
-    private void playSong(Song song)
+    /**
+     * Play a song from a socket.
+     * @param song the song
+     */
+    private void playSong(SocketSong song)
     {
-        String url = XugglerIO.map(song.getSongTitle(), new BytesHandler(song.getSongData()));
+        try
+        {
+            playUrl(XugglerIO.map(song.getTitle(), song.getSocket().getInputStream()), song);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Play a song from a byte array.
+     * @param song the song
+     */
+    private void playSong(BytesSong song)
+    {
+        playUrl(XugglerIO.map(song.getTitle(), new BytesHandler(song.getSongData())), song);
+    }
+
+    /**
+     * Play a song from a url.
+     * @param url the Xuggler url
+     * @param song the song
+     */
+    private void playUrl(String url, Song song)
+    {
         playController.setSongPosition(0);
 
         // Create a Xuggler container object
@@ -168,21 +203,21 @@ public class ConcurrentAudioController implements AudioController
         }
         if (audioStreamId == -1)
             throw new RuntimeException("could not find audio stream in container: " +
-                                               song.getSongTitle());
+                                               song.getTitle());
 
         if (audioCoder.open(null, null) < 0)
             throw new RuntimeException("could not open audio decoder for container: " +
-                                               song.getSongTitle());
+                                               song.getTitle());
 
         openJavaSound(audioCoder);
 
         // container duration in microseconds
         int durationInSecs = (int) (TimeUnit.SECONDS.convert(container.getDuration(),
                                                              TimeUnit.MICROSECONDS));
-        song.setSongLength(durationInSecs);
+        song.setLength(durationInSecs);
 
         IPacket packet = IPacket.make();
-outer:  while (container.readNextPacket(packet) >= 0)
+        outer: while (container.readNextPacket(packet) >= 0)
         {
             if (packet.getStreamIndex() == audioStreamId)
             {

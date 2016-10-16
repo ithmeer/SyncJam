@@ -1,14 +1,5 @@
 package syncjam;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
@@ -16,20 +7,29 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.KeyNotFoundException;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.images.Artwork;
+import syncjam.interfaces.Song;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 /**
  * A song to be played. The song data is stored as an array of bytes. Thread-safe.
  */
-public class Song implements Externalizable
+public class BytesSong extends SongBase
 {
-    private volatile byte[] _songData;
-    private volatile SongMetadata _metadata;
+    private final byte[] _songData;
 
     /**
      * Read song from file and set song info.
      */
-    public Song(File file) throws SyncJamException
+    public BytesSong(File file) throws SyncJamException
     {
+        super();
+
         String[] parts = file.getName().split("\\.");
         AudioFile song = null;
         _songData = new byte[(int) file.length()];
@@ -52,7 +52,6 @@ public class Song implements Externalizable
             // can't read metadata, not fatal
         }
 
-
         String songTitle = parts[0];
         BufferedImage albumArt = null;
         String artistName = "";
@@ -72,52 +71,7 @@ public class Song implements Externalizable
         _metadata = new SongMetadata(artistName, albumName, songTitle, albumArt, songLength);
     }
 
-    public Song(byte[] songData, SongMetadata metadata)
-    {
-        _songData = songData;
-        _metadata = metadata;
-    }
-
-    public BufferedImage getAlbumArt() {return _metadata.getAlbumArt(); }
-
-    public String getSongTitle() {return _metadata.getSongTitle(); }
-
-    public String getArtistName() {return _metadata.getArtistName();}
-
-    public String getAlbumName() {return _metadata.getAlbumName(); }
-
     public byte[] getSongData() { return _songData; }
-
-    public int getSongLength() { return _metadata.getSongLength(); }
-
-    public String getSongLengthString()
-    {
-        String lengthStr = "";
-        int length = getSongLength();
-
-        if (length > 3600)
-            lengthStr += (int) Math.floor(length / 3600) + ":"; //if longer or equal to an hour, include hour digit
-
-        Format timeFormat = new SimpleDateFormat("m:ss");
-        lengthStr += timeFormat.format(length * 1000); //format minutes:seconds
-
-        return lengthStr;
-    }
-
-    public BufferedImage getScaledAlbumArt(int width, int height)
-    {
-        return _metadata.getScaledAlbumArt(width, height);
-    }
-
-    public BufferedImage getScaledAlbumArtFast(int width, int height)
-    {
-        return _metadata.getScaledAlbumArtFast(width, height);
-    }
-
-    public void setSongLength(int lengthInSecs)
-    {
-        _metadata.setSongLength(lengthInSecs);
-    }
 
     private BufferedImage TryReadCover(Tag metadata)
     {
@@ -172,24 +126,5 @@ public class Song implements Externalizable
         }
 
         return length;
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException
-    {
-        out.writeInt(_songData.length);
-        out.write(_songData);
-
-        out.writeObject(_metadata);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException
-    {
-        int dataSize = in.readInt();
-        _songData = new byte[dataSize];
-
-        in.readFully(_songData);
-        _metadata = (SongMetadata) in.readObject();
     }
 }

@@ -2,6 +2,8 @@ package syncjam;
 
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.PlayController;
+import syncjam.interfaces.Playlist;
+import syncjam.interfaces.Song;
 
 import java.util.*;
 
@@ -10,7 +12,7 @@ import java.util.*;
  * Created by Marty on 2/26/2015.
  * Modified by Ithmeer.
  */
-public class ConcurrentPlaylist implements syncjam.interfaces.Playlist
+public class ConcurrentPlaylist implements Playlist
 {
     // a synchronized ArrayList to store the songs
     private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());

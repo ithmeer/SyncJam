@@ -1,6 +1,6 @@
 package syncjam.interfaces;
 
-import syncjam.Song;
+import syncjam.BytesSong;
 
 import java.util.Iterator;
 

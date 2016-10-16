@@ -2,7 +2,7 @@ package syncjam.net.server;
 
 import syncjam.SongUtilities;
 import syncjam.interfaces.CommandQueue;
-import syncjam.net.ConcurrentCommandQueue;
+import syncjam.net.NetworkSocket;
 import syncjam.net.client.ClientConsumer;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class ServerConsumer extends ClientConsumer
 
                 for (ServerSideSocket client : _clients)
                 {
-                    if (_inputStream != client.getInputStream(0))
+                    if (_inputStream != client.getInputStream(NetworkSocket.SocketType.Command))
                     {
                         client.sendCommand(commandBuffer);
                     }

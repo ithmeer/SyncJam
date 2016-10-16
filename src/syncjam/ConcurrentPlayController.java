@@ -1,9 +1,6 @@
 package syncjam;
 
-import syncjam.interfaces.AudioController;
-import syncjam.interfaces.CommandQueue;
-import syncjam.interfaces.PlayController;
-import syncjam.interfaces.Playlist;
+import syncjam.interfaces.*;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,13 +32,13 @@ public class ConcurrentPlayController implements PlayController
     public Song getSong()                { return currentSong; }
 
     @Override
-    public int getSongLength()           { return currentSong.getSongLength(); }
+    public int getSongLength()           { return currentSong.getLength(); }
 
     @Override
-    public String getSongLengthString()  { return currentSong.getSongLengthString(); }
+    public String getSongLengthString()  { return currentSong.getLengthString(); }
 
     @Override
-    public String getSongName()          { return currentSong.getSongTitle(); }
+    public String getSongName()          { return currentSong.getTitle(); }
 
     @Override
     public int getSongPosition()         { return songPosition.get(); }

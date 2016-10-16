@@ -1,10 +1,10 @@
 package syncjam.ui;
 
-import syncjam.ConcurrentPlaylist;
-import syncjam.Song;
+import syncjam.BytesSong;
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
 import syncjam.interfaces.Playlist;
+import syncjam.interfaces.Song;
 import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
@@ -35,12 +35,12 @@ public class PlaylistUI extends ItemList
             @Override
             public void filesDropped(File[] files)
             {
-                Song[] songs = new Song[files.length];
+                BytesSong[] songs = new BytesSong[files.length];
                 for(int i = 0; i < files.length; i++)
                 {
                     try
                     {
-                        songs[i] = new Song(files[i]);
+                        songs[i] = new BytesSong(files[i]);
                     }
                     catch (SyncJamException e)
                     {
@@ -288,7 +288,7 @@ public class PlaylistUI extends ItemList
         g.setColor(Colors.c_Foreground1);
 
         String songName = cutStringToWidth(
-                song.getSongTitle(),
+                song.getTitle(),
                 g.getFontMetrics(),
                 getWidth() - thisItemXPos - scrollbar.getWidth());
 
@@ -302,13 +302,13 @@ public class PlaylistUI extends ItemList
         Colors.setFont(g, 14);
 
         int textHeight = g.getFontMetrics().getHeight();
-        int textWidth = g.getFontMetrics().stringWidth(song.getSongLengthString());
+        int textWidth = g.getFontMetrics().stringWidth(song.getLengthString());
 
         int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 4;
         int thisItemYPos = y + itemHeight / 4 + textHeight / 2 - 3;
 
         g.setColor(Colors.c_Foreground2);
-        g.drawString(song.getSongLengthString(), thisItemXPos, thisItemYPos);
+        g.drawString(song.getLengthString(), thisItemXPos, thisItemYPos);
     }
 
     //====  UTILITY METHODS  ====

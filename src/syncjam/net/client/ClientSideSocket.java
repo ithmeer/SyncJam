@@ -17,19 +17,19 @@ public class ClientSideSocket extends NetworkSocket
     private final ClientConsumer _consumer;
     private final ClientProducer _producer;
 
-    private final DataSocketConsumer _dataConsumer;
-    private final DataSocketProducer _dataProducer;
+    private final ClientDataSocketConsumer _dataConsumer;
+    private final ClientDataSocketProducer _dataProducer;
 
     public ClientSideSocket(Executor exec, SongUtilities songUtils, LinkedList<Socket> sockets)
             throws IOException
     {
         super(exec, sockets);
 
-        _consumer = new ClientConsumer(getInputStream(0), songUtils);
-        _producer = new ClientProducer(getOutputStream(0), songUtils);
+        _consumer = new ClientConsumer(getInputStream(SocketType.Command), songUtils);
+        _producer = new ClientProducer(getOutputStream(SocketType.Command), songUtils);
 
-        _dataConsumer = new DataSocketConsumer(getInputStream(1), songUtils);
-        _dataProducer = new DataSocketProducer(getOutputStream(1), songUtils);
+        _dataConsumer = new ClientDataSocketConsumer(getInputStream(SocketType.Data), songUtils);
+        _dataProducer = new ClientDataSocketProducer(getOutputStream(SocketType.Data), songUtils);
     }
 
     @Override

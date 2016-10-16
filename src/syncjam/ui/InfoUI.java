@@ -1,7 +1,8 @@
 package syncjam.ui;
 
-import syncjam.Song;
+import syncjam.BytesSong;
 import syncjam.SongUtilities;
+import syncjam.interfaces.Song;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,7 +59,7 @@ public class InfoUI extends JPanel
         int spacing = 32;
 
         String songName = cutStringToWidth(
-                song.getSongTitle(),
+                song.getTitle(),
                 g.getFontMetrics(),
                 getWidth()/2 - aaWidth/2 - hOffset);
         String artistName = cutStringToWidth(
@@ -74,7 +75,7 @@ public class InfoUI extends JPanel
         Colors.setFont(g, 18);
         g.drawString(artistName,                 aaWidth + hOffset, vOffset + spacing);
         g.drawString(song.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);
-        g.drawString(song.getSongLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
+        g.drawString(song.getLengthString(), aaWidth + hOffset, vOffset + spacing * 3);
     }
 
     private String cutStringToWidth(String str, FontMetrics f, int width)

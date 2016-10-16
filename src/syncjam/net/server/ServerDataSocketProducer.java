@@ -2,7 +2,6 @@ package syncjam.net.server;
 
 import syncjam.SongUtilities;
 import syncjam.net.SocketProducer;
-import syncjam.net.client.DataSocketProducer;
 
 import java.io.OutputStream;
 

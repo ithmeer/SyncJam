@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -14,31 +15,34 @@ import java.util.concurrent.Executor;
 public abstract class NetworkSocket
 {
     protected final Executor _exec;
-    protected final List<InputStream> _inputStreams;
-    protected final List<OutputStream> _outputStreams;
+    protected final HashMap<SocketType, InputStream> _inputStreams;
+    protected final HashMap<SocketType, OutputStream> _outputStreams;
+
+    public enum SocketType { Command, Data, Stream }
 
     public NetworkSocket(Executor exec, List<Socket> sockets) throws IOException
     {
         _exec = exec;
 
-        _inputStreams = new LinkedList<InputStream>();
-        _outputStreams = new LinkedList<OutputStream>();
+        _inputStreams = new HashMap<SocketType, InputStream>();
+        _outputStreams = new HashMap<SocketType, OutputStream>();
 
-        for (Socket sock : sockets)
-        {
-            _inputStreams.add(sock.getInputStream());
-            _outputStreams.add(sock.getOutputStream());
-        }
+        _inputStreams.put(SocketType.Command, sockets.get(0).getInputStream());
+        _outputStreams.put(SocketType.Command, sockets.get(0).getOutputStream());
+        _inputStreams.put(SocketType.Data, sockets.get(1).getInputStream());
+        _outputStreams.put(SocketType.Data, sockets.get(1).getOutputStream());
+        _inputStreams.put(SocketType.Stream, sockets.get(2).getInputStream());
+        _outputStreams.put(SocketType.Stream, sockets.get(2).getOutputStream());
     }
 
-    public InputStream getInputStream(int i)
+    public InputStream getInputStream(SocketType type)
     {
-        return _inputStreams.get(i);
+        return _inputStreams.get(type);
     }
 
-    public OutputStream getOutputStream(int i)
+    public OutputStream getOutputStream(SocketType type)
     {
-        return _outputStreams.get(i);
+        return _outputStreams.get(type);
     }
 
     public String readNextCommand()
@@ -47,7 +51,7 @@ public abstract class NetworkSocket
 
         try
         {
-            getInputStream(0).read(next);
+            getInputStream(SocketType.Command).read(next);
         }
         catch (IOException e)
         {
@@ -66,7 +70,7 @@ public abstract class NetworkSocket
     {
         try
         {
-            getOutputStream(0).write(cmd);
+            getOutputStream(SocketType.Command).write(cmd);
         }
         catch (IOException e)
         {
