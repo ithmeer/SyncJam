@@ -57,7 +57,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     {
         super.paintComponent(g);
 
-        double viewRatio = (float)getHeight() / (float)( max + getHeight() );
+        double viewRatio = (float)getHeight() / (float)( rawmax );
 
         if(viewRatio < 1)
         {
