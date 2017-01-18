@@ -1,5 +1,6 @@
 package syncjam.net;
 
+import syncjam.ConnectionStatus;
 import syncjam.SyncJamException;
 import syncjam.interfaces.AudioController;
 import syncjam.interfaces.NetworkController;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Handle server hosting or connection. Thread-safe.
@@ -47,10 +49,23 @@ public class SocketNetworkController implements NetworkController
     // the client-side socket for this client
     private volatile NetworkSocket _socket;
 
+    protected AtomicReference<ConnectionStatus> _status;
+
     public SocketNetworkController(ServiceContainer services)
     {
         _services = services;
         _audioCon = services.getService(AudioController.class);
+        _status = new AtomicReference<ConnectionStatus>(ConnectionStatus.Unconnected);
+    }
+
+    public ConnectionStatus getStatus()
+    {
+        return _status.get();
+    }
+
+    public void setStatus(ConnectionStatus st)
+    {
+        _status.set(st);
     }
 
     public void disconnect()
@@ -71,6 +86,8 @@ public class SocketNetworkController implements NetworkController
 
             _clients.clear();
         }
+
+        setStatus(ConnectionStatus.Unconnected);
     }
 
     public Queue<ServerSideSocket> getClients()
@@ -93,6 +110,8 @@ public class SocketNetworkController implements NetworkController
     @Override
     public void connectToServer(String address, int port, String password) throws SyncJamException
     {
+        setStatus(ConnectionStatus.Intermediate);
+
         final InetAddress host;
         try
         {
@@ -101,6 +120,7 @@ public class SocketNetworkController implements NetworkController
         catch (UnknownHostException ex)
         {
             // TODO: log error
+            setStatus(ConnectionStatus.Disconnected);
             throw new SyncJamException(String.format(connectionErrorStr, address, port));
         }
 
@@ -134,16 +154,19 @@ public class SocketNetworkController implements NetworkController
                 System.out.println("password accepted");
                 _socket = cs;
                 cs.start();
+                setStatus(ConnectionStatus.Connected);
             }
             else
             {
                 // TODO: log error
                 System.out.println("password rejected");
+                setStatus(ConnectionStatus.Disconnected);
             }
         }
         catch (IOException e)
         {
             // TODO: log error
+            setStatus(ConnectionStatus.Disconnected);
             throw new SyncJamException(String.format(connectionErrorStr, address, port));
         }
     }
@@ -157,6 +180,7 @@ public class SocketNetworkController implements NetworkController
     @Override
     public void startServer(int port, final String password) throws SyncJamException
     {
+        setStatus(ConnectionStatus.Intermediate);
         final ServerSocket serv;
 
         try
@@ -184,6 +208,7 @@ public class SocketNetworkController implements NetworkController
                     {
                         Socket clientSock = serv.accept();
                         InetAddress info = clientSock.getInetAddress();
+                        setStatus(ConnectionStatus.Hosted);
                         System.out.printf("Connection from %s (%s)%n",
                                           info.getHostName(), info.getHostAddress());
 
