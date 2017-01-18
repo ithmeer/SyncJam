@@ -8,10 +8,12 @@ import syncjam.net.server.ServerSideSocket;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.channels.DatagramChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Handle server hosting or connection. Thread-safe.
@@ -24,10 +26,22 @@ public class SocketNetworkController implements NetworkController
     private final String hostingErrorStr = "Could not start server on port {0}";
     private final ExecutorService _exec = Executors.newCachedThreadPool();
     private final SongUtilities _songUtils;
+    private final Queue<ServerSideSocket> _clients = new ConcurrentLinkedQueue<ServerSideSocket>();
+    private AtomicBoolean _isClient = new AtomicBoolean(true);
 
     public SocketNetworkController(SongUtilities songUtils)
     {
         _songUtils = songUtils;
+    }
+
+    public Queue<ServerSideSocket> getClients()
+    {
+        return _clients;
+    }
+
+    public boolean isClient()
+    {
+        return _isClient.get();
     }
 
     /**
@@ -52,20 +66,23 @@ public class SocketNetworkController implements NetworkController
 
         try
         {
+            _isClient.set(true);
             Socket commandSocket = new Socket(host, port);
             commandSocket.setKeepAlive(true);
             Socket dataSocket = new Socket(host, port);
             dataSocket.setKeepAlive(true);
-            Socket streamSocket = new Socket(host, port);
-            streamSocket.setKeepAlive(true);
+            DatagramChannel streamChannel = DatagramChannel.open();
+            streamChannel.configureBlocking(false);
+            streamChannel.bind(dataSocket.getRemoteSocketAddress());
 
             InetAddress info = commandSocket.getInetAddress();
             System.out.printf("Connected to %s (%s)%n",
                               info.getHostName(), info.getHostAddress());
 
             LinkedList<Socket> sockets = new LinkedList<Socket>(
-                    Arrays.asList(commandSocket, dataSocket, streamSocket));
-            ClientSideSocket cs = new ClientSideSocket(_exec, _songUtils, sockets);
+                    Arrays.asList(commandSocket, dataSocket));
+            ClientSideSocket cs = new ClientSideSocket(_exec, _songUtils, sockets, streamChannel,
+                                                       commandSocket.getRemoteSocketAddress());
 
             cs.sendCommand(password);
 
@@ -100,6 +117,7 @@ public class SocketNetworkController implements NetworkController
 
         try
         {
+            _isClient.set(false);
             serv = new ServerSocket(port);
             System.out.println("Server started\n");
         }
@@ -131,7 +149,7 @@ public class SocketNetworkController implements NetworkController
                             socketMap.put(info.getHostAddress(), currentSockets);
                         }
 
-                        if (currentSockets.size() < 2)
+                        if (currentSockets.size() == 0)
                         {
                             currentSockets.add(clientSock);
                         }
@@ -152,12 +170,13 @@ public class SocketNetworkController implements NetworkController
         });
     }
 
+    /**
+     * Handle a connection to the server by a client.
+     */
     private class ServerRunner extends InterruptableRunnable
     {
         private final String _password;
         private final List<Socket> _socketList;
-        private final Queue<ServerSideSocket> _clients =
-                new ConcurrentLinkedQueue<ServerSideSocket>();
 
         public ServerRunner(String password, List<Socket> socketList)
         {
@@ -175,10 +194,15 @@ public class SocketNetworkController implements NetworkController
                     Socket commandSocket = _socketList.get(0);
                     Socket dataSocket = _socketList.get(1);
 
-                    // start up the socket producer and consumer tasks
-                    ServerSideSocket cs = new ServerSideSocket(_exec, _songUtils, _clients,
-                                                               _socketList);
+                    DatagramChannel streamChannel = DatagramChannel.open();
+                    streamChannel.configureBlocking(false);
+                    streamChannel.bind(dataSocket.getRemoteSocketAddress());
 
+                    ServerSideSocket cs = new ServerSideSocket(_exec, _songUtils, _clients,
+                                                               _socketList, streamChannel,
+                                                               commandSocket.getRemoteSocketAddress());
+
+                    // TODO: investigate
                     String password = cs.readNextCommand();
                     if (_password.isEmpty() || password.equals(_password))
                     {

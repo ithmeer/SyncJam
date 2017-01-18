@@ -25,7 +25,8 @@ public class SyncJam
         ConcurrentPlayController playCon = new ConcurrentPlayController();
         ConcurrentPlaylist playlist = new ConcurrentPlaylist(playCon);
         ConcurrentCommandQueue cmdQueue = new ConcurrentCommandQueue(playCon, playlist);
-        ConcurrentAudioController audioController = new ConcurrentAudioController(playlist, playCon, cmdQueue);
+        ConcurrentAudioController audioController = new ConcurrentAudioController(playlist, playCon,
+                                                                                  cmdQueue);
         ConcurrentSongQueue songQueue = new ConcurrentSongQueue();
         playCon.setAudioController(audioController);
         playCon.setCommandQueue(cmdQueue);
@@ -34,6 +35,7 @@ public class SyncJam
         SongUtilities songUtils = new SongUtilities(audioController, songQueue, cmdQueue, playCon,
                                                     playlist);
         SocketNetworkController networkCon = new SocketNetworkController(songUtils);
+        audioController.setNetworkController(networkCon);
 
         mainWindow = new SyncJamUI(songUtils);
 
@@ -48,7 +50,7 @@ public class SyncJam
         timer.setRepeats(true);
         timer.start();
 
-        songUtils.getAudioController().start();
+        audioController.start();
     }
 
     public static void main(String[] args)

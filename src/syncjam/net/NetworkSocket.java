@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.channels.ByteChannel;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,14 +17,18 @@ import java.util.concurrent.Executor;
 public abstract class NetworkSocket
 {
     protected final Executor _exec;
+    private final SocketAddress _ipAddress;
     protected final HashMap<SocketType, InputStream> _inputStreams;
     protected final HashMap<SocketType, OutputStream> _outputStreams;
+    protected final ByteChannel _streamChannel;
 
-    public enum SocketType { Command, Data, Stream }
+    public enum SocketType { Command, Data }
 
-    public NetworkSocket(Executor exec, List<Socket> sockets) throws IOException
+    public NetworkSocket(Executor exec, List<Socket> sockets, ByteChannel channel,
+                         SocketAddress ipAddress) throws IOException
     {
         _exec = exec;
+        _ipAddress = ipAddress;
 
         _inputStreams = new HashMap<SocketType, InputStream>();
         _outputStreams = new HashMap<SocketType, OutputStream>();
@@ -31,8 +37,18 @@ public abstract class NetworkSocket
         _outputStreams.put(SocketType.Command, sockets.get(0).getOutputStream());
         _inputStreams.put(SocketType.Data, sockets.get(1).getInputStream());
         _outputStreams.put(SocketType.Data, sockets.get(1).getOutputStream());
-        _inputStreams.put(SocketType.Stream, sockets.get(2).getInputStream());
-        _outputStreams.put(SocketType.Stream, sockets.get(2).getOutputStream());
+
+        _streamChannel = channel;
+    }
+
+    public SocketAddress getIPAddress()
+    {
+        return _ipAddress;
+    }
+
+    public ByteChannel getStreamChannel()
+    {
+        return _streamChannel;
     }
 
     public InputStream getInputStream(SocketType type)

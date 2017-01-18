@@ -6,6 +6,8 @@ import syncjam.net.NetworkSocket;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.channels.ByteChannel;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -22,10 +24,11 @@ public class ServerSideSocket extends NetworkSocket
     private final ServerDataSocketProducer _dataProducer;
 
     public ServerSideSocket(Executor exec, SongUtilities songUtils,
-                            Iterable<ServerSideSocket> clients, List<Socket> sockets)
+                            Iterable<ServerSideSocket> clients, List<Socket> sockets,
+                            ByteChannel channel, SocketAddress ipAddress)
             throws IOException
     {
-        super(exec, sockets);
+        super(exec, sockets, channel, ipAddress);
 
         _consumer = new ServerConsumer(getInputStream(SocketType.Command), songUtils, clients);
 
@@ -33,7 +36,7 @@ public class ServerSideSocket extends NetworkSocket
             _producer = new ServerProducer(getOutputStream(SocketType.Command), songUtils, clients);
 
         _dataConsumer = new ServerDataSocketConsumer(getInputStream(SocketType.Data), songUtils, clients);
-        _dataProducer = new ServerDataSocketProducer(getOutputStream(SocketType.Data), songUtils);
+        _dataProducer = new ServerDataSocketProducer(getOutputStream(SocketType.Data), songUtils, clients);
     }
 
     @Override

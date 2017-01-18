@@ -1,8 +1,10 @@
 package syncjam.net.client;
 
+import syncjam.DatagramChannelSong;
+import syncjam.SongMetadata;
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
-import syncjam.net.InterruptableRunnable;
+import syncjam.net.NetworkSocket;
 import syncjam.net.SocketConsumer;
 
 import java.io.IOException;
@@ -14,9 +16,13 @@ import java.io.ObjectInputStream;
  */
 public class ClientDataSocketConsumer extends SocketConsumer
 {
-    public ClientDataSocketConsumer(InputStream inStream, SongUtilities songUtils)
+    private NetworkSocket _parent;
+
+    public ClientDataSocketConsumer(InputStream inStream, SongUtilities songUtils,
+                                    NetworkSocket parent)
     {
         super(inStream, songUtils);
+        _parent = parent;
     }
 
     @Override
@@ -36,25 +42,28 @@ public class ClientDataSocketConsumer extends SocketConsumer
 
         while (!terminated)
         {
-            int progress = 0;
-
-            do
+            try
             {
-                try
+                SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
+                DatagramChannelSong song = new DatagramChannelSong(metadata);
+                _songUtils.getPlaylist().add(song);
+
+                int progress;
+                do
                 {
                     progress = socketObjectReader.readInt();
+                    song.setProgress(progress);
                 }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                    throw new SyncJamException(e.getMessage());
-                }
+                while (progress < 100);
 
-                // update progress
+                song.setComplete();
+                song.setStreamChannel(_parent.getStreamChannel());
             }
-            while (progress < 100);
-
-            // finish progress
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                throw new SyncJamException(e.getMessage());
+            }
         }
     }
 }

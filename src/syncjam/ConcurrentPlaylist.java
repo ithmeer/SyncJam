@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class ConcurrentPlaylist implements Playlist
 {
-    // a synchronized ArrayList to store the songs
+    // a thread-safe ArrayList to store the songs (synchronized on itself)
     private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());
     private final PlayController _playController;
 

@@ -4,11 +4,16 @@ import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
 import com.xuggle.xuggler.io.XugglerIO;
 import syncjam.interfaces.*;
+import syncjam.net.NetworkSocket;
+import syncjam.net.client.ClientSideSocket;
+import syncjam.net.server.ServerSideSocket;
 
 import javax.sound.sampled.*;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.channels.ByteChannel;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,22 +39,53 @@ public class ConcurrentAudioController implements AudioController
 
     private final CommandQueue queue;
 
+    // effectively final
+    private volatile NetworkController _networkController;
+
     // block thread if stopped
     private final Semaphore sem = new Semaphore(0);
 
     // synchronized on this
     private boolean playing;
 
-    public ConcurrentAudioController(Playlist pl, PlayController np, CommandQueue cq)
+    // thread-safe container map (synchronized on itself)
+    private final Map<SocketAddress, XugglerClient> _clientMap;
+
+    public ConcurrentAudioController(Playlist pl, PlayController playCon, CommandQueue cq)
     {
-        playController = np;
+        playController = playCon;
         playlist = pl;
         queue = cq;
+
+        _clientMap = Collections.synchronizedMap(new HashMap<SocketAddress, XugglerClient>());
 
         synchronized (this)
         {
             playing = false;
         }
+    }
+
+    public void addNetworkContainer(NetworkSocket client)
+    {
+        synchronized (_clientMap)
+        {
+            // remove in case this is a reconnect-on-error
+            _clientMap.remove(client.getIPAddress());
+
+            _clientMap.put(client.getIPAddress(),
+                           new XugglerClient(IContainer.make(), client.getStreamChannel(),
+                                             client.getIPAddress()));
+
+        }
+    }
+
+    /**
+     * Set the network controller (call before starting)
+     * @param networkCon the network controller
+     */
+    public void setNetworkController(NetworkController networkCon)
+    {
+        _networkController = networkCon;
     }
 
     /**
@@ -124,8 +160,8 @@ public class ConcurrentAudioController implements AudioController
             {
                 Song next = playlist.getNextSong();
                 playController.setSong(next);
-                if (next instanceof SocketSong)
-                    playSong((SocketSong) next);
+                if (next instanceof DatagramChannelSong)
+                    playSong((DatagramChannelSong) next);
                 else if (next instanceof BytesSong)
                     playSong((BytesSong) next);
                 else
@@ -143,16 +179,9 @@ public class ConcurrentAudioController implements AudioController
      * Play a song from a socket.
      * @param song the song
      */
-    private void playSong(SocketSong song)
+    private void playSong(DatagramChannelSong song)
     {
-        try
-        {
-            playUrl(XugglerIO.map(song.getTitle(), song.getSocket().getInputStream()), song);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        playUrl(XugglerIO.map(song.getTitle(), song.getStreamChannel()), song, false);
     }
 
     /**
@@ -161,7 +190,7 @@ public class ConcurrentAudioController implements AudioController
      */
     private void playSong(BytesSong song)
     {
-        playUrl(XugglerIO.map(song.getTitle(), new BytesHandler(song.getSongData())), song);
+        playUrl(XugglerIO.map(song.getTitle(), new BytesHandler(song.getSongData())), song, true);
     }
 
     /**
@@ -169,20 +198,30 @@ public class ConcurrentAudioController implements AudioController
      * @param url the Xuggler url
      * @param song the song
      */
-    private void playUrl(String url, Song song)
+    private void playUrl(String url, Song song, boolean isServer)
     {
-        playController.setSongPosition(0);
-
         // Create a Xuggler container object
         IContainer container = IContainer.make();
-        int openStatus = container.open(url, IContainer.Type.READ, null);
-        if (openStatus < 0)
+        openContainer(container, url, IContainer.Type.READ);
+
+        if (isServer)
         {
-            IError err = IError.make(openStatus);
-            if (err.getType() == IError.Type.ERROR_INTERRUPTED)
-                throw new IllegalArgumentException("open song interrupted for: " + url);
-            else
-                throw new IllegalArgumentException("could not open song: " + url);
+            playController.setSongPosition(0);
+
+            synchronized (_clientMap)
+            {
+                for (XugglerClient client : _clientMap.values())
+                {
+                    try
+                    {
+                        openContainer(container, client, IContainer.Type.WRITE);
+                    }
+                    catch (Exception ex)
+                    {
+                        // log a message but don't crash
+                    }
+                }
+            }
         }
 
         int numStreams = container.getNumStreams();
@@ -202,12 +241,16 @@ public class ConcurrentAudioController implements AudioController
             }
         }
         if (audioStreamId == -1)
+        {
             throw new RuntimeException("could not find audio stream in container: " +
-                                               song.getTitle());
+                                       song.getTitle());
+        }
 
         if (audioCoder.open(null, null) < 0)
+        {
             throw new RuntimeException("could not open audio decoder for container: " +
-                                               song.getTitle());
+                                       song.getTitle());
+        }
 
         openJavaSound(audioCoder);
 
@@ -221,6 +264,13 @@ public class ConcurrentAudioController implements AudioController
         {
             if (packet.getStreamIndex() == audioStreamId)
             {
+                // stream to all client IContainers
+                if (isServer)
+                {
+                    for (ServerSideSocket socket : _networkController.getClients())
+                    {
+                    }
+                }
                 IAudioSamples samples = IAudioSamples.make(1024, audioCoder.getChannels());
 
                 int offset = 0;
@@ -238,7 +288,7 @@ public class ConcurrentAudioController implements AudioController
                     int curPos = (int) (packet.getTimeStamp() * packet.getTimeBase().getDouble());
                     int oldPos = playController.getSongPosition();
                     long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
-                    if (oldPos > curPos + 1 || oldPos < curPos - 1)
+                    if ((oldPos > curPos + 1 || oldPos < curPos - 1) && isServer)
                     {
                         int length = playController.getSongLength();
                         queue.seek(Math.round((oldPos / (float) length) * 100.0f));
@@ -266,6 +316,38 @@ public class ConcurrentAudioController implements AudioController
         closeJavaSound();
         audioCoder.close();
         container.close();
+    }
+
+    public void openContainer(IContainer container, String url, IContainer.Type type)
+    {
+        int openStatus = container.open(url, type, null);
+        if (openStatus < 0)
+        {
+            IError err = IError.make(openStatus);
+            if (err.getType() == IError.Type.ERROR_INTERRUPTED)
+                throw new IllegalArgumentException("open song interrupted for: " + url);
+            else
+                throw new IllegalArgumentException("could not open song: " + url);
+        }
+    }
+
+    public void openContainer(IContainer orig, XugglerClient client, IContainer.Type type)
+    {
+        int openStatus = client.container.open(client.channel, type, orig.getContainerFormat());
+        if (openStatus < 0)
+        {
+            IError err = IError.make(openStatus);
+            if (err.getType() == IError.Type.ERROR_INTERRUPTED)
+            {
+                throw new IllegalArgumentException("open song interrupted for: " + orig.getURL());
+            }
+            else
+            {
+                throw new IllegalArgumentException(String.format(
+                        "could not open song: \'%s\' for client %s",
+                        orig.getURL(), client.address));
+            }
+        }
     }
 
     private void openJavaSound(IStreamCoder aAudioCoder)

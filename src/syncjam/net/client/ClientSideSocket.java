@@ -5,6 +5,9 @@ import syncjam.net.NetworkSocket;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.channels.ByteChannel;
+import java.nio.channels.Channel;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
@@ -20,15 +23,16 @@ public class ClientSideSocket extends NetworkSocket
     private final ClientDataSocketConsumer _dataConsumer;
     private final ClientDataSocketProducer _dataProducer;
 
-    public ClientSideSocket(Executor exec, SongUtilities songUtils, LinkedList<Socket> sockets)
+    public ClientSideSocket(Executor exec, SongUtilities songUtils, LinkedList<Socket> sockets,
+                            ByteChannel channel, SocketAddress ipAddress)
             throws IOException
     {
-        super(exec, sockets);
+        super(exec, sockets, channel, ipAddress);
 
         _consumer = new ClientConsumer(getInputStream(SocketType.Command), songUtils);
         _producer = new ClientProducer(getOutputStream(SocketType.Command), songUtils);
 
-        _dataConsumer = new ClientDataSocketConsumer(getInputStream(SocketType.Data), songUtils);
+        _dataConsumer = new ClientDataSocketConsumer(getInputStream(SocketType.Data), songUtils, this);
         _dataProducer = new ClientDataSocketProducer(getOutputStream(SocketType.Data), songUtils);
     }
 

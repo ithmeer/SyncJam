@@ -4,6 +4,7 @@ import syncjam.BytesSong;
 import syncjam.SongMetadata;
 import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.Song;
 import syncjam.net.SocketProducer;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class ClientDataSocketProducer extends SocketProducer
     @Override
     public void run()
     {
-        BlockingQueue<BytesSong> songQueue = _songUtils.getSongQueue();
+        BlockingQueue<Song> songQueue = _songUtils.getSongQueue();
         ObjectOutputStream socketObjectWriter;
 
         try
@@ -41,9 +42,9 @@ public class ClientDataSocketProducer extends SocketProducer
         {
             try
             {
-                BytesSong song = songQueue.take();
+                Song song = songQueue.take();
                 SongMetadata metadata = song.getMetadata();
-                byte[] data = song.getSongData();
+                byte[] data = ((BytesSong) song).getSongData();
 
                 socketObjectWriter.writeObject(metadata);
 

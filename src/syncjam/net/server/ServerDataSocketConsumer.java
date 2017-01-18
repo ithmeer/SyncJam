@@ -1,6 +1,7 @@
 package syncjam.net.server;
 
 import syncjam.*;
+import syncjam.interfaces.Song;
 import syncjam.net.NetworkSocket;
 import syncjam.net.SocketConsumer;
 
@@ -25,7 +26,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
     @Override
     public void run()
     {
-        BlockingQueue<BytesSong> songQueue = _songUtils.getSongQueue();
+        BlockingQueue<Song> songQueue = _songUtils.getSongQueue();
         ObjectInputStream socketObjectReader;
 
         try
@@ -38,12 +39,33 @@ public class ServerDataSocketConsumer extends SocketConsumer
             throw new SyncJamException(e.getMessage());
         }
 
+
         while (!terminated)
         {
             try
             {
                 SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
                 PartialBytesSong song = new PartialBytesSong(metadata);
+                _songUtils.getPlaylist().add(song);
+
+                // send metadata to all clients
+                for (ServerSideSocket client : _clients)
+                {
+                    ObjectOutputStream socketObjectWriter;
+
+                    try
+                    {
+                        socketObjectWriter = new ObjectOutputStream(
+                                client.getOutputStream(NetworkSocket.SocketType.Data));
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        throw new SyncJamException(e.getMessage());
+                    }
+
+                    socketObjectWriter.writeObject(metadata);
+                }
 
                 int songLength = socketObjectReader.readInt();
                 byte[] songData = new byte[songLength];
@@ -78,6 +100,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     }
                 }
 
+                song.setComplete();
             }
             catch (IOException e)
             {
