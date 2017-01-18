@@ -1,5 +1,6 @@
 package syncjam.ui.net;
 
+import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
@@ -23,10 +24,29 @@ public class NetworkIndicator extends JPanel
         g.setColor(Colors.c_Foreground1);
         g.drawOval(6,3,13,13);
 
-        if(!_network.isClient())
-            g.setColor(Color.green);
-        else
-            g.setColor(Colors.c_Background2);
-        g.fillOval(8,5,9,9);
+
+        ConnectionStatus status = _network.getStatus();
+        switch(status)
+        {
+            case Hosted:
+                g.setColor(Color.green.brighter());
+                break;
+            case Connected:
+                g.setColor(Color.green);
+                break;
+            case Intermediate:
+                g.setColor(Color.orange);
+                break;
+            case Disconnected:
+                g.setColor(new Color(209, 72, 58));
+                break;
+            case Unconnected:
+                g.setColor(Colors.c_Background2);
+                break;
+            default:
+                g.setColor(Colors.c_Background2);
+                break;
+        }
+        g.fillOval(7,4,11,11);
     }
 }

@@ -23,7 +23,6 @@ public class PlaylistUI extends ItemList
     private final SongQueue _songQueue;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
-    private int prog = 0;
 
     public PlaylistUI(final ServiceContainer services)
     {
@@ -140,12 +139,6 @@ public class PlaylistUI extends ItemList
     {
 
         int progress = 100;
-        if(i == 3)
-        {
-            if(prog < 100) prog++;
-            progress = prog;
-        }
-
         if(progress < 100)
         {
             g.setColor(Colors.c_Background1);

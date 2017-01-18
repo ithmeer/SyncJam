@@ -17,7 +17,7 @@ public class NetworkPanel extends JPanel
     private final JPanel mainPanel;
     private JPanel visiblePanel;
     private final NetworkController _network;
-    private ButtonUI connectButton, hostButton, addButton, removeButton;
+    private ButtonUI connectButton, disconnectButton, hostButton, addButton, removeButton;
 
     public NetworkPanel(ServiceContainer services)
     {
@@ -65,7 +65,22 @@ public class NetworkPanel extends JPanel
         constraints.weightx = 1;
         constraints.weighty = .5;
         mainPanel.add(connectButton, constraints);
-        //connectButton.setEnabled(false);
+        connectButton.setEnabled(false);
+
+        disconnectButton = new ButtonUI(0, 0, Colors.c_Background2) {
+            @Override
+            protected void clicked() { disconnect(); }
+        };
+        disconnectButton.setText("Disconnect");
+        disconnectButton.setMargin(new Insets(0,0,0,0));
+        constraints.gridy = 3;
+        constraints.insets = new Insets(8,8,8,8);
+        constraints.ipadx = 200;
+        constraints.ipady = 30;
+        constraints.weightx = 1;
+        constraints.weighty = .5;
+        mainPanel.add(disconnectButton, constraints);
+        disconnectButton.setEnabled(false);
 
 
         hostButton = new ButtonUI(0, 0, Colors.c_Background2) {
@@ -74,7 +89,7 @@ public class NetworkPanel extends JPanel
         };
         hostButton.setText("Host");
         hostButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 3;
+        constraints.gridy = 4;
         mainPanel.add(hostButton, constraints);
 
         addButton = new ButtonUI(0, 0, Colors.c_Background2) {
@@ -85,7 +100,7 @@ public class NetworkPanel extends JPanel
         };
         addButton.setText("Add");
         addButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 4;
+        constraints.gridy = 5;
         mainPanel.add(addButton, constraints);
 
         removeButton = new ButtonUI(0, 0, Colors.c_Background2) {
@@ -94,7 +109,7 @@ public class NetworkPanel extends JPanel
         };
         removeButton.setText("Remove");
         removeButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 5;
+        constraints.gridy = 6;
         mainPanel.add(removeButton, constraints);
     }
 
@@ -120,19 +135,34 @@ public class NetworkPanel extends JPanel
     public void connect()
     {
         serverList.connect(_network);
+        connectButton.setEnabled(false);
+        disconnectButton.setEnabled(true);
+    }
+    public void disconnect()
+    {
+        _network.disconnect();
+        disconnectButton.setEnabled(false);
     }
 
     public void hostServer(String name, int port, String password)
     {
         _network.startServer(port, password);
         connectButton.setEnabled(false);
+        disconnectButton.setEnabled(true);
         hostButton.setEnabled(false);
     }
 
     public void paintComponent(Graphics g)
     {
-        if(serverList.getSelectedItemIndex() == -1) removeButton.setEnabled(false);
-        else removeButton.setEnabled(true);
-
+        if(serverList.getSelectedItemIndex() == -1)
+        {
+            removeButton.setEnabled(false);
+            connectButton.setEnabled(false);
+        }
+        else
+        {
+            removeButton.setEnabled(true);
+            connectButton.setEnabled(true);
+        }
     }
 }
