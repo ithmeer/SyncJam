@@ -2,8 +2,9 @@ package syncjam.net.client;
 
 import syncjam.DatagramChannelSong;
 import syncjam.SongMetadata;
-import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.Playlist;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.NetworkSocket;
 import syncjam.net.SocketConsumer;
 
@@ -17,12 +18,14 @@ import java.io.ObjectInputStream;
 public class ClientDataSocketConsumer extends SocketConsumer
 {
     private NetworkSocket _parent;
+    private final Playlist _playlist;
 
-    public ClientDataSocketConsumer(InputStream inStream, SongUtilities songUtils,
+    public ClientDataSocketConsumer(InputStream inStream, ServiceContainer services,
                                     NetworkSocket parent)
     {
-        super(inStream, songUtils);
+        super(inStream);
         _parent = parent;
+        _playlist = services.getService(Playlist.class);
     }
 
     @Override
@@ -46,7 +49,7 @@ public class ClientDataSocketConsumer extends SocketConsumer
             {
                 SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
                 DatagramChannelSong song = new DatagramChannelSong(metadata);
-                _songUtils.getPlaylist().add(song);
+                _playlist.add(song);
 
                 int progress;
                 do
@@ -61,6 +64,7 @@ public class ClientDataSocketConsumer extends SocketConsumer
             }
             catch (Exception e)
             {
+                // TODO: log error
                 e.printStackTrace();
                 throw new SyncJamException(e.getMessage());
             }

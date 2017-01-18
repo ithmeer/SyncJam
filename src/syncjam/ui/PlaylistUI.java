@@ -1,10 +1,11 @@
 package syncjam.ui;
 
 import syncjam.BytesSong;
-import syncjam.SongUtilities;
 import syncjam.SyncJamException;
 import syncjam.interfaces.Playlist;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Song;
+import syncjam.interfaces.SongQueue;
 import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
@@ -18,15 +19,16 @@ import java.util.Iterator;
 
 public class PlaylistUI extends ItemList
 {
-
-    private final Playlist playlist;
+    private final Playlist _playlist;
+    private final SongQueue _songQueue;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
     private int prog = 0;
 
-    public PlaylistUI(final SongUtilities songUtils)
+    public PlaylistUI(final ServiceContainer services)
     {
-        playlist = songUtils.getPlaylist();
+        _playlist = services.getService(Playlist.class);
+        _songQueue = services.getService(SongQueue.class);
         super.setBackground(Colors.c_Background2);
         this.setEnableCustomDrawing(true);
 
@@ -49,10 +51,10 @@ public class PlaylistUI extends ItemList
                     }
                 }
 
-                songUtils.getSongQueue().addAll(Arrays.asList(songs));
-                playlist.addAll(songs);
+                _songQueue.addAll(Arrays.asList(songs));
+                _playlist.addAll(songs);
 
-                scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
+                scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
                 buildSplitArray();
             }
         });
@@ -63,7 +65,7 @@ public class PlaylistUI extends ItemList
         super.paintComponent(g);
 
         int i = 0;
-        Iterator<Song> songIter = playlist.iterator();
+        Iterator<Song> songIter = _playlist.iterator();
         Song draggedSong = null;
         int draggedIndex = -1;
         while (songIter.hasNext())
@@ -124,7 +126,7 @@ public class PlaylistUI extends ItemList
         drawSongName(  g, x, y, song);
         drawSongLength(g, x, y, song);
 
-        if(index == playlist.getCurrentSongIndex())
+        if(index == _playlist.getCurrentSongIndex())
         {
             g.setColor(Colors.c_Highlight);
             g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 1, itemHeight);
@@ -362,8 +364,8 @@ public class PlaylistUI extends ItemList
 
         if(itemDragIndex >= 0)
         {
-            if(mouseY > getHeight() && i < playlist.size())
-                itemHoverIndex = playlist.size()-1;
+            if(mouseY > getHeight() && i < _playlist.size())
+                itemHoverIndex = _playlist.size()-1;
             else if(mouseY < 0 && i > 0)
                 itemHoverIndex = 0;
         }
@@ -388,24 +390,24 @@ public class PlaylistUI extends ItemList
     @Override
     protected void updateScrollbar()
     {
-        scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
+        scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
     }
 
     private void buildSplitArray()
     {
-        splits = new int[playlist.size()+1];
+        splits = new int[_playlist.size()+1];
     }
 
     @Override
     public void remove(int index)
     {
-        playlist.remove(index);
+        _playlist.remove(index);
         updateScrollbar();
         buildSplitArray();
     }
     public void clear()
     {
-        //playlist.clear();
+        //_playlist.clear();
         //updateScrollbar();
     }
 
@@ -420,7 +422,7 @@ public class PlaylistUI extends ItemList
                 itemDropIndex = itemDragIndex;
 
             if(itemDragIndex != itemDropIndex-1)
-                playlist.moveSong(itemDragIndex, itemDropIndex);
+                _playlist.moveSong(itemDragIndex, itemDropIndex);
             buildSplitArray();
             itemDragIndex  = -1;
             itemDropIndex  = -1;
@@ -431,7 +433,7 @@ public class PlaylistUI extends ItemList
         else
         {
             if (artHoverIndex >= 0)
-                playlist.setCurrentSong(artHoverIndex);
+                _playlist.setCurrentSong(artHoverIndex);
             else if (removeHoverIndex >= 0)
                 remove(removeHoverIndex);
         }

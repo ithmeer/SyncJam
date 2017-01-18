@@ -1,7 +1,7 @@
 package syncjam.ui;
 
-import syncjam.BytesSong;
-import syncjam.SongUtilities;
+import syncjam.interfaces.PlayController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Song;
 
 import javax.swing.*;
@@ -12,9 +12,9 @@ public class InfoUI extends JPanel
     private int myW, myH;
     private int aaWidth = 120; //album art width
     private int aaHeight = 120; //album art height
-    private final SongUtilities _songUtilities;
+    private final PlayController _playCon;
 
-    public InfoUI(SongUtilities songUtils)
+    public InfoUI(ServiceContainer services)
     {
         myW = 350;
         myH = 114;
@@ -22,7 +22,7 @@ public class InfoUI extends JPanel
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
         setBackground(Colors.c_Background1);
-        _songUtilities = songUtils;
+        _playCon = services.getService(PlayController.class);
     }
 
     public int getW() { return myW; }
@@ -32,7 +32,7 @@ public class InfoUI extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        Song curSong = _songUtilities.getPlayController().getSong();
+        Song curSong = _playCon.getSong();
 
         if(curSong != null)
         {

@@ -1,7 +1,5 @@
 package syncjam.net;
 
-import syncjam.SongUtilities;
-
 import java.io.OutputStream;
 
 /**
@@ -10,11 +8,9 @@ import java.io.OutputStream;
 public abstract class SocketProducer extends InterruptableRunnable
 {
     protected final OutputStream _outputStream;
-    protected final SongUtilities _songUtils;
 
-    public SocketProducer(OutputStream outStream, SongUtilities songUtils)
+    public SocketProducer(OutputStream outStream)
     {
         _outputStream = outStream;
-        _songUtils = songUtils;
     }
 }

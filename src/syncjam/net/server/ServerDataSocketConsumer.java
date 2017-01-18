@@ -1,7 +1,10 @@
 package syncjam.net.server;
 
 import syncjam.*;
+import syncjam.interfaces.Playlist;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Song;
+import syncjam.interfaces.SongQueue;
 import syncjam.net.NetworkSocket;
 import syncjam.net.SocketConsumer;
 
@@ -15,18 +18,19 @@ import java.util.concurrent.BlockingQueue;
 public class ServerDataSocketConsumer extends SocketConsumer
 {
     private final Iterable<ServerSideSocket> _clients;
+    private final Playlist _playlist;
 
-    public ServerDataSocketConsumer(InputStream inStream, SongUtilities songUtils,
+    public ServerDataSocketConsumer(InputStream inStream, ServiceContainer services,
                                     Iterable<ServerSideSocket> clients)
     {
-        super(inStream, songUtils);
+        super(inStream);
         _clients = clients;
+        _playlist = services.getService(Playlist.class);
     }
 
     @Override
     public void run()
     {
-        BlockingQueue<Song> songQueue = _songUtils.getSongQueue();
         ObjectInputStream socketObjectReader;
 
         try
@@ -46,7 +50,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
             {
                 SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
                 PartialBytesSong song = new PartialBytesSong(metadata);
-                _songUtils.getPlaylist().add(song);
+                _playlist.add(song);
 
                 // send metadata to all clients
                 for (ServerSideSocket client : _clients)
@@ -77,6 +81,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     int read = socketObjectReader.read(buffer);
                     if (read == -1)
                     {
+                        // TODO: log error
                         throw new SyncJamException("socket song read error");
                     }
 
@@ -104,11 +109,13 @@ public class ServerDataSocketConsumer extends SocketConsumer
             }
             catch (IOException e)
             {
+                // TODO: log error
                 e.printStackTrace();
                 throw new SyncJamException(e.getMessage());
             }
             catch (ClassNotFoundException e)
             {
+                // TODO: log error
                 e.printStackTrace();
                 throw new SyncJamException(e.getMessage());
             }

@@ -1,7 +1,7 @@
 package syncjam.ui.buttons;
 
-import syncjam.SongUtilities;
 import syncjam.interfaces.PlayController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.SliderUI;
 
@@ -13,10 +13,10 @@ public class SongPositionSlider extends SliderUI
 {
     private final PlayController _player;
 
-    public SongPositionSlider(SongUtilities songUtils)
+    public SongPositionSlider(ServiceContainer services)
     {
-        super(0, 0, false, songUtils);
-        _player = songUtils.getPlayController();
+        super(0, 0, false);
+        _player = services.getService(PlayController.class);
     }
 
     public void paintComponent(Graphics g)
@@ -37,7 +37,7 @@ public class SongPositionSlider extends SliderUI
     @Override
     protected void drawValue(Graphics g)
     {
-        if(_player.getSong()!= null)
+        if(_player.getSong() != null)
         {
             g.setColor(Colors.c_Highlight);
             g.drawString(getTimeStamp(this.getPosOnBar()), barXOffset, barYOffset - 9);
@@ -48,11 +48,13 @@ public class SongPositionSlider extends SliderUI
             g.drawString(timeToMax, barXOffset + getW() - strWidth, barYOffset - 9);
         }
     }
+
     public void setValue(int n)
     {
         super.setValue(n);
         _player.setSongPosition(n);
     }
+
     public String getTimeStamp(int seconds)
     {
         String ts = "";

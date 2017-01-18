@@ -21,6 +21,7 @@ public abstract class NetworkSocket
     protected final HashMap<SocketType, InputStream> _inputStreams;
     protected final HashMap<SocketType, OutputStream> _outputStreams;
     protected final ByteChannel _streamChannel;
+    private final List<Socket> _sockets;
 
     public enum SocketType { Command, Data }
 
@@ -39,6 +40,7 @@ public abstract class NetworkSocket
         _outputStreams.put(SocketType.Data, sockets.get(1).getOutputStream());
 
         _streamChannel = channel;
+        _sockets = sockets;
     }
 
     public SocketAddress getIPAddress()
@@ -71,6 +73,7 @@ public abstract class NetworkSocket
         }
         catch (IOException e)
         {
+            // TODO: log and report error
             e.printStackTrace();
         }
 
@@ -90,9 +93,26 @@ public abstract class NetworkSocket
         }
         catch (IOException e)
         {
+            // TODO: log and report error
             e.printStackTrace();
         }
     }
 
     public abstract void start();
+
+    public void stop()
+    {
+        for (Socket s : _sockets)
+        {
+            try
+            {
+                s.close();
+            }
+            catch (IOException e)
+            {
+                // TODO: log error
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -1,6 +1,6 @@
 package syncjam.ui;
 
-import syncjam.SongUtilities;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.NextButton;
 import syncjam.ui.buttons.PlayButton;
 import syncjam.ui.buttons.PrevButton;
@@ -14,7 +14,7 @@ public class ControlUI extends JPanel
     private int myW, myH;
     private ButtonUI playButton, prevButton, nexButton;
 
-    public ControlUI(SongUtilities songUtils)
+    public ControlUI(ServiceContainer services)
     {
         myW = 380;
         myH = 36;
@@ -24,13 +24,13 @@ public class ControlUI extends JPanel
         setBackground(Colors.c_Background1);
 
 
-        prevButton = new PrevButton(36, 36, songUtils);
+        prevButton = new PrevButton(36, 36, services);
         this.add(prevButton);
 
-        playButton = new PlayButton(36, 36, songUtils);
+        playButton = new PlayButton(36, 36, services);
         this.add(playButton);
 
-        nexButton = new NextButton(36, 36, songUtils);
+        nexButton = new NextButton(36, 36, services);
         this.add(nexButton);
     }
     public void paintComponent(Graphics g)

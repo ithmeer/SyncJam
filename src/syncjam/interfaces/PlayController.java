@@ -1,7 +1,5 @@
 package syncjam.interfaces;
 
-import syncjam.BytesSong;
-
 import java.awt.image.BufferedImage;
 
 /**

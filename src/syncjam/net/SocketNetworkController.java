@@ -1,8 +1,9 @@
 package syncjam.net;
 
-import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.AudioController;
 import syncjam.interfaces.NetworkController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.client.ClientSideSocket;
 import syncjam.net.server.ServerSideSocket;
 
@@ -21,17 +22,55 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SocketNetworkController implements NetworkController
 {
+    // string constants
     private final String ackMessage = "OK";
     private final String connectionErrorStr = "Could not connect to server {0}:{1}";
     private final String hostingErrorStr = "Could not start server on port {0}";
+
+    // the service container
+    private final ServiceContainer _services;
+
+    // the audio controller
+    private final AudioController _audioCon;
+
+    // the executor for all tasks
     private final ExecutorService _exec = Executors.newCachedThreadPool();
-    private final SongUtilities _songUtils;
-    private final Queue<ServerSideSocket> _clients = new ConcurrentLinkedQueue<ServerSideSocket>();
+
+    // true if this is a client
     private AtomicBoolean _isClient = new AtomicBoolean(true);
 
-    public SocketNetworkController(SongUtilities songUtils)
+    // thread-safe list of clients
+    private final Queue<ServerSideSocket> _clients = new ConcurrentLinkedQueue<ServerSideSocket>();
+
+    private volatile InterruptableRunnable _gateKeeper;
+
+    // the client-side socket for this client
+    private volatile NetworkSocket _socket;
+
+    public SocketNetworkController(ServiceContainer services)
     {
-        _songUtils = songUtils;
+        _services = services;
+        _audioCon = services.getService(AudioController.class);
+    }
+
+    public void disconnect()
+    {
+        if (isClient())
+        {
+            _socket.stop();
+        }
+        else
+        {
+            _gateKeeper.terminate();
+
+            // TODO: inform clients of shutdown
+            for (ServerSideSocket clientSocket: _clients)
+            {
+                clientSocket.stop();
+            }
+
+            _clients.clear();
+        }
     }
 
     public Queue<ServerSideSocket> getClients()
@@ -61,6 +100,7 @@ public class SocketNetworkController implements NetworkController
         }
         catch (UnknownHostException ex)
         {
+            // TODO: log error
             throw new SyncJamException(String.format(connectionErrorStr, address, port));
         }
 
@@ -81,7 +121,7 @@ public class SocketNetworkController implements NetworkController
 
             LinkedList<Socket> sockets = new LinkedList<Socket>(
                     Arrays.asList(commandSocket, dataSocket));
-            ClientSideSocket cs = new ClientSideSocket(_exec, _songUtils, sockets, streamChannel,
+            ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets, streamChannel,
                                                        commandSocket.getRemoteSocketAddress());
 
             cs.sendCommand(password);
@@ -90,16 +130,20 @@ public class SocketNetworkController implements NetworkController
 
             if (ack.equals(ackMessage))
             {
+                // TODO: log message
                 System.out.println("password accepted");
+                _socket = cs;
                 cs.start();
             }
             else
             {
+                // TODO: log error
                 System.out.println("password rejected");
             }
         }
         catch (IOException e)
         {
+            // TODO: log error
             throw new SyncJamException(String.format(connectionErrorStr, address, port));
         }
     }
@@ -123,12 +167,13 @@ public class SocketNetworkController implements NetworkController
         }
         catch (IOException e)
         {
+            // TODO: log error
             throw new SyncJamException(String.format(hostingErrorStr, port));
         }
 
         final Map<String, List<Socket>> socketMap = new HashMap<String, List<Socket>>();
 
-        _exec.execute(new InterruptableRunnable()
+        _gateKeeper = new InterruptableRunnable()
         {
             @Override
             public void run()
@@ -162,12 +207,15 @@ public class SocketNetworkController implements NetworkController
                     }
                     catch (IOException e)
                     {
+                        // TODO: log error
                         e.printStackTrace();
                         break;
                     }
                 }
             }
-        });
+        };
+
+        _exec.execute(_gateKeeper);
     }
 
     /**
@@ -187,48 +235,46 @@ public class SocketNetworkController implements NetworkController
         @Override
         public void run()
         {
-            while (!terminated)
+            try
             {
-                try
-                {
-                    Socket commandSocket = _socketList.get(0);
-                    Socket dataSocket = _socketList.get(1);
+                Socket commandSocket = _socketList.get(0);
+                Socket dataSocket = _socketList.get(1);
 
-                    DatagramChannel streamChannel = DatagramChannel.open();
-                    streamChannel.configureBlocking(false);
-                    streamChannel.bind(dataSocket.getRemoteSocketAddress());
+                DatagramChannel streamChannel = DatagramChannel.open();
+                streamChannel.configureBlocking(false);
+                streamChannel.bind(dataSocket.getRemoteSocketAddress());
 
-                    ServerSideSocket cs = new ServerSideSocket(_exec, _songUtils, _clients,
-                                                               _socketList, streamChannel,
-                                                               commandSocket.getRemoteSocketAddress());
+                ServerSideSocket ss = new ServerSideSocket(_exec, _services, _clients,
+                                                           _socketList, streamChannel,
+                                                           commandSocket.getRemoteSocketAddress());
 
-                    // TODO: investigate
-                    String password = cs.readNextCommand();
-                    if (_password.isEmpty() || password.equals(_password))
-                    {
-                        System.out.println("password accepted");
-                        _songUtils.getAudioController().addClient(cs);
-                        cs.sendCommand(ackMessage);
-                        cs.start();
-                        _clients.add(cs);
-                    }
-                    else
-                    {
-                        System.out.println("password rejected");
-                        cs.sendCommand("bad password");
-                        commandSocket.close();
-                        dataSocket.close();
-                    }
-                }
-                catch (SocketTimeoutException to)
+                // TODO: investigate
+                String password = ss.readNextCommand();
+                if (_password.isEmpty() || password.equals(_password))
                 {
-                    break;
+                    System.out.println("password accepted");
+                    _audioCon.addClient(ss);
+                    ss.sendCommand(ackMessage);
+                    ss.start();
+                    _clients.add(ss);
                 }
-                catch (IOException e)
+                else
                 {
-                    System.out.println("Cannot create socket: " + e.getMessage());
-                    break;
+                    System.out.println("password rejected");
+                    ss.sendCommand("bad password");
+                    commandSocket.close();
+                    dataSocket.close();
                 }
+            }
+            catch (SocketTimeoutException ex)
+            {
+                // TODO: log error
+                System.out.println("Socket timed out: " + ex.getMessage());
+            }
+            catch (IOException ex)
+            {
+                // TODO: log error
+                System.out.println("Cannot create socket: " + ex.getMessage());
             }
         }
     }

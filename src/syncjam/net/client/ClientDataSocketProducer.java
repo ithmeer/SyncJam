@@ -2,30 +2,32 @@ package syncjam.net.client;
 
 import syncjam.BytesSong;
 import syncjam.SongMetadata;
-import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Song;
+import syncjam.interfaces.SongQueue;
 import syncjam.net.SocketProducer;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Ithmeer on 6/5/2016.
  */
 public class ClientDataSocketProducer extends SocketProducer
 {
-    public ClientDataSocketProducer(OutputStream outStream, SongUtilities songUtils)
+    private final SongQueue _songQueue;
+
+    public ClientDataSocketProducer(OutputStream outStream, ServiceContainer services)
     {
-        super(outStream, songUtils);
+        super(outStream);
+        _songQueue = services.getService(SongQueue.class);
     }
 
     @Override
     public void run()
     {
-        BlockingQueue<Song> songQueue = _songUtils.getSongQueue();
         ObjectOutputStream socketObjectWriter;
 
         try
@@ -34,6 +36,7 @@ public class ClientDataSocketProducer extends SocketProducer
         }
         catch (IOException e)
         {
+            // TODO: log error
             e.printStackTrace();
             throw new SyncJamException(e.getMessage());
         }
@@ -42,7 +45,7 @@ public class ClientDataSocketProducer extends SocketProducer
         {
             try
             {
-                Song song = songQueue.take();
+                Song song = _songQueue.take();
                 SongMetadata metadata = song.getMetadata();
                 byte[] data = ((BytesSong) song).getSongData();
 
@@ -63,6 +66,7 @@ public class ClientDataSocketProducer extends SocketProducer
             }
             catch (Exception e)
             {
+                // TODO: log error
                 e.printStackTrace();
                 throw new SyncJamException(e.getMessage());
             }

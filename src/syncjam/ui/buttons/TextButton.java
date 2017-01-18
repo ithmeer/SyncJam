@@ -1,6 +1,5 @@
 package syncjam.ui.buttons;
 
-import syncjam.SongUtilities;
 import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.ButtonUI;
 
@@ -12,13 +11,13 @@ import java.awt.*;
 
 public class TextButton extends ButtonUI
 {
-    protected TextButton(String text, SongUtilities songUtils)
+    protected TextButton(String text)
     {
-        this(text, 0, 0, songUtils);
+        this(text, 0, 0);
     }
-    protected TextButton(String text, int w, int y, SongUtilities songUtils)
+    protected TextButton(String text, int w, int y)
     {
-        super(w, y, Colors.c_Background2, songUtils);
+        super(w, y, Colors.c_Background2);
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }

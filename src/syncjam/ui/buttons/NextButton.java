@@ -1,27 +1,32 @@
 package syncjam.ui.buttons;
 
-import syncjam.SongUtilities;
+import syncjam.interfaces.Playlist;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
 
 public class NextButton extends ButtonUI
 {
-    public NextButton(int w, int h, SongUtilities songUtils)
+    private final Playlist _playlist;
+
+    public NextButton(int w, int h, ServiceContainer services)
     {
-        super(w, h, songUtils);
+        super(w, h);
         setPreferredSize(new Dimension(getW() + 19, getH()));
+        _playlist = services.getService(Playlist.class);
     }
 
-    public NextButton(int w, int h, Color c, SongUtilities songUtils)
+    public NextButton(int w, int h, Color c, ServiceContainer services)
     {
-        super(w, h, c, songUtils);
+        super(w, h, c);
         setPreferredSize(new Dimension(getW() + 19, getH()));
+        _playlist = services.getService(Playlist.class);
     }
 
     protected void clicked()
     {
-        songUtilities.getPlaylist().nextSong();
+        _playlist.nextSong();
     }
 
     public void paintComponent(Graphics g)

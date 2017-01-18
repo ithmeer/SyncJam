@@ -1,17 +1,16 @@
 package syncjam.net.server;
 
-import syncjam.BytesSong;
 import syncjam.SongMetadata;
-import syncjam.SongUtilities;
 import syncjam.SyncJamException;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Song;
+import syncjam.interfaces.SongQueue;
 import syncjam.net.NetworkSocket;
 import syncjam.net.SocketProducer;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Ithmeer on 6/5/2016.
@@ -19,24 +18,24 @@ import java.util.concurrent.BlockingQueue;
 public class ServerDataSocketProducer extends SocketProducer
 {
     private final Iterable<ServerSideSocket> _clients;
+    private final SongQueue _songQueue;
 
-    public ServerDataSocketProducer(OutputStream outStream, SongUtilities songUtils,
+    public ServerDataSocketProducer(OutputStream outStream, ServiceContainer services,
                                     Iterable<ServerSideSocket> clients)
     {
-        super(outStream, songUtils);
+        super(outStream);
         _clients = clients;
+        _songQueue = services.getService(SongQueue.class);
     }
 
     @Override
     public void run()
     {
-        BlockingQueue<Song> songQueue = _songUtils.getSongQueue();
-
         while (!terminated)
         {
             try
             {
-                Song song = songQueue.take();
+                Song song = _songQueue.take();
                 SongMetadata metadata = song.getMetadata();
 
                 // send metadata to all clients
@@ -51,6 +50,7 @@ public class ServerDataSocketProducer extends SocketProducer
                     }
                     catch (IOException e)
                     {
+                        // TODO: log error
                         e.printStackTrace();
                         throw new SyncJamException(e.getMessage());
                     }
@@ -61,6 +61,7 @@ public class ServerDataSocketProducer extends SocketProducer
             }
             catch (Exception e)
             {
+                // TODO: log error
                 e.printStackTrace();
                 throw new SyncJamException(e.getMessage());
             }

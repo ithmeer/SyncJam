@@ -10,6 +10,8 @@ import java.util.Queue;
  */
 public interface NetworkController
 {
+    void disconnect();
+
     Queue<ServerSideSocket> getClients();
 
     boolean isClient();

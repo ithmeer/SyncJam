@@ -1,7 +1,7 @@
 package syncjam.net.client;
 
-import syncjam.SongUtilities;
 import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.SocketProducer;
 
 import java.io.IOException;
@@ -13,30 +13,34 @@ import java.io.OutputStream;
  */
 public class ClientProducer extends SocketProducer
 {
-    public ClientProducer(OutputStream outStream, SongUtilities songUtils)
+    protected final CommandQueue _cmdQueue;
+
+    public ClientProducer(OutputStream outStream, ServiceContainer services)
     {
-        super(outStream, songUtils);
+        super(outStream);
+        _cmdQueue = services.getService(CommandQueue.class);
     }
 
     public void run()
     {
-        CommandQueue cmdQueue = _songUtils.getCommandQueue();
-        cmdQueue.toggleEnabled(true);
+        _cmdQueue.toggleEnabled(true);
 
         while (!terminated)
         {
             try
             {
-                String command = cmdQueue.take();
+                String command = _cmdQueue.take();
                 System.out.println("produced command: " + command);
                 _outputStream.write(command.getBytes());
             }
             catch (InterruptedException e)
             {
+                // TODO: log error
                 break;
             }
             catch (IOException e)
             {
+                // TODO: log error
                 break;
             }
         }

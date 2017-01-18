@@ -1,9 +1,6 @@
 package syncjam.ui.net;
 
-import syncjam.SongUtilities;
-import syncjam.SyncJamException;
 import syncjam.ui.Colors;
-import syncjam.ui.base.ItemList;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
@@ -175,7 +172,7 @@ class NetButton extends ButtonUI
 {
     protected NetButton(String text)
     {
-        super(0, 0, Colors.c_Background2, null);
+        super(0, 0, Colors.c_Background2);
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }

@@ -1,13 +1,12 @@
 package syncjam.net.client;
 
-import syncjam.SongUtilities;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.NetworkSocket;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.Channel;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
@@ -23,17 +22,39 @@ public class ClientSideSocket extends NetworkSocket
     private final ClientDataSocketConsumer _dataConsumer;
     private final ClientDataSocketProducer _dataProducer;
 
-    public ClientSideSocket(Executor exec, SongUtilities songUtils, LinkedList<Socket> sockets,
+    public ClientSideSocket(Executor exec, ServiceContainer services, LinkedList<Socket> sockets,
                             ByteChannel channel, SocketAddress ipAddress)
             throws IOException
     {
         super(exec, sockets, channel, ipAddress);
 
-        _consumer = new ClientConsumer(getInputStream(SocketType.Command), songUtils);
-        _producer = new ClientProducer(getOutputStream(SocketType.Command), songUtils);
+        _consumer = new ClientConsumer(getInputStream(SocketType.Command), services);
+        _producer = new ClientProducer(getOutputStream(SocketType.Command), services);
 
-        _dataConsumer = new ClientDataSocketConsumer(getInputStream(SocketType.Data), songUtils, this);
-        _dataProducer = new ClientDataSocketProducer(getOutputStream(SocketType.Data), songUtils);
+        _dataConsumer = new ClientDataSocketConsumer(getInputStream(SocketType.Data), services,
+                                                     this);
+        _dataProducer = new ClientDataSocketProducer(getOutputStream(SocketType.Data), services);
+    }
+
+    @Override
+    public void stop()
+    {
+        super.stop();
+
+        _consumer.terminate();
+        _producer.terminate();
+        _dataConsumer.terminate();
+        _dataProducer.terminate();
+
+        try
+        {
+            _streamChannel.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: log the error, it doesn't need to be reported
+            e.printStackTrace();
+        }
     }
 
     @Override

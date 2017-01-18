@@ -1,7 +1,6 @@
 package syncjam.net.server;
 
-import syncjam.SongUtilities;
-import syncjam.net.ConcurrentCommandQueue;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.NetworkSocket;
 
 import java.io.IOException;
@@ -23,20 +22,43 @@ public class ServerSideSocket extends NetworkSocket
     private final ServerDataSocketConsumer _dataConsumer;
     private final ServerDataSocketProducer _dataProducer;
 
-    public ServerSideSocket(Executor exec, SongUtilities songUtils,
+    public ServerSideSocket(Executor exec, ServiceContainer services,
                             Iterable<ServerSideSocket> clients, List<Socket> sockets,
                             ByteChannel channel, SocketAddress ipAddress)
             throws IOException
     {
         super(exec, sockets, channel, ipAddress);
 
-        _consumer = new ServerConsumer(getInputStream(SocketType.Command), songUtils, clients);
+        _consumer = new ServerConsumer(getInputStream(SocketType.Command), services, clients);
 
         if (_producer == null)
-            _producer = new ServerProducer(getOutputStream(SocketType.Command), songUtils, clients);
+            _producer = new ServerProducer(getOutputStream(SocketType.Command), services, clients);
 
-        _dataConsumer = new ServerDataSocketConsumer(getInputStream(SocketType.Data), songUtils, clients);
-        _dataProducer = new ServerDataSocketProducer(getOutputStream(SocketType.Data), songUtils, clients);
+        _dataConsumer = new ServerDataSocketConsumer(getInputStream(SocketType.Data), services,
+                                                     clients);
+        _dataProducer = new ServerDataSocketProducer(getOutputStream(SocketType.Data), services,
+                                                     clients);
+    }
+
+    @Override
+    public void stop()
+    {
+        super.stop();
+
+        _consumer.terminate();
+        _producer.terminate();
+        _dataConsumer.terminate();
+        _dataProducer.terminate();
+
+        try
+        {
+            _streamChannel.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: report the error? it doesn't really matter
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -1,7 +1,7 @@
 package syncjam.net.client;
 
-import syncjam.SongUtilities;
 import syncjam.interfaces.CommandQueue;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.net.SocketConsumer;
 
 import java.io.IOException;
@@ -13,14 +13,16 @@ import java.io.InputStream;
  */
 public class ClientConsumer extends SocketConsumer
 {
-    public ClientConsumer(InputStream inStream, SongUtilities songUtils)
+    protected final CommandQueue _cmdQueue;
+
+    public ClientConsumer(InputStream inStream, ServiceContainer services)
     {
-        super(inStream, songUtils);
+        super(inStream);
+        _cmdQueue = services.getService(CommandQueue.class);
     }
 
     public void run()
     {
-        CommandQueue cmdQueue = _songUtils.getCommandQueue();
         byte[] commandBuffer = new byte[3];
 
         while (!terminated)
@@ -30,10 +32,11 @@ public class ClientConsumer extends SocketConsumer
                 _inputStream.read(commandBuffer);
                 String command = new String(commandBuffer);
                 System.out.println("consumed command: " + command);
-                cmdQueue.executeCommand(command);
+                _cmdQueue.executeCommand(command);
             }
             catch (IOException e)
             {
+                // TODO: log error
                 break;
             }
         }

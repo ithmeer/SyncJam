@@ -52,6 +52,9 @@ public class ConcurrentPlayController implements PlayController
     @Override
     public synchronized void playToggle(boolean state)
     {
+        if (currentSong == null)
+            return;
+
         if(state)
         {
             _audioController.play();

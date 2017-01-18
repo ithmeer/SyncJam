@@ -1,7 +1,7 @@
 package syncjam.ui.buttons;
 
-import syncjam.SongUtilities;
 import syncjam.interfaces.PlayController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
@@ -10,22 +10,21 @@ public class PlayButton extends ButtonUI
 {
     private final PlayController _player;
 
-    public PlayButton(int w, int h, SongUtilities songUtils)
+    public PlayButton(int w, int h, ServiceContainer services)
     {
-        super(w, h, songUtils);
-        _player = songUtils.getPlayController();
+        super(w, h);
+        _player = services.getService(PlayController.class);
     }
 
-    public PlayButton(int w, int h, Color c, SongUtilities songUtils)
+    public PlayButton(int w, int h, Color c, ServiceContainer services)
     {
-        super(w, h, c, songUtils);
-        _player = songUtils.getPlayController();
+        super(w, h, c);
+        _player = services.getService(PlayController.class);
     }
 
     protected void clicked()
     {
-        if(_player.getSong() != null)
-            _player.playToggle();
+        _player.playToggle();
     }
 
     public void paintComponent(Graphics g)

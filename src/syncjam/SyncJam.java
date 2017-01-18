@@ -1,9 +1,6 @@
 package syncjam;
 
-import syncjam.interfaces.AudioController;
-import syncjam.interfaces.CommandQueue;
-import syncjam.interfaces.PlayController;
-import syncjam.interfaces.Playlist;
+import syncjam.interfaces.*;
 import syncjam.net.ConcurrentCommandQueue;
 import syncjam.net.ConcurrentSongQueue;
 import syncjam.net.SocketNetworkController;
@@ -28,16 +25,25 @@ public class SyncJam
         ConcurrentAudioController audioController = new ConcurrentAudioController(playlist, playCon,
                                                                                   cmdQueue);
         ConcurrentSongQueue songQueue = new ConcurrentSongQueue();
+
         playCon.setAudioController(audioController);
         playCon.setCommandQueue(cmdQueue);
         playCon.setPlaylist(playlist);
         playlist.setCommandQueue(cmdQueue);
-        SongUtilities songUtils = new SongUtilities(audioController, songQueue, cmdQueue, playCon,
-                                                    playlist);
-        SocketNetworkController networkCon = new SocketNetworkController(songUtils);
+
+        SyncJamServiceContainer servCon = new SyncJamServiceContainer();
+        servCon.addService(PlayController.class, playCon);
+        servCon.addService(Playlist.class, playlist);
+        servCon.addService(CommandQueue.class, cmdQueue);
+        servCon.addService(SongQueue.class, songQueue);
+        servCon.addService(AudioController.class, audioController);
+
+        SocketNetworkController networkCon = new SocketNetworkController(servCon);
         audioController.setNetworkController(networkCon);
 
-        mainWindow = new SyncJamUI(songUtils, networkCon);
+        servCon.addService(NetworkController.class, networkCon);
+
+        mainWindow = new SyncJamUI(servCon);
 
         Timer timer = new Timer(1000/120, new ActionListener()
         {

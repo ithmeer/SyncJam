@@ -1,6 +1,5 @@
 package syncjam.ui.buttons.base;
 
-import syncjam.SongUtilities;
 import syncjam.ui.Colors;
 
 import javax.swing.*;
@@ -13,14 +12,13 @@ public abstract class ButtonUI extends JButton implements ActionListener
 {
     private int myW, myH;
     private Color background;
-    protected final SongUtilities songUtilities;
 
-    public ButtonUI(int w, int h, SongUtilities utils)
+    public ButtonUI(int w, int h)
     {
-        this(w, h, Colors.c_Background1, utils);
+        this(w, h, Colors.c_Background1);
     }
 
-    public ButtonUI(int w, int h, Color bg, SongUtilities utils)
+    public ButtonUI(int w, int h, Color bg)
     {
         myW = w;
         myH = h;
@@ -37,7 +35,6 @@ public abstract class ButtonUI extends JButton implements ActionListener
         this.setBackground(background);
 
         background = bg;
-        songUtilities = utils;
     }
 
     public int getW() { return myW; }

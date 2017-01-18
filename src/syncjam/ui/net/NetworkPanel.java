@@ -1,7 +1,7 @@
 package syncjam.ui.net;
 
-import syncjam.SongUtilities;
 import syncjam.interfaces.NetworkController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.ButtonUI;
 
@@ -16,18 +16,18 @@ public class NetworkPanel extends JPanel
     private final ServerList serverList;
     private final JPanel mainPanel;
     private JPanel visiblePanel;
-    private NetworkController network;
+    private final NetworkController _network;
     private ButtonUI connectButton, hostButton, addButton, removeButton;
 
-    public NetworkPanel(NetworkController networkController)
+    public NetworkPanel(ServiceContainer services)
     {
+        _network = services.getService(NetworkController.class);
+
         this.setBackground(Colors.c_Background1);
         mainPanel = new JPanel();
         mainPanel.setBackground(Colors.c_Background1);
         this.add(mainPanel);
         visiblePanel = mainPanel;
-
-
 
         GridBagConstraints constraints = new GridBagConstraints();
         mainPanel.setLayout(new GridBagLayout());
@@ -52,7 +52,7 @@ public class NetworkPanel extends JPanel
         constraints.weighty = .5;
         mainPanel.add(serverList, constraints);
 
-        connectButton = new ButtonUI(0, 0, Colors.c_Background2, null) {
+        connectButton = new ButtonUI(0, 0, Colors.c_Background2) {
             @Override
             protected void clicked() { connect(); }
         };
@@ -67,7 +67,7 @@ public class NetworkPanel extends JPanel
         mainPanel.add(connectButton, constraints);
 
 
-        hostButton = new ButtonUI(0, 0, Colors.c_Background2, null) {
+        hostButton = new ButtonUI(0, 0, Colors.c_Background2) {
             @Override
             protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this)); }
         };
@@ -76,7 +76,7 @@ public class NetworkPanel extends JPanel
         constraints.gridy = 3;
         mainPanel.add(hostButton, constraints);
 
-        addButton = new ButtonUI(0, 0, Colors.c_Background2, null) {
+        addButton = new ButtonUI(0, 0, Colors.c_Background2) {
             @Override
             protected void clicked() {
                 openPanel(new AddServerPanel(NetworkPanel.this));
@@ -87,7 +87,7 @@ public class NetworkPanel extends JPanel
         constraints.gridy = 4;
         mainPanel.add(addButton, constraints);
 
-        removeButton = new ButtonUI(0, 0, Colors.c_Background2, null) {
+        removeButton = new ButtonUI(0, 0, Colors.c_Background2) {
             @Override
             protected void clicked() { serverList.removeSelected(); }
         };
@@ -118,12 +118,12 @@ public class NetworkPanel extends JPanel
 
     public void connect()
     {
-        serverList.connect(network);
+        serverList.connect(_network);
     }
 
     public void hostServer(String name, int port, String password)
     {
-        network.startServer(port, password);
+        _network.startServer(port, password);
         connectButton.setEnabled(false);
         hostButton.setEnabled(false);
     }

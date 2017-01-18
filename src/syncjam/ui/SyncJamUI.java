@@ -1,7 +1,6 @@
 package syncjam.ui;
 
-import syncjam.SongUtilities;
-import syncjam.net.SocketNetworkController;
+import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
@@ -25,7 +24,7 @@ public class SyncJamUI implements KeyListener
 
     private NetworkPanel networkPanel = null;
 
-    public SyncJamUI(SongUtilities songUtils, SocketNetworkController networkCon)
+    public SyncJamUI(ServiceContainer services)
     {
         window = new WindowObject(360, 500);
 
@@ -60,7 +59,7 @@ public class SyncJamUI implements KeyListener
 
         //Player Components
 
-        playerUI = new InfoUI(songUtils);
+        playerUI = new InfoUI(services);
         constraints = setGrid(0, 0, 1.0f, 0.0f, 0, 114);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -68,14 +67,14 @@ public class SyncJamUI implements KeyListener
 
         playerPanel.add(playerUI, constraints);
 
-        controlUI = new ControlUI(songUtils);
+        controlUI = new ControlUI(services);
         constraints = setGrid(0, 1, 1.0f, 0.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
 
         playerPanel.add(controlUI, constraints);
 
-        songPosition = new SongPositionSlider(songUtils);
+        songPosition = new SongPositionSlider(services);
         constraints = setGrid(0, 2, 1.0f, 0.0f, 0, 28);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
@@ -83,7 +82,7 @@ public class SyncJamUI implements KeyListener
 
         playerPanel.add(songPosition, constraints);
 
-        playlistUI = new PlaylistUI(songUtils);
+        playlistUI = new PlaylistUI(services);
         constraints = setGrid(0, 3, 1.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_END;
         constraints.fill = GridBagConstraints.BOTH;
@@ -101,7 +100,7 @@ public class SyncJamUI implements KeyListener
         tray.setBackground(Colors.c_Background1);
 
 
-        networkPanel = new NetworkPanel(networkCon);
+        networkPanel = new NetworkPanel(services);
         tray.add(networkPanel);
         networkPanel.validate();
 
@@ -134,12 +133,12 @@ public class SyncJamUI implements KeyListener
 
         //Network Indicator
         constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
-        NetworkIndicator indicator = new NetworkIndicator(networkCon);
+        NetworkIndicator indicator = new NetworkIndicator(services);
         sideBarItems.add(indicator, constraints);
 
         //Network Button
         constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
-        TextButton networkButton = new TextButton("C", 12, 12, null){
+        TextButton networkButton = new TextButton("C", 12, 12){
             protected void clicked() { togglePanel(networkPanel); }
         };
 
@@ -149,7 +148,7 @@ public class SyncJamUI implements KeyListener
         constraints = setGrid(0, 2, 0.0f, 0.0f, 12, 150);
         constraints.fill = GridBagConstraints.NONE;
 
-        sideBarItems.add(new VolumeSlider(50, 100, songUtils), constraints);
+        sideBarItems.add(new VolumeSlider(50, 100, services), constraints);
 
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
