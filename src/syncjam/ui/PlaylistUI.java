@@ -54,7 +54,6 @@ public class PlaylistUI extends ItemList
                 _playlist.addAll(songs);
 
                 scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
-                buildSplitArray();
             }
         });
     }
@@ -111,6 +110,8 @@ public class PlaylistUI extends ItemList
                 lastDropIndex = itemDropIndex;
             }
         }
+        else
+            buildSplitArray();
     }
 
     //====    DRAW SONG     ====
@@ -393,7 +394,6 @@ public class PlaylistUI extends ItemList
     {
         _playlist.remove(index);
         updateScrollbar();
-        buildSplitArray();
     }
     public void clear()
     {
@@ -413,7 +413,6 @@ public class PlaylistUI extends ItemList
 
             if(itemDragIndex != itemDropIndex-1)
                 _playlist.moveSong(itemDragIndex, itemDropIndex);
-            buildSplitArray();
             itemDragIndex  = -1;
             itemDropIndex  = -1;
             itemHoverIndex = -1;

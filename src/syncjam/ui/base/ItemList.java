@@ -69,6 +69,8 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
         if (itemDragIndex >= 0)
             scrollNearEdges();
+        else
+            buildSplitArray();
 
         if(!enableCustomDrawing)
         {
@@ -127,7 +129,9 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
         if (itemDragIndex != -1 && i >= itemDragIndex)
             yValue -= itemHeight;
 
-        return yValue + splits[i];
+        if(splits.length > i)
+            yValue += splits[i];
+        return yValue;
     }
 
     public int getTop() { return yOffset; }
@@ -159,10 +163,12 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     protected void updateSplit(int i)
     {
-        if (itemDropIndex != -1 && i >= itemDropIndex)
-            splits[i] = slerp(splits[i], itemHeight);
-        else
-            splits[i] = slerp(splits[i], 0);
+        if(splits.length > i) {
+            if (itemDropIndex != -1 && i >= itemDropIndex)
+                splits[i] = slerp(splits[i], itemHeight);
+            else
+                splits[i] = slerp(splits[i], 0);
+        }
     }
 
     private void buildSplitArray()
@@ -211,13 +217,11 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     {
         items.add(i);
         updateScrollbar();
-        buildSplitArray();
     }
     public void remove(int index)
     {
         items.remove(index);
         updateScrollbar();
-        buildSplitArray();
     }
     public Item getItem(int index) { return items.get(index); }
 
@@ -248,7 +252,6 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
                     itemDropIndex--;
                 items.add(itemDropIndex, o);
             }
-            buildSplitArray();
             splits[itemDragIndex] = 0;
             itemDragIndex  = -1;
             itemDropIndex  = -1;
