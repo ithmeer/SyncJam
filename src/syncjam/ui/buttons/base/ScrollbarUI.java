@@ -11,7 +11,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     protected int myW, myH;
     private int inset = 5;
     protected int value = 0;
-    protected int max = 0;
+    protected int rawmax = 100, max = 100;
 
     private int pos = 0, length = 0, target = value;
 
@@ -45,7 +45,11 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
     public int getValue() { return value; }
 
-    public void setMaxValue(int n) { max = n - getHeight(); }
+    public void setMaxValue(int n)
+    {
+        rawmax = n;
+        max = rawmax - getHeight();
+    }
 
     public int getMaxValue() { return max; }
 
@@ -90,12 +94,6 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             }
             else
                 g.setColor(Colors.c_Foreground2);
-
-            //this is how i was doing it before, its so bad
-            //double scaleEquation = Math.pow(myH - max,3) / (myH + max);
-            //length = (int)(scaleEquation / (myH*2)) + myH/2;
-            //length = Math.max(length, 30);
-            //length = Math.min(length, myH);
 
             length = Math.max(20, (int)(myH * viewRatio));
 
@@ -149,6 +147,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         //update with JPanel size changes
         int pu = myH; //pre-update value
         myH = (int)getSize().getHeight() - inset*2;
+        max = rawmax - getHeight();
 
         int temp = (pu-myH); //the change in size, positive or negative (i think they're reversed? idk)
 

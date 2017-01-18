@@ -1,5 +1,9 @@
 package syncjam.ui;
 
+import syncjam.ConnectionStatus;
+import syncjam.interfaces.NetworkController;
+import syncjam.interfaces.ServiceContainer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -9,7 +13,8 @@ import java.awt.event.WindowEvent;
 public class WindowObject extends JFrame
 {
     public boolean Resizable = false;
-    public WindowObject(int minW, int minH, boolean resizable)
+    public NetworkController _network;
+    public WindowObject(int minW, int minH, boolean resizable, ServiceContainer services)
     {
         this.setTitle("SyncJam");
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -19,6 +24,7 @@ public class WindowObject extends JFrame
         this.setMinimumSize(new Dimension(minW, minH));
         this.setPreferredSize(new Dimension(minW + 20, minH + 150));
         Resizable = resizable;
+        _network = services.getService(NetworkController.class);
 
         this.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){
@@ -28,9 +34,9 @@ public class WindowObject extends JFrame
         });
     }
 
-    public WindowObject(int minW, int minH)
+    public WindowObject(int minW, int minH, ServiceContainer services)
     {
-        this(minW, minH, true);
+        this(minW, minH, true, services);
     }
 
     public void open()
@@ -43,6 +49,7 @@ public class WindowObject extends JFrame
 
     private void close()
     {
-        // TODO: 6/9/2016 Disconnect from server, etc. 
+        if(_network.getStatus() != ConnectionStatus.Unconnected)
+            _network.disconnect();
     }
 }

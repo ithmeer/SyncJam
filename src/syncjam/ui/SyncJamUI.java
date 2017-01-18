@@ -1,5 +1,6 @@
 package syncjam.ui;
 
+import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
@@ -26,7 +27,7 @@ public class SyncJamUI implements KeyListener
 
     public SyncJamUI(ServiceContainer services)
     {
-        window = new WindowObject(360, 500);
+        window = new WindowObject(360, 500, services);
 
         //= = = = = = = = = = Window Stuff = = = = = = = = = =//
 

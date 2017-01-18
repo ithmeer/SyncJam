@@ -11,10 +11,7 @@ import java.awt.*;
 public class NetworkIndicator extends JPanel
 {
     private NetworkController _network;
-    public NetworkIndicator(ServiceContainer services)
-    {
-        _network = services.getService(NetworkController.class);
-    }
+    public NetworkIndicator(ServiceContainer services) { _network = services.getService(NetworkController.class); }
     @Override
     protected void paintComponent(Graphics g)
     {

@@ -381,10 +381,7 @@ public class PlaylistUI extends ItemList
     }
 
     @Override
-    protected void updateScrollbar()
-    {
-        scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
-    }
+    protected void updateScrollbar() { scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2); }
 
     private void buildSplitArray()
     {
