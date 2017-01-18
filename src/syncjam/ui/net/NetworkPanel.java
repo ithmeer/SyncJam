@@ -65,6 +65,7 @@ public class NetworkPanel extends JPanel
         constraints.weightx = 1;
         constraints.weighty = .5;
         mainPanel.add(connectButton, constraints);
+        //connectButton.setEnabled(false);
 
 
         hostButton = new ButtonUI(0, 0, Colors.c_Background2) {

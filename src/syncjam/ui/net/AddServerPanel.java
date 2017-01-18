@@ -62,7 +62,7 @@ public class AddServerPanel extends JPanel
                 int port = Integer.parseInt(fields[2].getText());
                 String password = fields[3].getText();
 
-                System.out.println("Connecting: " + address + "\n" + port + "\n" + password);
+                System.out.println("Adding: " + address + "\n" + port + "\n" + password);
                 networkPanel.addServer(name, address, port, password);
                 networkPanel.back();
             }
