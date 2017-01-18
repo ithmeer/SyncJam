@@ -208,7 +208,6 @@ public class SocketNetworkController implements NetworkController
                     {
                         Socket clientSock = serv.accept();
                         InetAddress info = clientSock.getInetAddress();
-                        setStatus(ConnectionStatus.Hosted);
                         System.out.printf("Connection from %s (%s)%n",
                                           info.getHostName(), info.getHostAddress());
 
@@ -241,6 +240,7 @@ public class SocketNetworkController implements NetworkController
         };
 
         _exec.execute(_gateKeeper);
+        setStatus(ConnectionStatus.Hosted);
     }
 
     /**
