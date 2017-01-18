@@ -207,6 +207,7 @@ public class SocketNetworkController implements NetworkController
                     if (_password.isEmpty() || password.equals(_password))
                     {
                         System.out.println("password accepted");
+                        _songUtils.getAudioController().addClient(cs);
                         cs.sendCommand(ackMessage);
                         cs.start();
                         _clients.add(cs);
