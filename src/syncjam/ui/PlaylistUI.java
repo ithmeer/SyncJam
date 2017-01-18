@@ -22,6 +22,7 @@ public class PlaylistUI extends ItemList
     private final Playlist playlist;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
+    private int prog = 0;
 
     public PlaylistUI(final SongUtilities songUtils)
     {
@@ -29,7 +30,7 @@ public class PlaylistUI extends ItemList
         super.setBackground(Colors.c_Background2);
         this.setEnableCustomDrawing(true);
 
-        Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.c_Highlight);
+        final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.c_Highlight);
         new FileDrop(this, fileDropBorder, new FileDrop.Listener()
         {
             @Override
@@ -116,6 +117,7 @@ public class PlaylistUI extends ItemList
     private void drawSong(Graphics g, int x, int y, int index, Song song)
     {
         checkHoverIndex(index);
+        drawSongProgress(g,x,y, song, index);
         drawSongNum(   g, x, y, index);
         drawAlbumArt(  g, x, y, song, index);
         drawArtistName(g, x, y, song);
@@ -125,8 +127,39 @@ public class PlaylistUI extends ItemList
         if(index == playlist.getCurrentSongIndex())
         {
             g.setColor(Colors.c_Highlight);
-            g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight);
-            g.drawRect(x+1,y+1, getWidth() - scrollbar.getWidth() - xOffset - 5, itemHeight-2);
+            g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 1, itemHeight);
+            g.drawRect(x+1,y+1, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight-2);
+        }
+    }
+
+    //====  DRAW DOWNLOAD PROGRESS  ====
+
+    private void drawSongProgress(Graphics g, int x, int y, Song s, int i)
+    {
+
+        int progress = 100;
+        if(i == 3)
+        {
+            if(prog < 100) prog++;
+            progress = prog;
+        }
+
+        if(progress < 100)
+        {
+            g.setColor(Colors.c_Background1);
+            g.fillRect(x, y, getWidth() - scrollbar.getWidth(), itemHeight);
+
+            if(progress > 0)
+            {
+                g.setColor(Colors.c_Highlight);
+
+                float progWidth = (float)progress/100 * (getWidth() - scrollbar.getWidth());
+
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
+                g2.fillRect(x, y, (int)progWidth, itemHeight);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+            }
         }
     }
 
@@ -352,14 +385,28 @@ public class PlaylistUI extends ItemList
         }
     }
 
+    @Override
+    protected void updateScrollbar()
+    {
+        scrollbar.setMaxValue(playlist.size() * itemHeight + yOffset*2);
+    }
+
     private void buildSplitArray()
     {
         splits = new int[playlist.size()+1];
     }
 
+    @Override
+    public void remove(int index)
+    {
+        playlist.remove(index);
+        updateScrollbar();
+        buildSplitArray();
+    }
     public void clear()
     {
         //playlist.clear();
+        //updateScrollbar();
     }
 
     //====  LISTENERS  ====
@@ -386,7 +433,7 @@ public class PlaylistUI extends ItemList
             if (artHoverIndex >= 0)
                 playlist.setCurrentSong(artHoverIndex);
             else if (removeHoverIndex >= 0)
-                playlist.remove(removeHoverIndex);
+                remove(removeHoverIndex);
         }
     }
 
@@ -403,7 +450,8 @@ public class PlaylistUI extends ItemList
     {
         mouseX = e.getX();
         mouseY = e.getY();
-        if(isDraggingEnabled())
+        double dist = Math.hypot(clickStartX-mouseX, clickStartY-mouseY);
+        if(isDraggingEnabled() && dist > 8)
         {
             if (itemDragIndex == -1 &&
                     itemHoverIndex != -1 &&

@@ -1,10 +1,12 @@
 package syncjam.ui;
 
 import syncjam.SongUtilities;
+import syncjam.net.SocketNetworkController;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
+import syncjam.ui.net.NetworkIndicator;
 import syncjam.ui.net.NetworkPanel;
 
 import javax.swing.*;
@@ -23,7 +25,7 @@ public class SyncJamUI implements KeyListener
 
     private NetworkPanel networkPanel = null;
 
-    public SyncJamUI(SongUtilities songUtils)
+    public SyncJamUI(SongUtilities songUtils, SocketNetworkController networkCon)
     {
         window = new WindowObject(360, 500);
 
@@ -99,7 +101,7 @@ public class SyncJamUI implements KeyListener
         tray.setBackground(Colors.c_Background1);
 
 
-        networkPanel = new NetworkPanel(songUtils);
+        networkPanel = new NetworkPanel(networkCon);
         tray.add(networkPanel);
         networkPanel.validate();
 
@@ -128,10 +130,15 @@ public class SyncJamUI implements KeyListener
 
 
         //Components
+        constraints.anchor = GridBagConstraints.PAGE_START;
+
+        //Network Indicator
+        constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
+        NetworkIndicator indicator = new NetworkIndicator(networkCon);
+        sideBarItems.add(indicator, constraints);
 
         //Network Button
-        constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
-        constraints.anchor = GridBagConstraints.PAGE_START;
+        constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
         TextButton networkButton = new TextButton("C", 12, 12, null){
             protected void clicked() { togglePanel(networkPanel); }
         };
@@ -139,8 +146,7 @@ public class SyncJamUI implements KeyListener
         sideBarItems.add(networkButton, constraints);
 
         //Volume Slider
-        constraints = setGrid(0, 1, 0.0f, 0.0f, 12, 150);
-        constraints.anchor = GridBagConstraints.PAGE_START;
+        constraints = setGrid(0, 2, 0.0f, 0.0f, 12, 150);
         constraints.fill = GridBagConstraints.NONE;
 
         sideBarItems.add(new VolumeSlider(50, 100, songUtils), constraints);
@@ -192,13 +198,13 @@ public class SyncJamUI implements KeyListener
         if(networkPanel.isVisible())
         {
             window.setSize(window.getWidth() - pWidth, window.getHeight());
-            //window.setMinimumSize(new Dimension((int)min.getWidth() - pWidth, (int)min.getHeight()));
+            window.setMinimumSize(new Dimension((int)min.getWidth() - pWidth, (int)min.getHeight()));
             networkPanel.setVisible(false);
         }
         else if(!networkPanel.isVisible())
         {
             window.setSize(window.getWidth() + pWidth, window.getHeight());
-            //window.setMinimumSize(new Dimension((int)min.getWidth() + pWidth, (int)min.getHeight()));
+            window.setMinimumSize(new Dimension((int)min.getWidth() + pWidth, (int)min.getHeight()));
             networkPanel.setVisible(true);
         }
         return networkPanel.isVisible();

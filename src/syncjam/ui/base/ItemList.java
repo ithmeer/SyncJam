@@ -15,6 +15,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 {
     private int myW, myH;
     protected int mouseX = -1, mouseY = -1;
+    protected int clickStartX, clickStartY;
 
     protected final int xOffset = 4, yOffset = 6;
 
@@ -71,7 +72,6 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
         if(!enableCustomDrawing)
         {
-            scrollbar.setMaxValue(items.size() * itemHeight + yOffset*2);
             for(int i = 0; i < items.size(); i++)
             {
                 if(itemDragIndex == i)
@@ -203,14 +203,20 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     //====  LIST METHODS ====
 
+    protected void updateScrollbar()
+    {
+        scrollbar.setMaxValue(items.size() * itemHeight + yOffset*2);
+    }
     public void add(Item i)
     {
         items.add(i);
+        updateScrollbar();
         buildSplitArray();
     }
     public void remove(int index)
     {
         items.remove(index);
+        updateScrollbar();
         buildSplitArray();
     }
     public Item getItem(int index) { return items.get(index); }
@@ -221,7 +227,11 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     public void mouseClicked(MouseEvent e){}
 
     @Override
-    public void mousePressed(MouseEvent e){}
+    public void mousePressed(MouseEvent e)
+    {
+        clickStartX = e.getX();
+        clickStartY = e.getY();
+    }
 
     @Override
     public void mouseReleased(MouseEvent e)
@@ -263,7 +273,8 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     {
         mouseX = e.getX();
         mouseY = e.getY();
-        if(isDraggingEnabled())
+        double dist = Math.hypot(clickStartX-mouseX, clickStartY-mouseY);
+        if(isDraggingEnabled() && dist > 8)
         {
             if(itemDragIndex == -1 && itemHoverIndex != -1)
             {

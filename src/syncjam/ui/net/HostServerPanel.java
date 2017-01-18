@@ -1,22 +1,18 @@
 package syncjam.ui.net;
 
-import syncjam.SongUtilities;
-import syncjam.SyncJamException;
 import syncjam.ui.Colors;
-import syncjam.ui.base.ItemList;
-import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class AddServerPanel extends JPanel
+public class HostServerPanel extends JPanel
 {
     private final String defaultPort = "9982";
     //private final NetTextField addressField, portField, passField;
     private final NetTextField[] fields;
 
 
-    public AddServerPanel(final NetworkPanel networkPanel) {
+    public HostServerPanel(final NetworkPanel networkPanel) {
         super();
 
         this.setBackground(Colors.c_Background1);
@@ -27,7 +23,7 @@ public class AddServerPanel extends JPanel
         NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
         this.add(title);
 
-        String[] labels = {"Name", "IP Address", "Port", "Password"};
+        String[] labels = {"Name", "Port", "Password"};
         int numPairs = labels.length;
         fields = new NetTextField[numPairs];
 
@@ -43,7 +39,7 @@ public class AddServerPanel extends JPanel
             fields[i] = textField;
         }
 
-        fields[2].setText(defaultPort);
+        fields[1].setText(defaultPort);
 
         //Lay out the panel.
         makeCompactGrid(p1,
@@ -57,16 +53,15 @@ public class AddServerPanel extends JPanel
         JPanel p2 = new JPanel(new SpringLayout());
         p2.setBackground(Colors.c_Background1);
 
-        p2.add(new NetButton("Add") {
+        p2.add(new NetButton("Host") {
             @Override
             protected void clicked() {
                 String name = fields[0].getText();
-                String address = fields[1].getText();
-                int port = Integer.parseInt(fields[2].getText());
-                String password = fields[3].getText();
+                int port = Integer.parseInt(fields[1].getText());
+                String password = fields[2].getText();
 
-                System.out.println("Connecting: " + address + "\n" + port + "\n" + password);
-                networkPanel.addServer(name, address, port, password);
+                System.out.println("Hosting: " + port + "\n" + password);
+                networkPanel.hostServer(name, port, password);
                 networkPanel.back();
             }
         });
@@ -148,40 +143,3 @@ public class AddServerPanel extends JPanel
     }
 }
 
-class NetTextField extends TextField
-{
-    protected NetTextField(int length, String default_text)
-    {
-        setBackground(Colors.c_Background1);
-        setForeground(Colors.c_Foreground1);
-        setColumns(length);
-        setText(default_text);
-    }
-}
-class NetLabel extends JLabel
-{
-    protected NetLabel(String text)
-    {
-        super(text);
-        setForeground(Colors.c_Foreground1);
-    }
-    protected NetLabel(String text, int trailing)
-    {
-        super(text, trailing);
-        setForeground(Colors.c_Foreground1);
-    }
-}
-class NetButton extends ButtonUI
-{
-    protected NetButton(String text)
-    {
-        super(0, 0, Colors.c_Background2, null);
-        setText(text);
-        setMargin(new Insets(0,0,0,0));
-    }
-    @Override
-    protected void clicked()
-    {
-
-    }
-}

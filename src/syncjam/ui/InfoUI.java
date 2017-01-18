@@ -86,7 +86,7 @@ public class InfoUI extends JPanel
         }
         else
         {
-            while(f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' ')
+            while(str.length() > 0 && f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' ')
             {
                 str = str.substring(0,str.length()-1);
             }

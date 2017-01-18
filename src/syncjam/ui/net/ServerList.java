@@ -1,5 +1,6 @@
 package syncjam.ui.net;
 
+import syncjam.interfaces.NetworkController;
 import syncjam.ui.Colors;
 import syncjam.ui.base.ItemList;
 
@@ -13,6 +14,7 @@ import java.awt.event.MouseEvent;
 public class ServerList extends ItemList<ServerList.ServerItem>
 {
     private ServerItem selectedItem = null;
+    private ServerItem connectedServer = null;
 
     public ServerList()
     {
@@ -32,16 +34,19 @@ public class ServerList extends ItemList<ServerList.ServerItem>
     {
         super.drawItem(item, g, x, y);
 
-        Colors.setFont(g, 14);
-        g.setColor(Colors.c_Foreground1);
-        if(item == selectedItem)
+        boolean hovering = itemHoverIndex > -1 && item == getItem(itemHoverIndex);
+
+
+        g.setColor(Colors.c_Foreground2);
+        if(item == connectedServer)
             g.setColor(Colors.c_Highlight);
+        else if(item == selectedItem || hovering)
+            g.setColor(Colors.c_Foreground1);
+
+        Colors.setFont(g, 14);
         g.drawString(item.getServerName(), x + 8, y + itemHeight/2 - 8);
 
         Colors.setFont(g, 12);
-        g.setColor(Colors.c_Foreground2);
-        if(item == selectedItem)
-            g.setColor(Colors.c_Highlight);
         g.drawString(item.getIpAddress(),  x + 8, y + itemHeight/2 + 8);
     }
 
@@ -50,6 +55,18 @@ public class ServerList extends ItemList<ServerList.ServerItem>
     {
         if(itemHoverIndex > -1)
             selectedItem  = getItem(itemHoverIndex);
+    }
+
+
+    public boolean connect(NetworkController network)
+    {
+        boolean connected = false;
+
+        ServerItem server = selectedItem;
+        network.connectToServer(server.getIpAddress(), server.getPort(), server.getPassword());
+        connectedServer = server;
+
+        return connected;
     }
 
     public int getSelectedItemIndex()
@@ -64,11 +81,17 @@ public class ServerList extends ItemList<ServerList.ServerItem>
         int index = getSelectedItemIndex();
         if(index > -1)
         {
+            if(items.size() > 1)
+            {
+                if (index + 1 < items.size())
+                    selectedItem = getItem(index+1);
+                else if (index - 1 >= 0)
+                    selectedItem = getItem(index-1);
+            }
+            else selectedItem = null;
             remove(index);
-            selectedItem = null;
         }
     }
-
     //=====================================
 
     class ServerItem

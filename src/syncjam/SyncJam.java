@@ -37,9 +37,9 @@ public class SyncJam
         SocketNetworkController networkCon = new SocketNetworkController(songUtils);
         audioController.setNetworkController(networkCon);
 
-        mainWindow = new SyncJamUI(songUtils);
+        mainWindow = new SyncJamUI(songUtils, networkCon);
 
-        Timer timer = new Timer(1000/60, new ActionListener()
+        Timer timer = new Timer(1000/120, new ActionListener()
         {
             public void actionPerformed(ActionEvent event)
             {
