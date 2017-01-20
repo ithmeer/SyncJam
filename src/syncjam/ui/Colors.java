@@ -25,12 +25,25 @@ public class Colors
             new Color(44, 130, 226), //Highlight
             new Color(226, 82, 61),  //Highlight2
     };
-    public static Color c_Background1 = defaultColors[0];
-    public static Color c_Background2 = defaultColors[1];
-    public static Color c_Foreground1 = defaultColors[2];
-    public static Color c_Foreground2 = defaultColors[3];
-    public static Color c_Highlight   = defaultColors[4];
-    public static Color c_Highlight2  = defaultColors[5];
+    private static Color[] currentColors = defaultColors;
+
+    public static Color c_Background1 = currentColors[0];
+    public static Color c_Background2 = currentColors[1];
+    public static Color c_Foreground1 = currentColors[2];
+    public static Color c_Foreground2 = currentColors[3];
+    public static Color c_Highlight   = currentColors[4];
+    public static Color c_Highlight2  = currentColors[5];
+
+    public static void setColorScheme(Color[] colors)
+    {
+        if(colors.length == defaultColors.length)
+        {
+            for(int i = 0; i < colors.length; i++)
+            {
+                currentColors[i] = colors[i];
+            }
+        }
+    }
 
     public static void setFont(Graphics g, int size)
     {

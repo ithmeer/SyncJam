@@ -175,7 +175,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void scrollEvent(MouseWheelEvent e)
     {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            int sc = value + e.getUnitsToScroll() * getHeight() / 5;
+            int sc = target + e.getUnitsToScroll() * getHeight() / 6;
 
             setTargetValue(sc);
             scrolling = true;

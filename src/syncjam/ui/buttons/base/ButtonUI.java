@@ -76,11 +76,6 @@ public abstract class ButtonUI extends JButton implements ActionListener
             g.setColor(Colors.c_Foreground2);
             setForeground(Colors.c_Foreground2);
         }
-        if(!isEnabled())
-        {
-            g.setColor(Colors.c_Background1);
-            setForeground(Colors.c_Background1);
-        }
     }
 }
 class ButtonUIStyle extends MetalButtonUI

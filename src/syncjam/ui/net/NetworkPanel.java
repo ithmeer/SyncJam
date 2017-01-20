@@ -1,5 +1,6 @@
 package syncjam.ui.net;
 
+import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
@@ -135,21 +136,38 @@ public class NetworkPanel extends JPanel
     public void connect()
     {
         serverList.connect(_network);
-        connectButton.setEnabled(false);
-        disconnectButton.setEnabled(true);
+        statusEnableButtons();
     }
     public void disconnect()
     {
         _network.disconnect();
-        disconnectButton.setEnabled(false);
+        statusEnableButtons();
     }
 
-    public void hostServer(String name, int port, String password)
+    public void hostServer(int port, String password)
     {
         _network.startServer(port, password);
-        connectButton.setEnabled(false);
-        disconnectButton.setEnabled(true);
-        hostButton.setEnabled(false);
+        statusEnableButtons();
+    }
+
+    private void statusEnableButtons()
+    {
+        ConnectionStatus status = _network.getStatus();
+        switch (status)
+        {
+            case Hosted:
+            case Connected:
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+                hostButton.setEnabled(false);
+                break;
+            case Unconnected:
+            case Disconnected:
+                connectButton.setEnabled(true);
+                disconnectButton.setEnabled(false);
+                hostButton.setEnabled(true);
+                break;
+        }
     }
 
     public void paintComponent(Graphics g)

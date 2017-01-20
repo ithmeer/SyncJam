@@ -83,14 +83,14 @@ public class AddServerPanel extends JPanel
     }
 
 
-    private SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
+    protected SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
     {
         SpringLayout layout = (SpringLayout) parent.getLayout();
         Component c = parent.getComponent(row * cols + col);
         return layout.getConstraints(c);
     }
 
-    private void makeCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
+    protected void makeCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
                                  int xPad, int yPad)
     {
         SpringLayout layout;

@@ -23,7 +23,7 @@ public class HostServerPanel extends JPanel
         NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
         this.add(title);
 
-        String[] labels = {"Name", "Port", "Password"};
+        String[] labels = {"Password", "Port"};
         int numPairs = labels.length;
         fields = new NetTextField[numPairs];
 
@@ -56,12 +56,11 @@ public class HostServerPanel extends JPanel
         p2.add(new NetButton("Host") {
             @Override
             protected void clicked() {
-                String name = fields[0].getText();
+                String password = fields[0].getText();
                 int port = Integer.parseInt(fields[1].getText());
-                String password = fields[2].getText();
 
                 System.out.println("Hosting: " + port + "\n" + password);
-                networkPanel.hostServer(name, port, password);
+                networkPanel.hostServer(port, password);
                 networkPanel.back();
             }
         });
