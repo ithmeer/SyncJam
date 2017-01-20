@@ -21,7 +21,7 @@ public class InfoUI extends JPanel
 
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
-        setBackground(Colors.c_Background1);
+        setBackground(Colors.get(Colors.Background1));
         _playCon = services.getService(PlayController.class);
     }
 
@@ -43,7 +43,7 @@ public class InfoUI extends JPanel
 
     private void drawAlbumArt(Graphics g, Song song)
     {
-        g.setColor(Colors.c_Highlight);
+        g.setColor(Colors.get(Colors.Highlight));
         g.drawRect(0, 0, aaWidth + 3, aaHeight + 3);
         g.drawRect(1, 1, aaWidth + 1, aaHeight + 1);
         if (song.getAlbumArt() != null)
@@ -67,11 +67,11 @@ public class InfoUI extends JPanel
                 g.getFontMetrics(),
                 getWidth()/2 - aaWidth/2 - hOffset);
 
-        g.setColor(Colors.c_Foreground1);
+        g.setColor(Colors.get(Colors.Foreground1));
         Colors.setFont(g, 22);
         g.drawString(songName, aaWidth + hOffset, vOffset);
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         Colors.setFont(g, 18);
         g.drawString(artistName,                 aaWidth + hOffset, vOffset + spacing);
         g.drawString(song.getAlbumName(),        aaWidth + hOffset, vOffset + spacing * 2);

@@ -36,12 +36,12 @@ public class CustomFrame extends JFrame
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.c_Background1);
+                g.setColor(Colors.get(Colors.Background1));
                 g.fillRect(0,0,super.getWidth(), super.getHeight());
-                g.setColor(Colors.c_Background2);
+                g.setColor(Colors.get(Colors.Background2));
                 g.drawRect(0,0,super.getWidth(), super.getHeight());
                 g.drawRect(0,0,super.getWidth()-1, super.getHeight()-1);
-                g.setColor(Colors.c_Background1.brighter());
+                g.setColor(Colors.get(Colors.Background1).brighter());
                 g.drawRect(1,1,super.getWidth()-3, super.getHeight()-3);
             }
         };
@@ -53,7 +53,7 @@ public class CustomFrame extends JFrame
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.c_Background1);
+                g.setColor(Colors.get(Colors.Background1));
                 g.fillRect(0,0,super.getWidth(), super.getHeight());
             }
         };
@@ -63,7 +63,7 @@ public class CustomFrame extends JFrame
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.c_Background1);
+                g.setColor(Colors.get(Colors.Background1));
                 g.fillRect(0,0,super.getWidth(), super.getHeight());
             }
         };
@@ -78,7 +78,7 @@ public class CustomFrame extends JFrame
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.c_Background1);
+                g.setColor(Colors.get(Colors.Background1));
                 g.fillRect(0,0,super.getWidth(), super.getHeight());
             }
         };
@@ -138,7 +138,7 @@ public class CustomFrame extends JFrame
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.setBackground(Colors.c_Background1);
+        button.setBackground(Colors.get(Colors.Background1));
         button.addActionListener(e -> {
             JComponent b = (JComponent) e.getSource();
             Container c = b.getTopLevelAncestor();
@@ -155,7 +155,7 @@ public class CustomFrame extends JFrame
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.setBackground(Colors.c_Background1);
+        button.setBackground(Colors.get(Colors.Background1));
         button.addActionListener(e -> {
             JComponent b = (JComponent) e.getSource();
             Container c = b.getTopLevelAncestor();
@@ -172,9 +172,9 @@ class CloseIcon implements Icon {
     @Override public void paintIcon(Component c, Graphics g, int x, int y) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.translate(x, y);
-        g2.setPaint(Colors.c_Background1);
+        g2.setPaint(Colors.get(Colors.Background1));
         g2.fillRect(0, 0, getIconWidth(), getIconHeight());
-        g2.setPaint(Colors.c_Foreground1);
+        g2.setPaint(Colors.get(Colors.Foreground1));
         g2.drawLine(4,  4, 11, 11);
         g2.drawLine(4,  5, 10, 11);
         g2.drawLine(5,  4, 11, 10);
@@ -194,9 +194,9 @@ class MinimizeIcon implements Icon {
     @Override public void paintIcon(Component c, Graphics g, int x, int y) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.translate(x, y);
-        g2.setPaint(Colors.c_Background1);
+        g2.setPaint(Colors.get(Colors.Background1));
         g2.fillRect(0, 0, getIconWidth(), getIconHeight());
-        g2.setPaint(Colors.c_Foreground1);
+        g2.setPaint(Colors.get(Colors.Foreground1));
         g2.drawLine(4,  11, 11, 11);
         g2.drawLine(5,  10, 10, 10);
         g2.dispose();

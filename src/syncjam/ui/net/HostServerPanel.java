@@ -4,24 +4,45 @@ import syncjam.ui.Colors;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class HostServerPanel extends JPanel
 {
     private final String defaultPort = "9982";
     //private final NetTextField addressField, portField, passField;
     private final NetTextField[] fields;
+    private final NetButton hostButton, cancelButton;
 
 
     public HostServerPanel(final NetworkPanel networkPanel) {
         super();
 
-        this.setBackground(Colors.c_Background1);
+        this.setBackground(Colors.get(Colors.Background1));
 
-        GridLayout gl = new GridLayout(3, 1);
-        this.setLayout(gl);
+        GridBagConstraints constraints = new GridBagConstraints();
+        this.setLayout(new GridBagLayout());
 
-        NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
-        this.add(title);
+        NetLabel title = new NetLabel("Host Server", JLabel.CENTER);
+        constraints.insets = new Insets(4,4,4,4);
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.ipadx = 167;
+        constraints.ipady = 30;
+        constraints.weightx = 1;
+        constraints.weighty = .5;
+        this.add(title, constraints);
+
+        KeyAdapter keys = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_ENTER)
+                    hostButton.clicked();
+                if(e.getKeyChar() == KeyEvent.VK_ESCAPE)
+                    cancelButton.clicked();
+            }
+        };
 
         String[] labels = {"Password", "Port"};
         int numPairs = labels.length;
@@ -29,11 +50,11 @@ public class HostServerPanel extends JPanel
 
         //Create and populate the panel.
         JPanel p1 = new JPanel(new SpringLayout());
-        p1.setBackground(Colors.c_Background2);
+        p1.setBackground(Colors.get(Colors.Background2));
         for (int i = 0; i < numPairs; i++) {
             NetLabel l = new NetLabel(labels[i], JLabel.TRAILING);
             p1.add(l);
-            NetTextField textField = new NetTextField(10, "");
+            NetTextField textField = new NetTextField(10, "", keys);
             l.setLabelFor(textField);
             p1.add(textField);
             fields[i] = textField;
@@ -47,13 +68,16 @@ public class HostServerPanel extends JPanel
                 6, 6,        //initX, initY
                 6, 10);       //xPad, yPad
 
-        this.add(p1);
+        constraints.insets = new Insets(10,4,8,4);
+        constraints.gridy = 1;
+        constraints.ipadx = 40;
+        constraints.ipady = 10;
+        this.add(p1, constraints);
 
-
+        //Panel for action buttons
         JPanel p2 = new JPanel(new SpringLayout());
-        p2.setBackground(Colors.c_Background1);
-
-        p2.add(new NetButton("Host") {
+        p2.setBackground(Colors.get(Colors.Background1));
+        p2.add(hostButton = new NetButton("Host") {
             @Override
             protected void clicked() {
                 String password = fields[0].getText();
@@ -65,7 +89,7 @@ public class HostServerPanel extends JPanel
             }
         });
 
-        p2.add(new NetButton("Cancel") {
+        p2.add(cancelButton = new NetButton("Cancel") {
             @Override
             protected void clicked() {
                 networkPanel.back();
@@ -73,9 +97,16 @@ public class HostServerPanel extends JPanel
         });
         makeCompactGrid(p2,
                 2, 1,        //rows, cols
-                6, 6,        //initX, initY
-                6, 8);       //xPad, yPad
-        this.add(p2);
+                0, 0,        //initX, initY
+                0, 8);       //xPad, yPad
+
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.insets = new Insets(4,20,4,20);
+        constraints.gridy = 2;
+        constraints.ipadx = 60;
+        constraints.ipady = 80;
+        this.add(p2, constraints);
+
         repaint();
     }
 

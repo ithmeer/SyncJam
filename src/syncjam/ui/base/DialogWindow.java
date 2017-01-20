@@ -9,6 +9,7 @@ import java.awt.*;
 
 /**
  * Created by Marty on 1/17/2017.
+ * Various Dialog Window Calls
  */
 public class DialogWindow
 {
@@ -29,11 +30,11 @@ public class DialogWindow
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
-        panel.setBackground(Colors.c_Background2.darker());
-        panel.setForeground(Colors.c_Foreground1);
-        JLabel text = new JLabel(message);
-        text.setBackground(Colors.c_Background1);
-        text.setForeground(Colors.c_Foreground1);
+        panel.setBackground(Colors.get(Colors.Background2).darker());
+        panel.setForeground(Colors.get(Colors.Foreground1));
+        JLabel text = new JLabel(message, JLabel.CENTER);
+        text.setBackground(Colors.get(Colors.Background1));
+        text.setForeground(Colors.get(Colors.Foreground1));
         panel.add(text, BorderLayout.CENTER);
         ButtonUI okButton = new ButtonUI(70,40, null) {
             protected void clicked() { window.dispose(); }

@@ -37,11 +37,11 @@ public class ServerList extends ItemList<ServerList.ServerItem>
         boolean hovering = itemHoverIndex > -1 && item == getItem(itemHoverIndex);
 
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         if(item == connectedServer)
-            g.setColor(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
         else if(item == selectedItem || hovering)
-            g.setColor(Colors.c_Foreground1);
+            g.setColor(Colors.get(Colors.Foreground1));
 
         Colors.setFont(g, 14);
         g.drawString(item.getServerName(), x + 8, y + itemHeight/2 - 8);
@@ -58,15 +58,11 @@ public class ServerList extends ItemList<ServerList.ServerItem>
     }
 
 
-    public boolean connect(NetworkController network)
+    public void connect(NetworkController network)
     {
-        boolean connected = false;
-
         ServerItem server = selectedItem;
         network.connectToServer(server.getIpAddress(), server.getPort(), server.getPassword());
         connectedServer = server;
-
-        return connected;
     }
 
     public int getSelectedItemIndex()

@@ -49,7 +49,7 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
 
         updateWhileDragging = dragUpdate;
 
-        this.setBackground(Colors.c_Background1);
+        this.setBackground(Colors.get(Colors.Background1));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
     }
@@ -87,12 +87,12 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
         barXOffset = getWidth()/2 - myW/2;
         barYOffset = 21;
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         g.fillRect(barXOffset,barYOffset,myW,3); //Draw Bar
 
         if(max != 0)
         {
-            if(dragging) g.setColor(Colors.c_Foreground1);
+            if(dragging) g.setColor(Colors.get(Colors.Foreground1));
             int pob = (int)( ( (float)posOnBar / (float)max ) * myW );
             g.fillRect(barXOffset+pob-1, barYOffset-4, 2, 11); //Draw notch on bar, draw Notch on bar
 
@@ -103,8 +103,8 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
 
     protected void drawValue(Graphics g)
     {
-        g.setColor(Colors.c_Highlight);
-        g.drawString(""+(int)posOnBar,barXOffset+4,barYOffset-10);
+        g.setColor(Colors.get(Colors.Highlight));
+        g.drawString(""+posOnBar,barXOffset+4,barYOffset-10);
     }
 
     @Override

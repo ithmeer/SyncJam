@@ -7,8 +7,15 @@ import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Colors
+public enum Colors
 {
+    Background1,
+    Background2,
+    Foreground1,
+    Foreground2,
+    Highlight,
+    Highlight2;
+
     public static final Color[] defaultColors = {
             new Color(27, 27, 27),   //Background1
             new Color(49, 49, 49),   //Background2
@@ -27,22 +34,14 @@ public class Colors
     };
     private static Color[] currentColors = defaultColors;
 
-    public static Color c_Background1 = currentColors[0];
-    public static Color c_Background2 = currentColors[1];
-    public static Color c_Foreground1 = currentColors[2];
-    public static Color c_Foreground2 = currentColors[3];
-    public static Color c_Highlight   = currentColors[4];
-    public static Color c_Highlight2  = currentColors[5];
+    public static Color get(Colors c)
+    {
+        return currentColors[c.ordinal()];
+    }
 
     public static void setColorScheme(Color[] colors)
     {
-        if(colors.length == defaultColors.length)
-        {
-            for(int i = 0; i < colors.length; i++)
-            {
-                currentColors[i] = colors[i];
-            }
-        }
+        currentColors = colors;
     }
 
     public static void setFont(Graphics g, int size)

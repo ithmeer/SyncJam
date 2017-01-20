@@ -39,10 +39,10 @@ public class SongPositionSlider extends SliderUI
     {
         if(_player.getSong() != null)
         {
-            g.setColor(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
             g.drawString(getTimeStamp(this.getPosOnBar()), barXOffset, barYOffset - 9);
 
-            g.setColor(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
             String timeToMax = "-" + getTimeStamp(this.getMaxValue() - this.getPosOnBar());
             int strWidth = g.getFontMetrics().stringWidth(timeToMax);
             g.drawString(timeToMax, barXOffset + getW() - strWidth, barYOffset - 9);

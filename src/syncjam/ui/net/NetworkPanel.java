@@ -24,20 +24,20 @@ public class NetworkPanel extends JPanel
     {
         _network = services.getService(NetworkController.class);
 
-        this.setBackground(Colors.c_Background1);
+        this.setBackground(Colors.get(Colors.Background1));
         mainPanel = new JPanel();
-        mainPanel.setBackground(Colors.c_Background1);
+        mainPanel.setBackground(Colors.get(Colors.Background1));
         this.add(mainPanel);
         visiblePanel = mainPanel;
 
         GridBagConstraints constraints = new GridBagConstraints();
         mainPanel.setLayout(new GridBagLayout());
 
-        constraints.gridwidth = 1;
+        constraints.gridwidth = 2;
 
         NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
         constraints.gridy = 0;
-        constraints.insets = new Insets(8,8,8,8);
+        constraints.insets = new Insets(4,4,4,4);
         constraints.ipadx = 120;
         constraints.ipady = 30;
         constraints.weightx = 1;
@@ -46,54 +46,17 @@ public class NetworkPanel extends JPanel
 
         serverList = new ServerList();
         constraints.gridy = 1;
-        constraints.insets = new Insets(8,8,8,8);
+        constraints.insets = new Insets(4,4,8,4);
         constraints.ipadx = 200;
         constraints.ipady = 250;
         constraints.weightx = 1;
         constraints.weighty = .5;
         mainPanel.add(serverList, constraints);
 
-        connectButton = new ButtonUI(0, 0, Colors.c_Background2) {
-            @Override
-            protected void clicked() { connect(); }
-        };
-        connectButton.setText("Connect");
-        connectButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 2;
-        constraints.insets = new Insets(8,8,8,8);
-        constraints.ipadx = 200;
-        constraints.ipady = 30;
-        constraints.weightx = 1;
-        constraints.weighty = .5;
-        mainPanel.add(connectButton, constraints);
-        connectButton.setEnabled(false);
+        //----- Add / Remove -----//
 
-        disconnectButton = new ButtonUI(0, 0, Colors.c_Background2) {
-            @Override
-            protected void clicked() { disconnect(); }
-        };
-        disconnectButton.setText("Disconnect");
-        disconnectButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 3;
-        constraints.insets = new Insets(8,8,8,8);
-        constraints.ipadx = 200;
-        constraints.ipady = 30;
-        constraints.weightx = 1;
-        constraints.weighty = .5;
-        mainPanel.add(disconnectButton, constraints);
-        disconnectButton.setEnabled(false);
-
-
-        hostButton = new ButtonUI(0, 0, Colors.c_Background2) {
-            @Override
-            protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this)); }
-        };
-        hostButton.setText("Host");
-        hostButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 4;
-        mainPanel.add(hostButton, constraints);
-
-        addButton = new ButtonUI(0, 0, Colors.c_Background2) {
+        constraints.gridwidth = 1;
+        addButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
             @Override
             protected void clicked() {
                 openPanel(new AddServerPanel(NetworkPanel.this));
@@ -101,17 +64,67 @@ public class NetworkPanel extends JPanel
         };
         addButton.setText("Add");
         addButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 5;
+        constraints.insets = new Insets(4,20,4,4);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.ipadx = 70;
+        constraints.ipady = 35;
+        constraints.weightx = 1;
+        constraints.weighty = .5;
         mainPanel.add(addButton, constraints);
 
-        removeButton = new ButtonUI(0, 0, Colors.c_Background2) {
+        removeButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
             @Override
             protected void clicked() { serverList.removeSelected(); }
         };
         removeButton.setText("Remove");
         removeButton.setMargin(new Insets(0,0,0,0));
-        constraints.gridy = 6;
+        constraints.insets = new Insets(4,4,4,20);
+        constraints.gridx = 1;
+        constraints.gridy = 2;
         mainPanel.add(removeButton, constraints);
+
+        //----- Connect / Disconnect -----//
+
+        constraints.gridwidth = 1;
+        connectButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+            @Override
+            protected void clicked() { connect(); }
+        };
+        connectButton.setText("Connect");
+        connectButton.setMargin(new Insets(0,0,0,0));
+        constraints.insets = new Insets(4,20,4,4);
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        mainPanel.add(connectButton, constraints);
+        connectButton.setEnabled(false);
+
+        disconnectButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+            @Override
+            protected void clicked() { disconnect(); }
+        };
+        disconnectButton.setText("Disconnect");
+        disconnectButton.setMargin(new Insets(0,0,0,0));
+        constraints.insets = new Insets(4,4,4,20);
+        constraints.gridx = 1;
+        constraints.gridy = 3;
+        mainPanel.add(disconnectButton, constraints);
+        disconnectButton.setEnabled(false);
+
+        //----- Host  -----//
+
+        constraints.gridwidth = 2;
+        hostButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+            @Override
+            protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this)); }
+        };
+        hostButton.setText("Host");
+        hostButton.setMargin(new Insets(0,0,0,0));
+        constraints.insets = new Insets(4,20,4,20);
+        constraints.gridx = 0;
+        constraints.gridy = 4;
+        mainPanel.add(hostButton, constraints);
     }
 
     private void openPanel(JPanel panel)

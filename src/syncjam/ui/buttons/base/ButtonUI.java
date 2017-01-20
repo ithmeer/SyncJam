@@ -15,7 +15,7 @@ public abstract class ButtonUI extends JButton implements ActionListener
 
     public ButtonUI(int w, int h)
     {
-        this(w, h, Colors.c_Background1);
+        this(w, h, Colors.get(Colors.Background1));
     }
 
     public ButtonUI(int w, int h, Color bg)
@@ -64,17 +64,17 @@ public abstract class ButtonUI extends JButton implements ActionListener
         //g.fillRect(0, 0, getWidth(), getHeight());
 
         if (getModel().isPressed()) {
-            g.setColor(Colors.c_Highlight);
-            setForeground(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
+            setForeground(Colors.get(Colors.Highlight));
         }
         else if (getModel().isRollover()) {
-            g.setColor(Colors.c_Foreground1);
-            setForeground(Colors.c_Foreground1);
+            g.setColor(Colors.get(Colors.Foreground1));
+            setForeground(Colors.get(Colors.Foreground1));
         }
         else
         {
-            g.setColor(Colors.c_Foreground2);
-            setForeground(Colors.c_Foreground2);
+            g.setColor(Colors.get(Colors.Foreground2));
+            setForeground(Colors.get(Colors.Foreground2));
         }
     }
 }
@@ -83,7 +83,7 @@ class ButtonUIStyle extends MetalButtonUI
     @Override
     public void paintButtonPressed(Graphics g, AbstractButton b) {
         paintText(g, b, b.getBounds(), b.getText());
-        g.setColor(Colors.c_Background1);
+        g.setColor(Colors.get(Colors.Background1));
         g.fillRect(0, 0, b.getSize().width, b.getSize().height);
     }
 }

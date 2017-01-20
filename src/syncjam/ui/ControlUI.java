@@ -21,7 +21,7 @@ public class ControlUI extends JPanel
 
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
-        setBackground(Colors.c_Background1);
+        setBackground(Colors.get(Colors.Background1));
 
 
         prevButton = new PrevButton(36, 36, services);

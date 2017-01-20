@@ -12,9 +12,8 @@ import java.awt.event.WindowEvent;
 
 public class WindowObject extends JFrame
 {
-    public boolean Resizable = false;
     public NetworkController _network;
-    public WindowObject(int minW, int minH, boolean resizable, ServiceContainer services)
+    public WindowObject(int minW, int minH, ServiceContainer services)
     {
         this.setTitle("SyncJam");
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -23,7 +22,6 @@ public class WindowObject extends JFrame
         //this.add(panel);
         this.setMinimumSize(new Dimension(minW, minH));
         this.setPreferredSize(new Dimension(minW + 20, minH + 150));
-        Resizable = resizable;
         _network = services.getService(NetworkController.class);
 
         this.addWindowListener(new WindowAdapter(){
@@ -34,16 +32,11 @@ public class WindowObject extends JFrame
         });
     }
 
-    public WindowObject(int minW, int minH, ServiceContainer services)
-    {
-        this(minW, minH, true, services);
-    }
-
     public void open()
     {
         this.pack();
         this.setLocationRelativeTo(null);
-        this.setResizable(Resizable);
+        this.setResizable(true);
         this.setVisible(true);
     }
 

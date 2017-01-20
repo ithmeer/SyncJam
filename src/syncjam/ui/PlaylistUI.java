@@ -28,33 +28,28 @@ public class PlaylistUI extends ItemList
     {
         _playlist = services.getService(Playlist.class);
         _songQueue = services.getService(SongQueue.class);
-        super.setBackground(Colors.c_Background2);
+        super.setBackground(Colors.get(Colors.Background2));
         this.setEnableCustomDrawing(true);
 
-        final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.c_Highlight);
-        new FileDrop(this, fileDropBorder, new FileDrop.Listener()
-        {
-            @Override
-            public void filesDropped(File[] files)
+        final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
+        new FileDrop(this, fileDropBorder, files -> {
+            BytesSong[] songs = new BytesSong[files.length];
+            for(int i = 0; i < files.length; i++)
             {
-                BytesSong[] songs = new BytesSong[files.length];
-                for(int i = 0; i < files.length; i++)
+                try
                 {
-                    try
-                    {
-                        songs[i] = new BytesSong(files[i]);
-                    }
-                    catch (SyncJamException e)
-                    {
-                        e.printStackTrace();
-                    }
+                    songs[i] = new BytesSong(files[i]);
                 }
-
-                _songQueue.addAll(Arrays.asList(songs));
-                _playlist.addAll(songs);
-
-                scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
+                catch (SyncJamException e)
+                {
+                    e.printStackTrace();
+                }
             }
+
+            _songQueue.addAll(Arrays.asList(songs));
+            _playlist.addAll(songs);
+
+            scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
         });
     }
     @Override
@@ -128,7 +123,7 @@ public class PlaylistUI extends ItemList
 
         if(index == _playlist.getCurrentSongIndex())
         {
-            g.setColor(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
             g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 1, itemHeight);
             g.drawRect(x+1,y+1, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight-2);
         }
@@ -142,12 +137,12 @@ public class PlaylistUI extends ItemList
         int progress = 100;
         if(progress < 100)
         {
-            g.setColor(Colors.c_Background1);
+            g.setColor(Colors.get(Colors.Background1));
             g.fillRect(x, y, getWidth() - scrollbar.getWidth(), itemHeight);
 
             if(progress > 0)
             {
-                g.setColor(Colors.c_Highlight);
+                g.setColor(Colors.get(Colors.Highlight));
 
                 float progWidth = (float)progress/100 * (getWidth() - scrollbar.getWidth());
 
@@ -186,9 +181,9 @@ public class PlaylistUI extends ItemList
 
         if(itemRect.contains(mouseX, mouseY) && itemHoverIndex == i && itemDragIndex == -1)
         {
-            g.setColor(Colors.c_Highlight2);
+            g.setColor(Colors.get(Colors.Highlight2));
             g.fillRect(xRect.x, xRect.y, xRect.width, xRect.height);
-            g.setColor(Colors.c_Foreground1);
+            g.setColor(Colors.get(Colors.Foreground1));
 
             int cX = x+13;   //center xPos
             int cY = y + itemHeight/2; //center yPos
@@ -198,7 +193,7 @@ public class PlaylistUI extends ItemList
         }
         else
         {
-            g.setColor(Colors.c_Foreground2);
+            g.setColor(Colors.get(Colors.Foreground2));
             g.drawString("" + (i + 1),
                     x - textWidth + 20,
                     y + itemHeight/2 + textHeight/4);
@@ -218,14 +213,14 @@ public class PlaylistUI extends ItemList
         int thisItemXPos = x + ins + 18;
         int thisItemYPos = y + ins;
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         g.drawRect(thisItemXPos,
                    thisItemYPos,
                    itemHeight - ins*2,
                    itemHeight - ins*2); //frame
 
         //draw dark color behind art
-        g.setColor(Colors.c_Background1);
+        g.setColor(Colors.get(Colors.Background1));
         int imgsize = itemHeight - ins * 2 - 2;
         g.fillRect(thisItemXPos + 1,
                    thisItemYPos + 1,
@@ -256,7 +251,7 @@ public class PlaylistUI extends ItemList
 
         if(itemRect.contains(mouseX, mouseY) && itemHoverIndex == i && itemDragIndex == -1)
         {
-            g.setColor(Colors.c_Background1);
+            g.setColor(Colors.get(Colors.Background1));
             Graphics2D g2 = (Graphics2D) g;
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .4f));
             g2.fillRect(artRect.x, artRect.y, artRect.width + 1, artRect.height + 1);  //shade over art
@@ -265,10 +260,10 @@ public class PlaylistUI extends ItemList
             int centerX = artRect.x + artRect.width / 2;
             int centerY = artRect.y + artRect.height / 2;
 
-            g.setColor(Colors.c_Highlight);
+            g.setColor(Colors.get(Colors.Highlight));
             g.fillOval(centerX - imgsize / 4, centerY - imgsize / 4, imgsize / 2, imgsize / 2); //circle
 
-            g.setColor(Colors.c_Foreground1);
+            g.setColor(Colors.get(Colors.Foreground1));
             Polygon playShape = new Polygon(  //play symbol
                     new int[]{centerX - imgsize / 9, centerX - imgsize / 9, centerX + imgsize / 6},
                     new int[]{centerY - imgsize / 7, centerY + imgsize / 7, centerY}, 3);
@@ -293,7 +288,7 @@ public class PlaylistUI extends ItemList
         int thisItemXPos = x + itemHeight + 20;
         int thisItemYPos = y + itemHeight / 4 + textHeight / 2;
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
 
         String artistName = cutStringToWidth(
                 song.getArtistName(),
@@ -314,7 +309,7 @@ public class PlaylistUI extends ItemList
         int thisItemXPos = x + itemHeight + 20;
         int thisItemYPos = y + itemHeight / 2 + textHeight / 2 + 8;
 
-        g.setColor(Colors.c_Foreground1);
+        g.setColor(Colors.get(Colors.Foreground1));
 
         String songName = cutStringToWidth(
                 song.getTitle(),
@@ -336,7 +331,7 @@ public class PlaylistUI extends ItemList
         int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 4;
         int thisItemYPos = y + itemHeight / 4 + textHeight / 2 - 3;
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         g.drawString(song.getLengthString(), thisItemXPos, thisItemYPos);
     }
 

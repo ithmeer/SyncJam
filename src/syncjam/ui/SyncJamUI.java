@@ -51,9 +51,9 @@ public class SyncJamUI implements KeyListener
 
         GridBagConstraints constraints;
         window.getContentPanel().setLayout(new GridBagLayout());
-        window.setBackground(Colors.c_Background1);
+        window.setBackground(Colors.get(Colors.Background1));
         //window.setUndecorated(true);
-        UIManager.put("Button.disabledText", Colors.c_Background1);
+        UIManager.put("Button.disabledText", Colors.get(Colors.Background1));
 
 
         //= = = = = = = = = = Player = = = = = = = = = =//
@@ -73,7 +73,7 @@ public class SyncJamUI implements KeyListener
         constraints.fill = GridBagConstraints.BOTH;
         window.getContentPanel().add(playerPanel, constraints);
 
-        playerPanel.setBackground(Colors.c_Background1);
+        playerPanel.setBackground(Colors.get(Colors.Background1));
 
         //Player Components
 
@@ -116,7 +116,7 @@ public class SyncJamUI implements KeyListener
         //= = = = = = = = = = Side Panels = = = = = = = = = =//
 
         JPanel tray = new JPanel();
-        tray.setBackground(Colors.c_Background1);
+        tray.setBackground(Colors.get(Colors.Background1));
 
 
         networkPanel = new NetworkPanel(services);
@@ -132,7 +132,7 @@ public class SyncJamUI implements KeyListener
         //= = = = = = = = = = Side Bar = = = = = = = = = =//
 
         JPanel sideBar = new JPanel(new GridBagLayout());
-        sideBar.setBackground(Colors.c_Background1);
+        sideBar.setBackground(Colors.get(Colors.Background1));
 
         constraints = setGrid(1, 0, 0.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
@@ -140,7 +140,7 @@ public class SyncJamUI implements KeyListener
         window.getContentPanel().add(sideBar, constraints);
 
         JPanel sideBarItems = new JPanel(new GridBagLayout());
-        sideBarItems.setBackground(Colors.c_Background1);
+        sideBarItems.setBackground(Colors.get(Colors.Background1));
 
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(12,0,12,0);

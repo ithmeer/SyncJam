@@ -16,9 +16,9 @@ public class NetworkIndicator extends JPanel
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        this.setBackground(Colors.c_Background1);
+        this.setBackground(Colors.get(Colors.Background1));
 
-        g.setColor(Colors.c_Foreground1);
+        g.setColor(Colors.get(Colors.Foreground1));
         g.drawOval(6,3,13,13);
 
 
@@ -26,7 +26,7 @@ public class NetworkIndicator extends JPanel
         switch(status)
         {
             case Hosted:
-                g.setColor(Color.green.brighter());
+                g.setColor(Color.blue.brighter());
                 break;
             case Connected:
                 g.setColor(Color.green);
@@ -38,10 +38,10 @@ public class NetworkIndicator extends JPanel
                 g.setColor(new Color(209, 72, 58));
                 break;
             case Unconnected:
-                g.setColor(Colors.c_Background2);
+                g.setColor(Colors.get(Colors.Background2));
                 break;
             default:
-                g.setColor(Colors.c_Background2);
+                g.setColor(Colors.get(Colors.Background2));
                 break;
         }
         g.fillOval(7,4,11,11);

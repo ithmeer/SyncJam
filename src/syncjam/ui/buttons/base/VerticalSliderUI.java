@@ -51,7 +51,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
 
         updateWhileDragging = dragUpdate;
 
-        this.setBackground(Colors.c_Background1);
+        this.setBackground(Colors.get(Colors.Background1));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
 
@@ -92,12 +92,12 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
         barXOffset = 10;
         barYOffset = getHeight()/2 - myH/2;
 
-        g.setColor(Colors.c_Foreground2);
+        g.setColor(Colors.get(Colors.Foreground2));
         g.fillRect(barXOffset,barYOffset,3,myH); //Draw Bar
 
         if(max != 0)
         {
-            if(dragging) g.setColor(Colors.c_Foreground1);
+            if(dragging) g.setColor(Colors.get(Colors.Foreground1));
             int pob = myH - (int)( ( (float)posOnBar / (float)max ) * myH );
             g.fillRect(barXOffset-4, barYOffset+pob-1, 11, 2); //Draw notch on bar, draw Notch on bar
 
@@ -108,7 +108,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
 
     protected void drawValue(Graphics g)
     {
-        g.setColor(Colors.c_Highlight);
+        g.setColor(Colors.get(Colors.Highlight));
         g.drawString("" + posOnBar,
                      barXOffset + 1 - g.getFontMetrics().stringWidth(""+value)/2,
                      barYOffset - 8);

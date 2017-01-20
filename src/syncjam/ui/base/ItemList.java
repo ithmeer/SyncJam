@@ -21,7 +21,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     protected int itemHeight = 60;
 
-    protected final ScrollbarUI scrollbar = new ScrollbarUI(Colors.c_Background2);
+    protected final ScrollbarUI scrollbar = new ScrollbarUI(Colors.get(Colors.Background2));
 
     protected int itemHoverIndex = -1;
     protected int itemDragIndex = -1;
@@ -29,14 +29,14 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     private boolean allowDragging = true;
 
     protected int lastDropIndex = 0;
-    protected ArrayList<Item> items = new ArrayList<Item>();
+    protected ArrayList<Item> items = new ArrayList<>();
     protected int[] splits;
 
     private boolean enableCustomDrawing = false;
 
     public ItemList()
     {
-        this.setBackground(Colors.c_Background2);
+        this.setBackground(Colors.get(Colors.Background2));
         this.setLayout(new BorderLayout());
         this.add(scrollbar, BorderLayout.EAST);
 
