@@ -1,11 +1,9 @@
 package syncjam.ui;
 
 import syncjam.BytesSong;
+import syncjam.ConnectionStatus;
 import syncjam.SyncJamException;
-import syncjam.interfaces.Playlist;
-import syncjam.interfaces.ServiceContainer;
-import syncjam.interfaces.Song;
-import syncjam.interfaces.SongQueue;
+import syncjam.interfaces.*;
 import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
@@ -21,6 +19,7 @@ public class PlaylistUI extends ItemList
 {
     private final Playlist _playlist;
     private final SongQueue _songQueue;
+    private final NetworkController _networkController;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
 
@@ -28,6 +27,7 @@ public class PlaylistUI extends ItemList
     {
         _playlist = services.getService(Playlist.class);
         _songQueue = services.getService(SongQueue.class);
+        _networkController = services.getService(NetworkController.class);
         this.setEnableCustomDrawing(true);
 
         final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
@@ -46,9 +46,13 @@ public class PlaylistUI extends ItemList
             }
 
             _songQueue.addAll(Arrays.asList(songs));
-            _playlist.addAll(songs);
 
-            scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2);
+            ConnectionStatus st = _networkController.getStatus();
+            if (st == ConnectionStatus.Hosted || st == ConnectionStatus.Unconnected ||
+                st == ConnectionStatus.Disconnected)
+            {
+                _playlist.addAll(songs);
+            }
         });
     }
     @Override
@@ -66,6 +70,7 @@ public class PlaylistUI extends ItemList
 
             int curItemYPos = getYPosInUI(i);
             updateSplit(i);
+            updateScrollbar();
 
             if(itemDragIndex == i && draggedSong == null)
             {
