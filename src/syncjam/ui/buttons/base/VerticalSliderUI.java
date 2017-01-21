@@ -51,7 +51,6 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
 
         updateWhileDragging = dragUpdate;
 
-        this.setBackground(Colors.get(Colors.Background1));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
 
@@ -83,6 +82,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background1));
 
         myH = getHeight() - 50;
 

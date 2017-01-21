@@ -7,12 +7,13 @@ import syncjam.ui.buttons.PrevButton;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class ControlUI extends JPanel
 {
     private int myW, myH;
-    private ButtonUI playButton, prevButton, nexButton;
+    private ButtonUI playButton, prevButton, nextButton;
 
     public ControlUI(ServiceContainer services)
     {
@@ -21,7 +22,7 @@ public class ControlUI extends JPanel
 
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
-        setBackground(Colors.get(Colors.Background1));
+        this.setBorder(new EmptyBorder(10,0,0,0));
 
 
         prevButton = new PrevButton(36, 36, services);
@@ -30,11 +31,16 @@ public class ControlUI extends JPanel
         playButton = new PlayButton(36, 36, services);
         this.add(playButton);
 
-        nexButton = new NextButton(36, 36, services);
-        this.add(nexButton);
+        nextButton = new NextButton(36, 36, services);
+        this.add(nextButton);
     }
+    public void pressPlayButton() { playButton.doClick(); }
+    public void pressNextButton() { nextButton.doClick(); }
+    public void pressPrevButton() { prevButton.doClick(); }
+    
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background1));
     }
 }

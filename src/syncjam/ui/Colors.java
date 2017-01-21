@@ -1,5 +1,6 @@
 package syncjam.ui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.font.TransformAttribute;
@@ -32,6 +33,15 @@ public enum Colors
             new Color(44, 130, 226), //Highlight
             new Color(226, 82, 61),  //Highlight2
     };
+    public static final Color[] test = {
+            new Color(17, 22, 27),//Background1
+            new Color(31, 39, 49),//Background2
+            new Color(87, 225, 255),      //Foreground1
+            new Color(52, 118, 172),   //Foreground2
+            new Color(255, 255, 255), //Highlight
+            new Color(226, 82, 61),  //Highlight2
+    };
+
     private static Color[] currentColors = defaultColors;
 
     public static Color get(Colors c)
@@ -42,6 +52,7 @@ public enum Colors
     public static void setColorScheme(Color[] colors)
     {
         currentColors = colors;
+        UIManager.put("Button.disabledText", Colors.get(Colors.Background1));
     }
 
     public static void setFont(Graphics g, int size)

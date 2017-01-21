@@ -17,7 +17,8 @@ public class TextButton extends ButtonUI
     }
     protected TextButton(String text, int w, int y)
     {
-        super(w, y, Colors.get(Colors.Background2));
+        super(w, y);
+        background = Colors.Background2;
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }

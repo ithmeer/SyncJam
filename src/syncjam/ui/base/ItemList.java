@@ -21,7 +21,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     protected int itemHeight = 60;
 
-    protected final ScrollbarUI scrollbar = new ScrollbarUI(Colors.get(Colors.Background2));
+    protected final ScrollbarUI scrollbar = new ScrollbarUI(Colors.Background2);
 
     protected int itemHoverIndex = -1;
     protected int itemDragIndex = -1;
@@ -36,7 +36,6 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     public ItemList()
     {
-        this.setBackground(Colors.get(Colors.Background2));
         this.setLayout(new BorderLayout());
         this.add(scrollbar, BorderLayout.EAST);
 
@@ -66,6 +65,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background2));
 
         if (itemDragIndex >= 0)
             scrollNearEdges();

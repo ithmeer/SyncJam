@@ -2,6 +2,7 @@ package syncjam.ui.buttons;
 
 import syncjam.interfaces.PlayController;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
@@ -16,7 +17,7 @@ public class PlayButton extends ButtonUI
         _player = services.getService(PlayController.class);
     }
 
-    public PlayButton(int w, int h, Color c, ServiceContainer services)
+    public PlayButton(int w, int h, Colors c, ServiceContainer services)
     {
         super(w, h, c);
         _player = services.getService(PlayController.class);

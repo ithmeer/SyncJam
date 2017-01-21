@@ -9,6 +9,7 @@ import java.awt.event.*;
 public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionListener, ComponentListener, MouseWheelListener
 {
     protected int myW, myH;
+    private final Colors background;
     private int inset = 5;
     protected int value = 0;
     protected int rawmax = 100, max = 100;
@@ -17,15 +18,15 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
     protected boolean dragging = false, scrolling = false;
 
-    public ScrollbarUI() { this(Colors.get(Colors.Background1)); }
+    public ScrollbarUI() { this(Colors.Background1); }
 
-    public ScrollbarUI(Color bg)
+    public ScrollbarUI(Colors bg)
     {
         myW = 8;
         myH = 0;
 
+        background = bg;
         this.setPreferredSize(new Dimension(myW+inset*2, myH));
-        this.setBackground(bg);
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
@@ -56,6 +57,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        setBackground(Colors.get(background));
 
         double viewRatio = (float)getHeight() / (float)( rawmax );
 

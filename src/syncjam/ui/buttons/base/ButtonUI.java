@@ -11,17 +11,18 @@ import java.awt.event.ActionListener;
 public abstract class ButtonUI extends JButton implements ActionListener
 {
     private int myW, myH;
-    private Color background;
+    protected Colors background;
 
     public ButtonUI(int w, int h)
     {
-        this(w, h, Colors.get(Colors.Background1));
+        this(w, h, Colors.Background1);
     }
 
-    public ButtonUI(int w, int h, Color bg)
+    public ButtonUI(int w, int h, Colors bg)
     {
         myW = w;
         myH = h;
+        background = bg;
 
         validate();
         addActionListener(this);
@@ -32,9 +33,8 @@ public abstract class ButtonUI extends JButton implements ActionListener
         this.setFocusPainted(false);
         this.setFocusable(false);
         this.setUI(new ButtonUIStyle());
-        this.setBackground(background);
+        super.setBackground(Colors.get(background));
 
-        background = bg;
     }
 
     public int getW() { return myW; }
@@ -49,7 +49,6 @@ public abstract class ButtonUI extends JButton implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        setBackground(background);
         if(e.getActionCommand().equals("clicked"))
         {
             clicked();
@@ -58,10 +57,8 @@ public abstract class ButtonUI extends JButton implements ActionListener
 
     public void paintComponent(Graphics g)
     {
-        setBackground(background);
         super.paintComponent(g);
-        //g.setColor(background);
-        //g.fillRect(0, 0, getWidth(), getHeight());
+        super.setBackground(Colors.get(background));
 
         if (getModel().isPressed()) {
             g.setColor(Colors.get(Colors.Highlight));

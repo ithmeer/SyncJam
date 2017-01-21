@@ -2,6 +2,7 @@ package syncjam.ui.buttons;
 
 import syncjam.interfaces.Playlist;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.ui.Colors;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import java.awt.*;
@@ -17,7 +18,7 @@ public class PrevButton extends ButtonUI
         _playlist = services.getService(Playlist.class);
     }
 
-    public PrevButton(int w, int h, Color c, ServiceContainer services)
+    public PrevButton(int w, int h, Colors c, ServiceContainer services)
     {
         super(w, h, c);
         setPreferredSize(new Dimension(getW() + 20, getH()));

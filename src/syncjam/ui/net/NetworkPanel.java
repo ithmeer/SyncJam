@@ -24,9 +24,13 @@ public class NetworkPanel extends JPanel
     {
         _network = services.getService(NetworkController.class);
 
-        this.setBackground(Colors.get(Colors.Background1));
-        mainPanel = new JPanel();
-        mainPanel.setBackground(Colors.get(Colors.Background1));
+        mainPanel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
         this.add(mainPanel);
         visiblePanel = mainPanel;
 
@@ -56,7 +60,7 @@ public class NetworkPanel extends JPanel
         //----- Add / Remove -----//
 
         constraints.gridwidth = 1;
-        addButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+        addButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() {
                 openPanel(new AddServerPanel(NetworkPanel.this));
@@ -74,7 +78,7 @@ public class NetworkPanel extends JPanel
         constraints.weighty = .5;
         mainPanel.add(addButton, constraints);
 
-        removeButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+        removeButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() { serverList.removeSelected(); }
         };
@@ -88,7 +92,7 @@ public class NetworkPanel extends JPanel
         //----- Connect / Disconnect -----//
 
         constraints.gridwidth = 1;
-        connectButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+        connectButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() { connect(); }
         };
@@ -100,7 +104,7 @@ public class NetworkPanel extends JPanel
         mainPanel.add(connectButton, constraints);
         connectButton.setEnabled(false);
 
-        disconnectButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+        disconnectButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() { disconnect(); }
         };
@@ -115,7 +119,7 @@ public class NetworkPanel extends JPanel
         //----- Host  -----//
 
         constraints.gridwidth = 2;
-        hostButton = new ButtonUI(0, 0, Colors.get(Colors.Background2)) {
+        hostButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this)); }
         };
@@ -185,6 +189,7 @@ public class NetworkPanel extends JPanel
 
     public void paintComponent(Graphics g)
     {
+        setBackground(Colors.get(Colors.Background1));
         if(serverList.getSelectedItemIndex() == -1)
         {
             removeButton.setEnabled(false);

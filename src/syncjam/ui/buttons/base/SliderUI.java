@@ -49,7 +49,6 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
 
         updateWhileDragging = dragUpdate;
 
-        this.setBackground(Colors.get(Colors.Background1));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
     }
@@ -78,6 +77,7 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background1));
 
         myW = getWidth() - 50;
 

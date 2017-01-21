@@ -28,7 +28,6 @@ public class PlaylistUI extends ItemList
     {
         _playlist = services.getService(Playlist.class);
         _songQueue = services.getService(SongQueue.class);
-        super.setBackground(Colors.get(Colors.Background2));
         this.setEnableCustomDrawing(true);
 
         final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));

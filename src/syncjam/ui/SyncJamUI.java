@@ -26,6 +26,7 @@ public class SyncJamUI implements KeyListener
     private SliderUI songPosition = null;
 
     private NetworkPanel networkPanel = null;
+    private int colorToggle = 0;
 
     public SyncJamUI(ServiceContainer services)
     {
@@ -53,7 +54,6 @@ public class SyncJamUI implements KeyListener
         window.getContentPanel().setLayout(new GridBagLayout());
         window.setBackground(Colors.get(Colors.Background1));
         //window.setUndecorated(true);
-        UIManager.put("Button.disabledText", Colors.get(Colors.Background1));
 
 
         //= = = = = = = = = = Player = = = = = = = = = =//
@@ -62,6 +62,7 @@ public class SyncJamUI implements KeyListener
             public void paintComponent(Graphics g)
             {
                 super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
                 ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             }
@@ -72,8 +73,6 @@ public class SyncJamUI implements KeyListener
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
         window.getContentPanel().add(playerPanel, constraints);
-
-        playerPanel.setBackground(Colors.get(Colors.Background1));
 
         //Player Components
 
@@ -91,6 +90,7 @@ public class SyncJamUI implements KeyListener
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
 
+        window.cm.registerComponent(controlUI);
         playerPanel.add(controlUI, constraints);
 
         songPosition = new SongPositionSlider(services);
@@ -112,35 +112,29 @@ public class SyncJamUI implements KeyListener
         playerPanel.validate();
         playerPanel.repaint();
 
-
-        //= = = = = = = = = = Side Panels = = = = = = = = = =//
-
-        JPanel tray = new JPanel();
-        tray.setBackground(Colors.get(Colors.Background1));
-
-
-        networkPanel = new NetworkPanel(services);
-        tray.add(networkPanel);
-        networkPanel.validate();
-
-
-        constraints.anchor = GridBagConstraints.EAST;
-        constraints = setGrid(2, 0, 0.0f, 1.0f);
-        constraints.fill = GridBagConstraints.BOTH;
-        window.getContentPanel().add(tray, constraints);
-
         //= = = = = = = = = = Side Bar = = = = = = = = = =//
 
-        JPanel sideBar = new JPanel(new GridBagLayout());
-        sideBar.setBackground(Colors.get(Colors.Background1));
+        JPanel sideBar = new JPanel(new GridBagLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
 
         constraints = setGrid(1, 0, 0.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
+        window.cm.registerComponent(sideBar);
         window.getContentPanel().add(sideBar, constraints);
 
-        JPanel sideBarItems = new JPanel(new GridBagLayout());
-        sideBarItems.setBackground(Colors.get(Colors.Background1));
+        JPanel sideBarItems = new JPanel(new GridBagLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
 
         constraints.fill = GridBagConstraints.NONE;
         constraints.insets = new Insets(12,0,12,0);
@@ -169,9 +163,34 @@ public class SyncJamUI implements KeyListener
 
         sideBarItems.add(new VolumeSlider(50, 100, services), constraints);
 
+        //= = = = = = = = = = Side Panels = = = = = = = = = =//
+
+        JPanel tray = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
+
+
+        networkPanel = new NetworkPanel(services);
+        tray.add(networkPanel);
+        networkPanel.validate();
+
+
+        constraints.anchor = GridBagConstraints.EAST;
+        constraints = setGrid(2, 0, 0.0f, 1.0f);
+        constraints.fill = GridBagConstraints.BOTH;
+        window.cm.registerComponent(tray);
+        window.getContentPanel().add(tray, constraints);
+
+
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
         window.open();
+        DialogWindow.setMainWindow(window);
+
         networkPanel.setVisible(false);
     }
 
@@ -183,11 +202,23 @@ public class SyncJamUI implements KeyListener
     @Override
     public void keyReleased(KeyEvent e)
     {
-        int key = e.getKeyCode();
-        if(key == KeyEvent.VK_U)
-            Colors.setColorScheme(Colors.lightColors);
-        else if(key == KeyEvent.VK_E)
-            DialogWindow.showErrorMessage("BUGS!!!!!", window);
+        switch(e.getKeyCode())
+        {
+            case KeyEvent.VK_SPACE:
+                controlUI.pressPlayButton();
+                break;
+            case KeyEvent.VK_U:
+                colorToggle++;
+                switch(colorToggle % 3) {
+                    case 0: Colors.setColorScheme(Colors.defaultColors); break;
+                    case 1: Colors.setColorScheme(Colors.lightColors); break;
+                    case 2: Colors.setColorScheme(Colors.test); break;
+                }
+                break;
+            case KeyEvent.VK_E:
+                DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                break;
+        }
     }
 
     private GridBagConstraints setGrid(int gridX, int gridY, float weightX, float weightY)

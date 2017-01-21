@@ -106,9 +106,13 @@ public class CustomFrame extends JFrame
     {
     }
 
-    public void allowMinimizing(boolean allow)
+    public void allowMinimizing(boolean allow) { minimizeButton.setVisible(allow); }
+    public void allowResizing(boolean allow)
     {
-        minimizeButton.setVisible(allow);
+        if(allow)
+            cr.registerComponent(this);
+        else
+            cr.deregisterComponent(this);
     }
 
     public void setMinimumSize(Dimension s)
@@ -138,7 +142,6 @@ public class CustomFrame extends JFrame
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.setBackground(Colors.get(Colors.Background1));
         button.addActionListener(e -> {
             JComponent b = (JComponent) e.getSource();
             Container c = b.getTopLevelAncestor();
@@ -155,7 +158,6 @@ public class CustomFrame extends JFrame
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.setBackground(Colors.get(Colors.Background1));
         button.addActionListener(e -> {
             JComponent b = (JComponent) e.getSource();
             Container c = b.getTopLevelAncestor();

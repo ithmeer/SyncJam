@@ -1,6 +1,7 @@
 package syncjam.ui.net;
 
 import syncjam.ui.Colors;
+import syncjam.ui.base.DialogWindow;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
@@ -20,7 +21,6 @@ public class AddServerPanel extends JPanel
 
     public AddServerPanel(final NetworkPanel networkPanel) {
         super();
-
         this.setBackground(Colors.get(Colors.Background1));
 
         GridBagConstraints constraints = new GridBagConstraints();
@@ -45,6 +45,8 @@ public class AddServerPanel extends JPanel
                     cancelButton.clicked();
             }
         };
+        this.setFocusable(true);
+        this.addKeyListener(keys);
 
         String[] labels = {"Name", "IP Address", "Port", "Password"};
         int numPairs = labels.length;
@@ -88,8 +90,11 @@ public class AddServerPanel extends JPanel
                 int port = Integer.parseInt(fields[2].getText());
                 String password = fields[3].getText();
 
-                System.out.println("Adding: " + address + "\n" + port + "\n" + password);
-                networkPanel.addServer(name, address, port, password);
+                if(!address.equals("")) {
+                    System.out.println("Adding: " + address + "\n" + port + "\n" + password);
+                    networkPanel.addServer(name, address, port, password);
+                }
+                else DialogWindow.showErrorMessage("No SerAddress set");
                 networkPanel.back();
             }
         });
@@ -181,10 +186,10 @@ class NetTextField extends TextField
 {
     protected NetTextField(int length, String default_text)
     {
-        setBackground(Colors.get(Colors.Background1));
-        setForeground(Colors.get(Colors.Foreground1));
         setColumns(length);
         setText(default_text);
+        setBackground(Colors.get(Colors.Background1));
+        setForeground(Colors.get(Colors.Foreground1));
     }
     protected NetTextField(int length, String default_text, KeyAdapter key)
     {
@@ -197,11 +202,15 @@ class NetLabel extends JLabel
     protected NetLabel(String text)
     {
         super(text);
-        setForeground(Colors.get(Colors.Foreground1));
     }
     protected NetLabel(String text, int trailing)
     {
         super(text, trailing);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         setForeground(Colors.get(Colors.Foreground1));
     }
 }
@@ -209,13 +218,10 @@ class NetButton extends ButtonUI
 {
     protected NetButton(String text)
     {
-        super(0, 0, Colors.get(Colors.Background2));
+        super(0, 0, Colors.Background2);
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }
     @Override
-    protected void clicked()
-    {
-
-    }
+    protected void clicked() {}
 }
