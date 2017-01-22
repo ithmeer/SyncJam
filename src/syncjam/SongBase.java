@@ -61,6 +61,11 @@ public abstract class SongBase implements Song
     }
 
     @Override
+    public BufferedImage getPrescaledAlbumArt(int size)
+    {
+        return _metadata.getPrescaledAlbumArt(size);
+    }
+    @Override
     public BufferedImage getScaledAlbumArt(int width, int height)
     {
         return _metadata.getScaledAlbumArt(width, height);

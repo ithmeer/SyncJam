@@ -26,7 +26,7 @@ public class NetworkIndicator extends JPanel
         switch(status)
         {
             case Hosted:
-                g.setColor(Color.blue.brighter());
+                g.setColor(Color.green);
                 break;
             case Connected:
                 g.setColor(Color.green);

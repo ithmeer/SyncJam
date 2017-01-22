@@ -3,6 +3,7 @@ package syncjam.ui;
 import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.ui.base.CustomFrame;
 import syncjam.ui.base.DialogWindow;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
@@ -19,12 +20,13 @@ import java.awt.event.KeyListener;
 
 public class SyncJamUI implements KeyListener
 {
-    public CustomFrame window = null;
+    private CustomFrame window = null;
     private InfoUI infoUI = null;
     private ControlUI controlUI = null;
     private PlaylistUI playlistUI = null;
     private SliderUI songPosition = null;
 
+    private JPanel lastPanel = null;
     private NetworkPanel networkPanel = null;
     private int colorToggle = 0;
 
@@ -36,17 +38,19 @@ public class SyncJamUI implements KeyListener
             @Override
             protected void close()
             {
-                super.close();
                 NetworkController network = services.getService(NetworkController.class);
-                if(network != null && network.getStatus() != ConnectionStatus.Unconnected)
+                if(network.getStatus() != ConnectionStatus.Unconnected && network.getStatus() != ConnectionStatus.Disconnected)
                     network.disconnect();
                 System.exit(0);
             }
         };
         window.setPreferredSize(new Dimension(360, 620));
+        UIServices.setMainWindow(window);
+        UIServices.setSyncJamUI(this);
 
         //= = = = = = = = = = Window Stuff = = = = = = = = = =//
 
+        window.setFocusTraversalKeysEnabled(false);
         window.addKeyListener(this);
         window.setFocusable(true);
 
@@ -76,6 +80,7 @@ public class SyncJamUI implements KeyListener
 
         //Player Components
 
+        //InfoUI
         infoUI = new InfoUI(services);
         constraints = setGrid(0, 0, 1.0f, 0.0f, 0, 114);
         constraints.anchor = GridBagConstraints.PAGE_START;
@@ -85,6 +90,7 @@ public class SyncJamUI implements KeyListener
         window.cm.registerComponent(infoUI);
         playerPanel.add(infoUI, constraints);
 
+        //ControlUI
         controlUI = new ControlUI(services);
         constraints = setGrid(0, 1, 1.0f, 0.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
@@ -93,6 +99,7 @@ public class SyncJamUI implements KeyListener
         window.cm.registerComponent(controlUI);
         playerPanel.add(controlUI, constraints);
 
+        //Song Position Slider
         songPosition = new SongPositionSlider(services);
         constraints = setGrid(0, 2, 1.0f, 0.0f, 0, 28);
         constraints.anchor = GridBagConstraints.PAGE_START;
@@ -101,6 +108,7 @@ public class SyncJamUI implements KeyListener
 
         playerPanel.add(songPosition, constraints);
 
+        //PlaylistUI
         playlistUI = new PlaylistUI(services);
         constraints = setGrid(0, 3, 1.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_END;
@@ -189,7 +197,6 @@ public class SyncJamUI implements KeyListener
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
         window.open();
-        DialogWindow.setMainWindow(window);
 
         networkPanel.setVisible(false);
     }
@@ -218,6 +225,10 @@ public class SyncJamUI implements KeyListener
             case KeyEvent.VK_E:
                 DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 break;
+            case KeyEvent.VK_TAB:
+                if(lastPanel == null) lastPanel = networkPanel;
+                if(!lastPanel.isVisible()) togglePanel(lastPanel);
+                break;
         }
     }
 
@@ -241,6 +252,7 @@ public class SyncJamUI implements KeyListener
 
     public boolean togglePanel(JPanel panel)
     {
+        lastPanel = panel;
         int pWidth = panel.getWidth();
         Dimension min = window.getMinimumSize();
         if(panel.isVisible())

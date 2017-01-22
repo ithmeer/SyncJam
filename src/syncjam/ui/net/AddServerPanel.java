@@ -2,14 +2,17 @@ package syncjam.ui.net;
 
 import syncjam.ui.Colors;
 import syncjam.ui.base.DialogWindow;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class AddServerPanel extends JPanel
 {
@@ -17,14 +20,43 @@ public class AddServerPanel extends JPanel
     //private final NetTextField addressField, portField, passField;
     private final NetTextField[] fields;
     private final NetButton addButton, cancelButton;
+    private NetworkPanel networkPanel;
 
+    private KeyAdapter keys = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            int key = e.getKeyCode();
+            if(networkPanel.isVisible())
+            {
+                switch (key) {
+                    case KeyEvent.VK_ENTER:
+                        addButton.clicked();
+                        break;
+                    case KeyEvent.VK_ESCAPE:
+                        cancelButton.clicked();
+                        break;
+                    case KeyEvent.VK_TAB:
+                        boolean selected = false;
+                        for (NetTextField f : fields)
+                            if (f.hasFocus())
+                                selected = true;
+                        if (!selected)
+                            fields[0].requestFocus();
+                        break;
+                }
+            }
+        }
+    };
 
-    public AddServerPanel(final NetworkPanel networkPanel) {
+    public AddServerPanel(final NetworkPanel np) {
         super();
+        networkPanel = np;
         this.setBackground(Colors.get(Colors.Background1));
 
         GridBagConstraints constraints = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
+
+        UIServices.getMainWindow().addKeyListener(keys);
 
         NetLabel title = new NetLabel("Add Server", JLabel.CENTER);
         constraints.insets = new Insets(4,4,4,4);
@@ -35,18 +67,6 @@ public class AddServerPanel extends JPanel
         constraints.weightx = 1;
         constraints.weighty = .5;
         this.add(title, constraints);
-
-        KeyAdapter keys = new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if(e.getKeyChar() == KeyEvent.VK_ENTER)
-                    addButton.clicked();
-                if(e.getKeyChar() == KeyEvent.VK_ESCAPE)
-                    cancelButton.clicked();
-            }
-        };
-        this.setFocusable(true);
-        this.addKeyListener(keys);
 
         String[] labels = {"Name", "IP Address", "Port", "Password"};
         int numPairs = labels.length;
@@ -64,7 +84,15 @@ public class AddServerPanel extends JPanel
             fields[i] = textField;
         }
 
+        //fields[2].setNumbersOnly(true);
         fields[2].setText(defaultPort);
+        fields[2].addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+                fields[2].setText(fields[2].getText().replaceAll("[^\\d]", ""));
+            }
+        });
 
         //Lay out the panel.
         makeCompactGrid(p1,
@@ -87,21 +115,29 @@ public class AddServerPanel extends JPanel
             protected void clicked() {
                 String name = fields[0].getText();
                 String address = fields[1].getText();
-                int port = Integer.parseInt(fields[2].getText());
+                fields[2].setText(fields[2].getText().replaceAll("[^\\d]", ""));
+                String portText = fields[2].getText();
+                int port = portText.equals("") ? 0 : Integer.parseInt(portText);
                 String password = fields[3].getText();
 
-                if(!address.equals("")) {
+                if(address.equals(""))
+                    DialogWindow.showErrorMessage("No server address set");
+                else if(port == 0)
+                    DialogWindow.showErrorMessage("No port set");
+                else
+                {
+                    UIServices.getMainWindow().removeKeyListener(keys);
                     System.out.println("Adding: " + address + "\n" + port + "\n" + password);
                     networkPanel.addServer(name, address, port, password);
+                    networkPanel.back();
                 }
-                else DialogWindow.showErrorMessage("No SerAddress set");
-                networkPanel.back();
             }
         });
 
         p2.add(cancelButton = new NetButton("Cancel") {
             @Override
             protected void clicked() {
+                UIServices.getMainWindow().removeKeyListener(keys);
                 networkPanel.back();
             }
         });
@@ -117,6 +153,8 @@ public class AddServerPanel extends JPanel
         constraints.ipady = 80;
         this.add(p2, constraints);
         repaint();
+
+
     }
 
 
@@ -190,6 +228,13 @@ class NetTextField extends TextField
         setText(default_text);
         setBackground(Colors.get(Colors.Background1));
         setForeground(Colors.get(Colors.Foreground1));
+        addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                super.focusGained(e);
+                selectAll();
+            }
+        });
     }
     protected NetTextField(int length, String default_text, KeyAdapter key)
     {

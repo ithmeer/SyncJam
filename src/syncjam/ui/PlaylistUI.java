@@ -60,6 +60,10 @@ public class PlaylistUI extends ItemList
         Iterator<Song> songIter = _playlist.iterator();
         Song draggedSong = null;
         int draggedIndex = -1;
+        if(_playlist.getCurrentSongIndex() < _playlist.size())
+            scrollbar.setMarker(_playlist.getCurrentSongIndex(), _playlist.size());
+        else
+            scrollbar.setMarker(-1, 0);
         while (songIter.hasNext())
         {
             Song curSong = songIter.next();
@@ -220,14 +224,14 @@ public class PlaylistUI extends ItemList
 
         //draw dark color behind art
         g.setColor(Colors.get(Colors.Background1));
-        int imgsize = itemHeight - ins * 2 - 2;
+        int imgsize = itemHeight - ins * 2 - 1;
         g.fillRect(thisItemXPos + 1,
                    thisItemYPos + 1,
                    imgsize,
                    imgsize);
 
         //draw art
-        BufferedImage albumImg = song.getScaledAlbumArtFast(imgsize+1, imgsize+1);
+        BufferedImage albumImg = song.getPrescaledAlbumArt(1); //song.getScaledAlbumArt(imgsize, imgsize);
         if(albumImg != null)
             g.drawImage(albumImg,
                         thisItemXPos + 1,

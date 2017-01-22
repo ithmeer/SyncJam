@@ -48,7 +48,8 @@ public class InfoUI extends JPanel
         g.drawRect(1, 1, aaWidth + 1, aaHeight + 1);
         if (song.getAlbumArt() != null)
         {
-            g.drawImage(song.getScaledAlbumArtFast(aaWidth, aaHeight), 2, 2, null);
+            //g.drawImage(song.getScaledAlbumArt(aaWidth, aaHeight), 2, 2, null);
+            g.drawImage(song.getPrescaledAlbumArt(0), 2, 2, null);
         }
     }
 

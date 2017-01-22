@@ -1,9 +1,8 @@
 package syncjam.ui.base;
 
 import syncjam.ui.Colors;
-import syncjam.ui.CustomFrame;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.TextButton;
-import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,13 +19,6 @@ import java.awt.event.KeyEvent;
  */
 public class DialogWindow
 {
-    private static Component mainWindow;
-
-    public static void setMainWindow(Component c)
-    {
-        mainWindow = c;
-    }
-
     public static void showErrorMessage(String message)
     {
         //final JFrame window = new JFrame("Error");
@@ -36,29 +28,17 @@ public class DialogWindow
         window.allowMinimizing(false);
         window.allowResizing(false);
 
+        // Panel
+        JPanel panel = createPanel();
+        window.cm.registerComponent(panel);
         //
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-        panel.setBackground(Colors.get(Colors.Background1));
-        panel.setForeground(Colors.get(Colors.Foreground1));
-        panel.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
-
-        JTextPane text = new JTextPane();
+        //TextPane
+        JTextPane text = createText(message);
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
-        text.setText(message);
-
-        StyledDocument doc = text.getStyledDocument();
-        SimpleAttributeSet center = new SimpleAttributeSet();
-        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
-        doc.setParagraphAttributes(0, doc.getLength(), center, false);
-
-
-        text.setBorder( new EmptyBorder(16, 16, 16, 16) );
-        text.setBackground(Colors.get(Colors.Background1));
-        text.setForeground(Colors.get(Colors.Foreground1));
+        window.cm.registerComponent(text);
         panel.add(text);
-
+        //
+        //OK Button
         TextButton okButton = new TextButton("OK", 70, 30) {
             protected void clicked() { window.dispose(); }
         };
@@ -68,7 +48,6 @@ public class DialogWindow
         //
 
         window.getContentPanel().add(panel);
-
         window.setFocusable(true);
         window.addKeyListener(new KeyAdapter() {
             @Override
@@ -80,6 +59,35 @@ public class DialogWindow
         });
 
         window.open();
-        window.setLocationRelativeTo(mainWindow);
+        window.setLocationRelativeTo(UIServices.getMainWindow());
+    }
+
+    private static JPanel createPanel() {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setBackground(Colors.get(Colors.Background1));
+        p.setForeground(Colors.get(Colors.Foreground1));
+        p.setBorder(BorderFactory.createEmptyBorder(0, 40, 10, 40));
+
+        return p;
+    }
+    private static JTextPane createText(String m)
+    {
+        JTextPane t = new JTextPane();
+        t.setText(m);
+        t.setEditable(false);
+        t.getCaret().deinstall(t);
+
+        // Center Text
+        StyledDocument doc = t.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+        //
+        t.setBorder( new EmptyBorder(16, 16, 16, 16) );
+        t.setBackground(Colors.get(Colors.Background1));
+        t.setForeground(Colors.get(Colors.Foreground1));
+
+        return t;
     }
 }

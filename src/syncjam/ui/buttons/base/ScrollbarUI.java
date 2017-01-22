@@ -12,11 +12,13 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     private final Colors background;
     private int inset = 5;
     protected int value = 0;
+    protected final int snapspeed = 8;
     protected int rawmax = 100, max = 100;
 
     private int pos = 0, length = 0, target = value;
 
     protected boolean dragging = false, scrolling = false;
+    private double marker = -1;
 
     public ScrollbarUI() { this(Colors.Background1); }
 
@@ -63,7 +65,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
         if(viewRatio < 1)
         {
-            int SNAPSPEED = 5;
+            drawMarker(g);
             //System.out.println("" + myH + " - " + max + " - " + length);
 
             //only turn off scrolling when half a scroll off the edge of list
@@ -73,7 +75,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             //smooth bar movement
             if (value != target)
             {
-                value -= (value - target) / SNAPSPEED + (int)Math.signum(value - target);
+                value -= (value - target) / snapspeed + (int)Math.signum(value - target);
             }
 
             //allows scrolling past the edges for snapback effect
@@ -105,6 +107,22 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         else
         {
             value = 0;
+        }
+    }
+
+    public void setMarker(int item, int numItems)
+    {
+        if(item == -1) //item -1 means no marker
+            marker = -1;
+        else if(numItems > item) //as long as there are songs
+            marker = (double)item/(double)(numItems-1);
+    }
+    public void drawMarker(Graphics g)
+    {
+        if(marker > -1) {
+            double viewRatio = (float)getHeight() / (float)( rawmax );
+            g.setColor(Colors.get(Colors.Highlight));
+            g.fillRect(inset, inset + (int)(marker * (myH-inset)), myW, 4);
         }
     }
 
@@ -177,7 +195,7 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void scrollEvent(MouseWheelEvent e)
     {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            int sc = target + e.getUnitsToScroll() * getHeight() / 6;
+            int sc = target + e.getUnitsToScroll() * getHeight() / snapspeed;
 
             setTargetValue(sc);
             scrolling = true;

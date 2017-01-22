@@ -23,6 +23,8 @@ public interface Song
 
     String getLengthString();
 
+    BufferedImage getPrescaledAlbumArt(int size);
+
     BufferedImage getScaledAlbumArt(int width, int height);
 
     BufferedImage getScaledAlbumArtFast(int width, int height);

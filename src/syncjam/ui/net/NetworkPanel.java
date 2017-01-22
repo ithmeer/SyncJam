@@ -4,10 +4,13 @@ import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * Created by Marty on 6/12/2016
@@ -19,6 +22,53 @@ public class NetworkPanel extends JPanel
     private JPanel visiblePanel;
     private final NetworkController _network;
     private ButtonUI connectButton, disconnectButton, hostButton, addButton, removeButton;
+
+    private KeyAdapter keys = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            super.keyReleased(e);
+            if(visiblePanel == mainPanel && isVisible())
+            {
+                switch (e.getKeyCode())
+                {
+                    case KeyEvent.VK_A:
+                        addButton.doClick();
+                        break;
+                    case KeyEvent.VK_R:
+                        removeButton.doClick();
+                        break;
+                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_C:
+                        connectButton.doClick();
+                        break;
+                    case KeyEvent.VK_D:
+                        disconnectButton.doClick();
+                        break;
+                    case KeyEvent.VK_H:
+                        hostButton.doClick();
+                        break;
+                    case KeyEvent.VK_UP:
+                        serverList.moveSelection("up");
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        serverList.moveSelection("down");
+                        break;
+                    case KeyEvent.VK_TAB:
+                        UIServices.getSyncJamUI().togglePanel(NetworkPanel.this);
+                        break;
+                }
+            }
+        }
+    };
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        if(aFlag)
+            UIServices.getMainWindow().addKeyListener(keys);
+        else
+            UIServices.getMainWindow().removeKeyListener(keys);
+    }
 
     public NetworkPanel(ServiceContainer services)
     {
@@ -158,6 +208,7 @@ public class NetworkPanel extends JPanel
     public void disconnect()
     {
         _network.disconnect();
+        serverList.disconnected();
         statusEnableButtons();
     }
 

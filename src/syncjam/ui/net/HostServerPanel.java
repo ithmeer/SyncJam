@@ -1,10 +1,13 @@
 package syncjam.ui.net;
 
 import syncjam.ui.Colors;
+import syncjam.ui.UIServices;
+import syncjam.ui.base.DialogWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -15,14 +18,39 @@ public class HostServerPanel extends JPanel
     private final NetTextField[] fields;
     private final NetButton hostButton, cancelButton;
 
+    private KeyAdapter keys = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            int key = e.getKeyCode();
+            switch(key)
+            {
+                case KeyEvent.VK_ENTER:
+                    hostButton.clicked();
+                    break;
+                case KeyEvent.VK_ESCAPE:
+                    cancelButton.clicked();
+                    break;
+                case KeyEvent.VK_TAB:
+                    boolean selected = false;
+                    for(NetTextField f : fields)
+                        if(f.hasFocus())
+                            selected = true;
+                    if(!selected)
+                        fields[0].requestFocus();
+                    break;
+            }
+        }
+    };
+
 
     public HostServerPanel(final NetworkPanel networkPanel) {
         super();
-
         this.setBackground(Colors.get(Colors.Background1));
 
         GridBagConstraints constraints = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
+
+        UIServices.getMainWindow().addKeyListener(keys);
 
         NetLabel title = new NetLabel("Host Server", JLabel.CENTER);
         constraints.insets = new Insets(4,4,4,4);
@@ -33,16 +61,6 @@ public class HostServerPanel extends JPanel
         constraints.weightx = 1;
         constraints.weighty = .5;
         this.add(title, constraints);
-
-        KeyAdapter keys = new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if(e.getKeyChar() == KeyEvent.VK_ENTER)
-                    hostButton.clicked();
-                if(e.getKeyChar() == KeyEvent.VK_ESCAPE)
-                    cancelButton.clicked();
-            }
-        };
 
         String[] labels = {"Password", "Port"};
         int numPairs = labels.length;
@@ -61,6 +79,13 @@ public class HostServerPanel extends JPanel
         }
 
         fields[1].setText(defaultPort);
+        fields[1].addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+                fields[1].setText(fields[1].getText().replaceAll("[^\\d]", ""));
+            }
+        });
 
         //Lay out the panel.
         makeCompactGrid(p1,
@@ -81,17 +106,26 @@ public class HostServerPanel extends JPanel
             @Override
             protected void clicked() {
                 String password = fields[0].getText();
-                int port = Integer.parseInt(fields[1].getText());
+                fields[1].setText(fields[1].getText().replaceAll("[^\\d]", ""));
+                String portText = fields[1].getText();
+                int port = portText.equals("") ? 0 : Integer.parseInt(portText);
 
-                System.out.println("Hosting: " + port + "\n" + password);
-                networkPanel.hostServer(port, password);
-                networkPanel.back();
+                if(port == 0)
+                    DialogWindow.showErrorMessage("No port set");
+                else
+                {
+                    UIServices.getMainWindow().removeKeyListener(keys);
+                    System.out.println("Hosting: " + port + "\n" + password);
+                    networkPanel.hostServer(port, password);
+                    networkPanel.back();
+                }
             }
         });
 
         p2.add(cancelButton = new NetButton("Cancel") {
             @Override
             protected void clicked() {
+                UIServices.getMainWindow().removeKeyListener(keys);
                 networkPanel.back();
             }
         });

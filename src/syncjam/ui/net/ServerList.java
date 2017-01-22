@@ -40,14 +40,19 @@ public class ServerList extends ItemList<ServerList.ServerItem>
         g.setColor(Colors.get(Colors.Foreground2));
         if(item == connectedServer)
             g.setColor(Colors.get(Colors.Highlight));
-        else if(item == selectedItem || hovering)
+        else if(item == selectedItem || hovering) {
+            ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .3f));
+            g.setColor(Colors.get(Colors.Background1));
+            g.fillRect(x+2,y+2, getWidth()-4,itemHeight-4);
+            ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
             g.setColor(Colors.get(Colors.Foreground1));
+        }
 
         Colors.setFont(g, 14);
-        g.drawString(item.getServerName(), x + 8, y + itemHeight/2 - 8);
+        g.drawString(item.getServerName(), x + 8, y + itemHeight/2 - 4);
 
         Colors.setFont(g, 12);
-        g.drawString(item.getIpAddress(),  x + 8, y + itemHeight/2 + 8);
+        g.drawString(item.getIpAddress(),  x + 8, y + itemHeight/2 + 12);
     }
 
     @Override
@@ -63,6 +68,10 @@ public class ServerList extends ItemList<ServerList.ServerItem>
         ServerItem server = selectedItem;
         network.connectToServer(server.getIpAddress(), server.getPort(), server.getPassword());
         connectedServer = server;
+    }
+    public void disconnected()
+    {
+        connectedServer = null;
     }
 
     public int getSelectedItemIndex()
@@ -86,6 +95,19 @@ public class ServerList extends ItemList<ServerList.ServerItem>
             }
             else selectedItem = null;
             remove(index);
+        }
+    }
+
+    public void moveSelection(String dir)
+    {
+        if(items.size() > 0) {
+            int cur = getSelectedItemIndex();
+            if (cur == -1)
+                selectedItem = getItem(0);
+            else if (dir.equals("up") && cur-1 > -1)
+                selectedItem = getItem(cur-1);
+            else if (dir.equals("down") && cur+1 < items.size())
+                selectedItem = getItem(cur+1);
         }
     }
     //=====================================

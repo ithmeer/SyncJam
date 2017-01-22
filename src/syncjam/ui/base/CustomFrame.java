@@ -1,13 +1,8 @@
-package syncjam.ui;
+package syncjam.ui.base;
 //-*- mode:java; encoding:utf-8 -*-
 // vim:set fileencoding=utf-8:
 
-import syncjam.ConnectionStatus;
-import syncjam.interfaces.NetworkController;
-import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
-import syncjam.ui.base.ComponentMover;
-import syncjam.ui.base.ComponentResizer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -84,8 +79,9 @@ public class CustomFrame extends JFrame
         };
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
-        cr = new ComponentResizer(this);
         cm = new ComponentMover(this, titleBar);
+        cm.registerComponent(contentPanel);
+        cr = new ComponentResizer(this);
         cr.setMinimumSize(new Dimension(minW, minH));
         Dimension screenSize = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
         cr.setMaximumSize(screenSize);
@@ -102,9 +98,7 @@ public class CustomFrame extends JFrame
         Dimension size = getSize();
         this.setLocation(new Point((int)(pos.getX() - size.getWidth()/2), (int)(pos.getY() - size.getHeight()/2)));
     }
-    protected void close()
-    {
-    }
+    protected void close() {}
 
     public void allowMinimizing(boolean allow) { minimizeButton.setVisible(allow); }
     public void allowResizing(boolean allow)
