@@ -158,11 +158,21 @@ public class ConcurrentAudioController implements AudioController
                 Song next = playlist.getNextSong();
                 playController.setSong(next);
                 if (next instanceof DatagramChannelSong)
+                {
                     playSong((DatagramChannelSong) next);
+                }
                 else if (next instanceof BytesSong)
+                {
                     playSong((BytesSong) next);
+                }
+                else if (next instanceof PartialBytesSong)
+                {
+                    playSong((PartialBytesSong) next);
+                }
                 else
-                    return;
+                {
+                    System.out.println("bad format");
+                }
             }
             catch (InterruptedException e)
             {
@@ -191,6 +201,15 @@ public class ConcurrentAudioController implements AudioController
     }
 
     /**
+     * Play a song from a byte array.
+     * @param song the song
+     */
+    private void playSong(PartialBytesSong song)
+    {
+        playUrl(XugglerIO.map(song.getTitle(), new BytesHandler(song.getData())), song, true);
+    }
+
+    /**
      * Play a song from a url.
      * @param url the Xuggler url
      * @param song the song
@@ -213,7 +232,7 @@ public class ConcurrentAudioController implements AudioController
                 {
                     try
                     {
-                        openContainer(container, client, IContainer.Type.WRITE);
+                        openContainer(container, client);
                     }
                     catch (Exception ex)
                     {
@@ -357,9 +376,11 @@ public class ConcurrentAudioController implements AudioController
         }
     }
 
-    public void openContainer(IContainer orig, XugglerClient client, IContainer.Type type)
+    public void openContainer(IContainer orig, XugglerClient client)
     {
-        int openStatus = client.container.open(client.channel, type, orig.getContainerFormat());
+        IContainerFormat format = orig.getContainerFormat();
+        format.setOutputFormat(format.getInputFormatShortName(), "", "");
+        int openStatus = client.container.open(client.channel, format);
         if (openStatus < 0)
         {
             IError err = IError.make(openStatus);

@@ -69,6 +69,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     }
 
                     socketObjectWriter.writeObject(metadata);
+                    socketObjectWriter.writeInt(100);
                 }
 
                 int songLength = socketObjectReader.readInt();
@@ -105,6 +106,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     }
                 }
 
+                song.setData(songData);
                 song.setComplete();
             }
             catch (IOException e)

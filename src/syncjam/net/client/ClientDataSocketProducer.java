@@ -55,7 +55,7 @@ public class ClientDataSocketProducer extends SocketProducer
                 int bytesWritten = 0;
                 int chunkSize = 1024;
 
-                socketObjectWriter.write(dataLen);
+                socketObjectWriter.writeInt(dataLen);
 
                 while (bytesWritten < dataLen)
                 {
@@ -63,6 +63,8 @@ public class ClientDataSocketProducer extends SocketProducer
                                              Math.min(chunkSize, dataLen - bytesWritten));
                     bytesWritten += chunkSize;
                 }
+
+                socketObjectWriter.flush();
             }
             catch (Exception e)
             {

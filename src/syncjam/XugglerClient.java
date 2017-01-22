@@ -4,6 +4,7 @@ import com.xuggle.xuggler.IContainer;
 
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 /**
  * Created by Ithmeer on 1/14/2017.
@@ -11,7 +12,7 @@ import java.nio.channels.ByteChannel;
 public class XugglerClient
 {
     public final IContainer container;
-    public final ByteChannel channel;
+    public final WritableByteChannel channel;
     public final SocketAddress address;
 
     private volatile int _failures = 0;
