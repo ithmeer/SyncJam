@@ -9,8 +9,11 @@ import syncjam.net.client.ClientSideSocket;
 import syncjam.net.server.ServerSideSocket;
 
 import javax.sound.sampled.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -70,9 +73,15 @@ public class ConcurrentAudioController implements AudioController
             // remove in case this is a reconnect-on-error
             _clientMap.remove(client.getIPAddress());
 
-            _clientMap.put(client.getIPAddress(),
-                           new XugglerClient(IContainer.make(), client.getStreamChannel(),
-                                             client.getIPAddress()));
+            try
+            {
+                _clientMap.put(client.getIPAddress(),
+                               new XugglerClient(IContainer.make(), client.getStreamChannel().getOutputStream(),
+                                                 client.getIPAddress()));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -188,7 +197,8 @@ public class ConcurrentAudioController implements AudioController
      */
     private void playSong(DatagramChannelSong song)
     {
-        playUrl(XugglerIO.map(song.getTitle(), song.getStreamChannel()), song, false);
+        InputStream channel = song.getStreamChannel();
+        playUrl(XugglerIO.map(song.getTitle(), channel), song, false);
     }
 
     /**
@@ -218,36 +228,15 @@ public class ConcurrentAudioController implements AudioController
     {
         // Create the container for the client/host
         IContainer container = IContainer.make();
-        openContainer(container, url, IContainer.Type.READ);
-
-        if (isServer)
+        if (!isServer)
         {
-            playController.setSongPosition(0);
-
-            synchronized (_clientMap)
-            {
-                List<XugglerClient> deadClients = new LinkedList<XugglerClient>();
-
-                for (XugglerClient client : _clientMap.values())
-                {
-                    try
-                    {
-                        openContainer(container, client);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (client.isDead())
-                        {
-                            deadClients.add(client);
-                        }
-                    }
-                }
-
-                for (XugglerClient client : deadClients)
-                {
-                    _clientMap.remove(client.address);
-                }
-            }
+            IContainerFormat f = IContainerFormat.make();
+            f.setInputFormat("mp3");
+            openContainer(container, url, IContainer.Type.READ, f);
+        }
+        else
+        {
+            openContainer(container, url, IContainer.Type.READ, null);
         }
 
         int numStreams = container.getNumStreams();
@@ -279,11 +268,45 @@ public class ConcurrentAudioController implements AudioController
         }
 
         openJavaSound(audioCoder);
+        container.queryStreamMetaData();
 
         // container duration in microseconds
         int durationInSecs = (int) (TimeUnit.SECONDS.convert(container.getDuration(),
                                                              TimeUnit.MICROSECONDS));
-        song.setLength(durationInSecs);
+        if (song.getLength() == 0)
+            song.setLength(durationInSecs);
+
+        if (isServer)
+        {
+            playController.setSongPosition(0);
+
+            synchronized (_clientMap)
+            {
+                List<XugglerClient> deadClients = new LinkedList<XugglerClient>();
+
+                for (XugglerClient client : _clientMap.values())
+                {
+                    try
+                    {
+                        openContainer(container, client);
+                        IStream c = container.addNewStream(ICodec.ID.CODEC_ID_MP3);
+                        IStreamCoder coder = c.getStreamCoder();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (client.isDead())
+                        {
+                            deadClients.add(client);
+                        }
+                    }
+                }
+
+                for (XugglerClient client : deadClients)
+                {
+                    _clientMap.remove(client.address);
+                }
+            }
+        }
 
         IPacket packet = IPacket.make();
         outer: while (container.readNextPacket(packet) >= 0)
@@ -299,7 +322,7 @@ public class ConcurrentAudioController implements AudioController
                     {
                         try
                         {
-                            client.container.writePacket(packet.copyReference());
+                            client.container.writePacket(IPacket.make(packet, true));
                         }
                         catch (Exception ex)
                         {
@@ -363,9 +386,10 @@ public class ConcurrentAudioController implements AudioController
         container.close();
     }
 
-    public void openContainer(IContainer container, String url, IContainer.Type type)
+    public void openContainer(IContainer container, String url, IContainer.Type type,
+                              IContainerFormat format)
     {
-        int openStatus = container.open(url, type, null);
+        int openStatus = container.open(url, type, format);
         if (openStatus < 0)
         {
             IError err = IError.make(openStatus);
@@ -395,6 +419,9 @@ public class ConcurrentAudioController implements AudioController
                         orig.getURL(), client.address));
             }
         }
+
+        client.container.addNewStream(ICodec.ID.CODEC_ID_MP3);
+        client.container.writeHeader();
     }
 
     private void openJavaSound(IStreamCoder aAudioCoder)

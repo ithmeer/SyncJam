@@ -1,5 +1,7 @@
 package syncjam.net;
 
+import syncjam.interfaces.Song;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +9,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -20,12 +21,12 @@ public abstract class NetworkSocket
     private final SocketAddress _ipAddress;
     protected final HashMap<SocketType, InputStream> _inputStreams;
     protected final HashMap<SocketType, OutputStream> _outputStreams;
-    protected final ByteChannel _streamChannel;
+    protected final Socket _streamChannel;
     private final List<Socket> _sockets;
 
     public enum SocketType { Command, Data }
 
-    public NetworkSocket(Executor exec, List<Socket> sockets, ByteChannel channel,
+    public NetworkSocket(Executor exec, List<Socket> sockets, Socket streamSock,
                          SocketAddress ipAddress) throws IOException
     {
         _exec = exec;
@@ -39,7 +40,7 @@ public abstract class NetworkSocket
         _inputStreams.put(SocketType.Data, sockets.get(1).getInputStream());
         _outputStreams.put(SocketType.Data, sockets.get(1).getOutputStream());
 
-        _streamChannel = channel;
+        _streamChannel = streamSock;
         _sockets = sockets;
     }
 
@@ -48,7 +49,7 @@ public abstract class NetworkSocket
         return _ipAddress;
     }
 
-    public ByteChannel getStreamChannel()
+    public Socket getStreamChannel()
     {
         return _streamChannel;
     }

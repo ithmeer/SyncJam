@@ -1,6 +1,6 @@
 package syncjam;
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PartialBytesSong extends PartialSongBase
 {
-    private AtomicReference<byte[]> _songData =  new AtomicReference<byte[]>();
-    private Semaphore _gate = new Semaphore(0);
+    private AtomicReference<byte[]> _songData =  new AtomicReference<>();
+    private CountDownLatch _gate = new CountDownLatch(1);
 
     public PartialBytesSong(SongMetadata metadata)
     {
@@ -21,7 +21,7 @@ public class PartialBytesSong extends PartialSongBase
     {
         try
         {
-            _gate.acquire();
+            _gate.await();
         }
         catch (InterruptedException e)
         {
@@ -34,6 +34,6 @@ public class PartialBytesSong extends PartialSongBase
     public void setData(byte[] data)
     {
         _songData.set(data);
-        _gate.release();
+        _gate.countDown();
     }
 }

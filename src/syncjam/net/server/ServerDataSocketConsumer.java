@@ -70,6 +70,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
 
                     socketObjectWriter.writeObject(metadata);
                     socketObjectWriter.writeInt(100);
+                    socketObjectWriter.flush();
                 }
 
                 int songLength = socketObjectReader.readInt();
@@ -97,13 +98,13 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     song.setProgress(percentComplete);
 
                     // send progress back to all clients
-                    for (ServerSideSocket client : _clients)
+                    /*for (ServerSideSocket client : _clients)
                     {
                         if (_inputStream != client.getInputStream(NetworkSocket.SocketType.Data))
                         {
                             client.getOutputStream(NetworkSocket.SocketType.Data).write(percentComplete);
                         }
-                    }
+                    }*/
                 }
 
                 song.setData(songData);

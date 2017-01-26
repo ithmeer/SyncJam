@@ -1,5 +1,8 @@
 package syncjam.xml;
 
+import syncjam.utilities.ServerInfo;
+
+import javax.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.bind.annotation.XmlElement;
 
 /**
@@ -7,6 +10,18 @@ import javax.xml.bind.annotation.XmlElement;
  */
 public class XmlServerInfo
 {
+    public XmlServerInfo()
+    {
+    }
+
+    public XmlServerInfo(ServerInfo svr)
+    {
+        _name = svr.serverName;
+        _ip = svr.ipAddress;
+        _port = svr.port;
+        _password = svr.password;
+    }
+
     @XmlElement(name = "name")
     private String _name;
 

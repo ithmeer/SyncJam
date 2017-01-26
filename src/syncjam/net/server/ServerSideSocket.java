@@ -24,7 +24,7 @@ public class ServerSideSocket extends NetworkSocket
 
     public ServerSideSocket(Executor exec, ServiceContainer services,
                             Iterable<ServerSideSocket> clients, List<Socket> sockets,
-                            ByteChannel channel, SocketAddress ipAddress)
+                            Socket channel, SocketAddress ipAddress)
             throws IOException
     {
         super(exec, sockets, channel, ipAddress);

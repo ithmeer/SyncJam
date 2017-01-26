@@ -2,6 +2,7 @@ package syncjam;
 
 import com.xuggle.xuggler.IContainer;
 
+import java.io.OutputStream;
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -12,14 +13,14 @@ import java.nio.channels.WritableByteChannel;
 public class XugglerClient
 {
     public final IContainer container;
-    public final WritableByteChannel channel;
+    public final OutputStream channel;
     public final SocketAddress address;
 
     private volatile int _failures = 0;
 
     private final int MAX_RETRIES = 5;
 
-    public XugglerClient(IContainer container, ByteChannel streamChannel, SocketAddress addr)
+    public XugglerClient(IContainer container, OutputStream streamChannel, SocketAddress addr)
     {
         this.container = container;
         this.channel = streamChannel;

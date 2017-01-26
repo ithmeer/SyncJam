@@ -49,7 +49,6 @@ public class ClientDataSocketConsumer extends SocketConsumer
             {
                 SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
                 DatagramChannelSong song = new DatagramChannelSong(metadata);
-                _playlist.add(song);
 
                 int progress;
                 do
@@ -59,8 +58,9 @@ public class ClientDataSocketConsumer extends SocketConsumer
                 }
                 while (progress < 100);
 
+                song.setStreamChannel(_parent.getStreamChannel().getInputStream());
                 song.setComplete();
-                song.setStreamChannel(_parent.getStreamChannel());
+                _playlist.add(song);
             }
             catch (Exception e)
             {

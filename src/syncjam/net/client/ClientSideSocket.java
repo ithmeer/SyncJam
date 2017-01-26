@@ -23,7 +23,7 @@ public class ClientSideSocket extends NetworkSocket
     private final ClientDataSocketProducer _dataProducer;
 
     public ClientSideSocket(Executor exec, ServiceContainer services, LinkedList<Socket> sockets,
-                            ByteChannel channel, SocketAddress ipAddress)
+                            Socket channel, SocketAddress ipAddress)
             throws IOException
     {
         super(exec, sockets, channel, ipAddress);

@@ -10,6 +10,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @XmlRootElement(name="settings")
 public class SyncJamSettings implements Settings
 {
-    private static final String _savePath = "resources/settings.xml";
+    private static final String _savePath = "settings.xml";
 
     @XmlElement(name="server")
     private List<XmlServerInfo> _servers;
@@ -28,7 +29,7 @@ public class SyncJamSettings implements Settings
 
     private SyncJamSettings()
     {
-        // disallow instantiation of ItemDatabase outside this class
+        // disallow instantiation of SyncJamSettings outside this class
     }
 
     public static SyncJamSettings getInstance()
@@ -46,11 +47,21 @@ public class SyncJamSettings implements Settings
                 }
                 catch (JAXBException e)
                 {
-                    e.printStackTrace();
+                    _instance = new SyncJamSettings();
+                    _instance._servers = new LinkedList<>();
                 }
             }
 
             return _instance;
+        }
+    }
+
+    @Override
+    public void addServer(ServerInfo svr)
+    {
+        synchronized (SyncJamSettings.class)
+        {
+            _servers.add(new XmlServerInfo(svr));
         }
     }
 

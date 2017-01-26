@@ -57,6 +57,7 @@ public class ServerDataSocketProducer extends SocketProducer
 
                     socketObjectWriter.writeObject(metadata);
                     socketObjectWriter.writeInt(100);
+                    socketObjectWriter.flush();
                 }
             }
             catch (Exception e)

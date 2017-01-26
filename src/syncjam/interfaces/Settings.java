@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface Settings
 {
+    void addServer(ServerInfo svr);
+
     List<ServerInfo> getSavedServers();
 
     void saveToDisk();

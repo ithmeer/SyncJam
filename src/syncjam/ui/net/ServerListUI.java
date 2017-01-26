@@ -33,6 +33,7 @@ public class ServerListUI extends ItemList<ServerInfo>
     {
         ServerInfo server = new ServerInfo(name, ip, port, pass);
         add(server);
+        _settings.addServer(server);
         _settings.saveToDisk();
     }
 
