@@ -4,13 +4,13 @@ import syncjam.ConnectionStatus;
 import syncjam.SyncJamException;
 import syncjam.interfaces.AudioController;
 import syncjam.interfaces.NetworkController;
+import syncjam.utilities.ServerInfo;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.net.client.ClientSideSocket;
 import syncjam.net.server.ServerSideSocket;
 
 import java.io.IOException;
 import java.net.*;
-import java.nio.channels.DatagramChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -102,38 +102,35 @@ public class SocketNetworkController implements NetworkController
 
     /**
      * Client-to-server connection path. Connect to the given server.
-     * @param address
-     * @param port
-     * @param password
      * @throws SyncJamException
      */
     @Override
-    public void connectToServer(String address, int port, String password) throws SyncJamException
+    public void connectToServer(ServerInfo serverInfo) throws SyncJamException
     {
         setStatus(ConnectionStatus.Intermediate);
 
         final InetAddress host;
         try
         {
-            host = InetAddress.getByName(address);
+            host = InetAddress.getByName(serverInfo.ipAddress);
         }
         catch (UnknownHostException ex)
         {
             // TODO: log error
             setStatus(ConnectionStatus.Disconnected);
-            throw new SyncJamException(String.format(connectionErrorStr, address, port));
+            throw new SyncJamException(String.format(connectionErrorStr, serverInfo.ipAddress,
+                                                     serverInfo.port));
         }
 
         try
         {
             _isClient.set(true);
-            Socket commandSocket = new Socket(host, port);
+            Socket commandSocket = new Socket(host, serverInfo.port);
             commandSocket.setKeepAlive(true);
-            Socket dataSocket = new Socket(host, port);
+            Socket dataSocket = new Socket(host, serverInfo.port);
             dataSocket.setKeepAlive(true);
-            DatagramChannel streamChannel = DatagramChannel.open();
-            streamChannel.configureBlocking(false);
-            streamChannel.bind(dataSocket.getRemoteSocketAddress());
+            Socket streamSocket = new Socket(host, serverInfo.port);
+            streamSocket.setKeepAlive(true);
 
             InetAddress info = commandSocket.getInetAddress();
             System.out.printf("Connected to %s (%s)%n",
@@ -141,10 +138,10 @@ public class SocketNetworkController implements NetworkController
 
             LinkedList<Socket> sockets = new LinkedList<Socket>(
                     Arrays.asList(commandSocket, dataSocket));
-            ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets, streamChannel,
+            ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets, streamSocket,
                                                        commandSocket.getRemoteSocketAddress());
 
-            cs.sendCommand(password);
+            cs.sendCommand(serverInfo.password);
 
             String ack = cs.readNextCommand();
 
@@ -167,18 +164,18 @@ public class SocketNetworkController implements NetworkController
         {
             // TODO: log error
             setStatus(ConnectionStatus.Disconnected);
-            throw new SyncJamException(String.format(connectionErrorStr, address, port));
+            throw new SyncJamException(String.format(connectionErrorStr, serverInfo.ipAddress,
+                                                     serverInfo.port));
         }
     }
 
     /**
      * Server-to-clients connection path. Start the server socket and listen for connections.
-     * @param port
-     * @param password
+     * @param serverInfo
      * @throws SyncJamException
      */
     @Override
-    public void startServer(int port, final String password) throws SyncJamException
+    public void startServer(ServerInfo serverInfo) throws SyncJamException
     {
         setStatus(ConnectionStatus.Intermediate);
         final ServerSocket serv;
@@ -186,13 +183,13 @@ public class SocketNetworkController implements NetworkController
         try
         {
             _isClient.set(false);
-            serv = new ServerSocket(port);
+            serv = new ServerSocket(serverInfo.port);
             System.out.println("Server started\n");
         }
         catch (IOException e)
         {
             // TODO: log error
-            throw new SyncJamException(String.format(hostingErrorStr, port));
+            throw new SyncJamException(String.format(hostingErrorStr, serverInfo));
         }
 
         final Map<String, List<Socket>> socketMap = new HashMap<String, List<Socket>>();
@@ -218,7 +215,7 @@ public class SocketNetworkController implements NetworkController
                             socketMap.put(info.getHostAddress(), currentSockets);
                         }
 
-                        if (currentSockets.size() == 0)
+                        if (currentSockets.size() < 2)
                         {
                             currentSockets.add(clientSock);
                         }
@@ -226,7 +223,7 @@ public class SocketNetworkController implements NetworkController
                         {
                             currentSockets.add(clientSock);
                             socketMap.remove(info.getHostAddress());
-                            _exec.execute(new ServerRunner(password, currentSockets));
+                            _exec.execute(new ServerRunner(serverInfo.password, currentSockets));
                         }
                     }
                     catch (IOException e)
@@ -264,13 +261,10 @@ public class SocketNetworkController implements NetworkController
             {
                 Socket commandSocket = _socketList.get(0);
                 Socket dataSocket = _socketList.get(1);
-
-                DatagramChannel streamChannel = DatagramChannel.open();
-                streamChannel.configureBlocking(false);
-                streamChannel.bind(dataSocket.getRemoteSocketAddress());
+                Socket streamSocket = _socketList.get(2);
 
                 ServerSideSocket ss = new ServerSideSocket(_exec, _services, _clients,
-                                                           _socketList, streamChannel,
+                                                           _socketList, streamSocket,
                                                            commandSocket.getRemoteSocketAddress());
 
                 // TODO: investigate

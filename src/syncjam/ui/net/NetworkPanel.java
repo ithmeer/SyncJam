@@ -6,6 +6,7 @@ import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
 import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.utilities.ServerInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,7 @@ import java.awt.event.KeyEvent;
  */
 public class NetworkPanel extends JPanel
 {
-    private final ServerList serverList;
+    private final ServerListUI serverList;
     private final JPanel mainPanel;
     private JPanel visiblePanel;
     private final NetworkController _network;
@@ -98,7 +99,7 @@ public class NetworkPanel extends JPanel
         constraints.weighty = .5;
         mainPanel.add(title, constraints);
 
-        serverList = new ServerList();
+        serverList = new ServerListUI(services);
         constraints.gridy = 1;
         constraints.insets = new Insets(4,4,8,4);
         constraints.ipadx = 200;
@@ -214,7 +215,7 @@ public class NetworkPanel extends JPanel
 
     public void hostServer(int port, String password)
     {
-        _network.startServer(port, password);
+        _network.startServer(new ServerInfo(port, password));
         statusEnableButtons();
     }
 

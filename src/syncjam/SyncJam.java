@@ -5,6 +5,7 @@ import syncjam.net.ConcurrentCommandQueue;
 import syncjam.net.ConcurrentSongQueue;
 import syncjam.net.SocketNetworkController;
 import syncjam.ui.SyncJamUI;
+import syncjam.xml.SyncJamSettings;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -43,15 +44,12 @@ public class SyncJam
 
         servCon.addService(NetworkController.class, networkCon);
 
+        SyncJamSettings settings = SyncJamSettings.getInstance();
+        servCon.addService(Settings.class, settings);
+
         mainWindow = new SyncJamUI(servCon);
 
-        Timer timer = new Timer(1000/120, new ActionListener()
-        {
-            public void actionPerformed(ActionEvent event)
-            {
-                mainWindow.repaint();
-            }
-        });
+        Timer timer = new Timer(1000/120, event -> mainWindow.repaint());
 
         timer.setRepeats(true);
         timer.start();
