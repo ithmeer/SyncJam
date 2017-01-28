@@ -21,7 +21,7 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     protected int itemHeight = 60;
 
-    protected final ScrollbarUI scrollbar = new ScrollbarUI(Colors.Background2);
+    protected final ScrollbarUI scrollbar = new ScrollbarUI();
 
     protected int itemHoverIndex = -1;
     protected int itemDragIndex = -1;

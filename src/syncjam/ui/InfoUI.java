@@ -19,6 +19,7 @@ public class InfoUI extends JPanel
         myW = 350;
         myH = 114;
 
+        setOpaque(false);
         setMinimumSize(new Dimension(myW, myH));
         setMaximumSize(new Dimension(myW, myH));
         _playCon = services.getService(PlayController.class);
@@ -31,7 +32,6 @@ public class InfoUI extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        setBackground(Colors.get(Colors.Background1));
         Song curSong = _playCon.getSong();
 
         if(curSong != null)

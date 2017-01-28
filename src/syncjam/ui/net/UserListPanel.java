@@ -19,6 +19,7 @@ public class UserListPanel extends JPanel
         this.setPreferredSize(new Dimension(250, 500));
         this.setMinimumSize(new Dimension(250, 500));
         this.setLayout(new BorderLayout());
+        this.setOpaque(false);
 
         TextLabelUI title = new TextLabelUI("User List", JLabel.CENTER);
         title.setBorder(new EmptyBorder(8,8,8,8));
@@ -44,10 +45,5 @@ public class UserListPanel extends JPanel
         userListUI.add(new UserInfo("CuteDogBoy", "", 2));
 
         repaint();
-    }
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        setBackground(Colors.get(Colors.Background1));
     }
 }

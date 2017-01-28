@@ -48,7 +48,7 @@ public class HostServerPanel extends JPanel
 
     public HostServerPanel(final NetworkPanel networkPanel) {
         super();
-        this.setBackground(Colors.get(Colors.Background1));
+        setOpaque(false);
 
         GridBagConstraints constraints = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
@@ -155,12 +155,6 @@ public class HostServerPanel extends JPanel
         this.add(p2, constraints);
 
         repaint();
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        setBackground(Colors.get(Colors.Background1));
     }
 
     private SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)

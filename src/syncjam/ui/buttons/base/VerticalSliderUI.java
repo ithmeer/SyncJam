@@ -44,6 +44,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
 
         this.setMinimumSize(new Dimension(myW, myH));
         this.setMaximumSize(new Dimension(myW, myH));
+        setOpaque(false);
 
         value = startValue;
         posOnBar = value;
@@ -82,7 +83,6 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        setBackground(Colors.get(Colors.Background1));
 
         myH = getHeight() - 50;
 

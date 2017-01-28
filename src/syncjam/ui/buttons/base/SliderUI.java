@@ -43,6 +43,7 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
 
         this.setMinimumSize(new Dimension(myW, myH));
         this.setMaximumSize(new Dimension(myW, myH));
+        setOpaque(false);
 
         value = startValue;
         max =   maxValue;

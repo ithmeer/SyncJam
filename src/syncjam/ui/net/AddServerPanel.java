@@ -48,7 +48,7 @@ public class AddServerPanel extends JPanel
     public AddServerPanel(final NetworkPanel np) {
         super();
         networkPanel = np;
-        this.setBackground(Colors.get(Colors.Background1));
+        setOpaque(false);
 
         GridBagConstraints constraints = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
@@ -70,13 +70,9 @@ public class AddServerPanel extends JPanel
         fields = new TextFieldUI[numPairs];
 
         //Create and populate the panel.
-        JPanel p1 = new JPanel(new SpringLayout()){
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(Colors.get(Colors.Background2));
-            }
-        };
+        JPanel p1 = new JPanel(new SpringLayout());
+        p1.setOpaque(false);
+        
         for (int i = 0; i < numPairs; i++) {
             TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
             p1.add(l);
@@ -109,13 +105,8 @@ public class AddServerPanel extends JPanel
         this.add(p1, constraints);
 
 
-        JPanel p2 = new JPanel(new SpringLayout()){
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(Colors.get(Colors.Background1));
-            }
-        };
+        JPanel p2 = new JPanel(new SpringLayout());
+        p2.setOpaque(false);
 
         p2.add(addButton = new ButtonUI(0, 0, Colors.Background2, "Add") {
             @Override
@@ -162,12 +153,6 @@ public class AddServerPanel extends JPanel
         repaint();
 
 
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        setBackground(Colors.get(Colors.Background1));
     }
 
     protected SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
