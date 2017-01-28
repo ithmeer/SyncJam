@@ -59,8 +59,8 @@ public class SongMetadata implements Externalizable {
         return _songLength.get();
     }
 
-    public BufferedImage getPrescaledAlbumArt(int size) {
-        return _scaledAlbumArt[size];
+    public BufferedImage getPrescaledAlbumArt(int num) {
+        return _scaledAlbumArt[num];
     }
 
     public BufferedImage getScaledAlbumArt(int width, int height) {
@@ -135,6 +135,7 @@ public class SongMetadata implements Externalizable {
             g2.drawImage(ret, 0, 0, w, h, null);
 
             ret = tmp;
+            g2.dispose();
         } while (w != targetWidth || h != targetHeight);
 
         return ret;

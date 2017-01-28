@@ -1,16 +1,18 @@
 package syncjam.ui;
 
+import com.sun.awt.AWTUtilities;
 import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.interfaces.Settings;
 import syncjam.ui.base.CustomFrame;
-import syncjam.ui.base.DialogWindow;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
 import syncjam.ui.buttons.SongPositionSlider;
 import syncjam.ui.net.NetworkIndicator;
 import syncjam.ui.net.NetworkPanel;
+import syncjam.ui.net.UserListPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,44 +22,54 @@ import java.awt.event.KeyListener;
 
 public class SyncJamUI implements KeyListener
 {
-    private CustomFrame window = null;
-    private InfoUI infoUI = null;
-    private ControlUI controlUI = null;
-    private PlaylistUI playlistUI = null;
-    private SliderUI songPosition = null;
+    private CustomFrame _window;
+    private final InfoUI _infoUI;
+    private final ControlUI _controlUI;
+    private final PlaylistUI _playlistUI;
+    private final SliderUI _songPosition;
+    private final JPanel _tray;
 
-    private JPanel lastPanel = null;
-    private NetworkPanel networkPanel = null;
-    private int colorToggle = 0;
+    private final SettingsPanel _settingsPanel;
+    private final NetworkPanel _networkPanel;
+    private final UserListPanel _userListPanel;
+    private JPanel _lastPanel = null;
+    private int _colorToggle = 0;
 
     public SyncJamUI(ServiceContainer services)
     {
 
         //new WindowObject(360, 500, services);
-        window = new CustomFrame(340, 500) {
+        _window = new CustomFrame(340, 500) {
+            private JFrame _infoWindow = null;
             @Override
             protected void close()
             {
                 NetworkController network = services.getService(NetworkController.class);
                 if(network.getStatus() != ConnectionStatus.Unconnected && network.getStatus() != ConnectionStatus.Disconnected)
                     network.disconnect();
-                System.exit(0);
+                services.getService(Settings.class).saveToDisk();
+            }
+
+            @Override
+            protected void clickedInfoButton() {
+                if(_infoWindow == null || !_infoWindow.isValid())
+                    _infoWindow = DialogWindow.showErrorMessage("<About not yet implemented>", "SyncJam"); //TODO: About SyncJam
             }
         };
-        window.setPreferredSize(new Dimension(360, 620));
-        UIServices.setMainWindow(window);
+        _window.setPreferredSize(new Dimension(360, 620));
+        UIServices.setMainWindow(_window);
         UIServices.setSyncJamUI(this);
 
         //= = = = = = = = = = Window Stuff = = = = = = = = = =//
 
-        window.setFocusTraversalKeysEnabled(false);
-        window.addKeyListener(this);
-        window.setFocusable(true);
+        _window.setFocusTraversalKeysEnabled(false);
+        _window.addKeyListener(this);
+        _window.setFocusable(true);
 
         GridBagConstraints constraints;
-        window.getContentPanel().setLayout(new GridBagLayout());
-        window.setBackground(Colors.get(Colors.Background1));
-        //window.setUndecorated(true);
+        _window.getContentPanel().setLayout(new GridBagLayout());
+        _window.setBackground(Colors.get(Colors.Background1));
+        //_window.setUndecorated(true);
 
 
         //= = = = = = = = = = Player = = = = = = = = = =//
@@ -76,46 +88,46 @@ public class SyncJamUI implements KeyListener
         constraints = setGrid(0, 0, 1.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
-        window.getContentPanel().add(playerPanel, constraints);
+        _window.getContentPanel().add(playerPanel, constraints);
 
         //Player Components
 
         //InfoUI
-        infoUI = new InfoUI(services);
+        _infoUI = new InfoUI(services);
         constraints = setGrid(0, 0, 1.0f, 0.0f, 0, 114);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.insets = new Insets(8,8,0,8);
 
-        window.cm.registerComponent(infoUI);
-        playerPanel.add(infoUI, constraints);
+        _window.cm.registerComponent(_infoUI);
+        playerPanel.add(_infoUI, constraints);
 
         //ControlUI
-        controlUI = new ControlUI(services);
+        _controlUI = new ControlUI(services);
         constraints = setGrid(0, 1, 1.0f, 0.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
-        constraints.fill = GridBagConstraints.BOTH;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        window.cm.registerComponent(controlUI);
-        playerPanel.add(controlUI, constraints);
+        _window.cm.registerComponent(_controlUI);
+        playerPanel.add(_controlUI, constraints);
 
         //Song Position Slider
-        songPosition = new SongPositionSlider(services);
+        _songPosition = new SongPositionSlider(services);
         constraints = setGrid(0, 2, 1.0f, 0.0f, 0, 28);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.insets = new Insets(0,6,0,6);
 
-        playerPanel.add(songPosition, constraints);
+        playerPanel.add(_songPosition, constraints);
 
         //PlaylistUI
-        playlistUI = new PlaylistUI(services);
+        _playlistUI = new PlaylistUI(services);
         constraints = setGrid(0, 3, 1.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_END;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.insets = new Insets(8,8,8,8);
 
-        playerPanel.add(playlistUI, constraints);
+        playerPanel.add(_playlistUI, constraints);
 
         playerPanel.validate();
         playerPanel.repaint();
@@ -133,8 +145,8 @@ public class SyncJamUI implements KeyListener
         constraints = setGrid(1, 0, 0.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
-        window.cm.registerComponent(sideBar);
-        window.getContentPanel().add(sideBar, constraints);
+        _window.cm.registerComponent(sideBar);
+        _window.getContentPanel().add(sideBar, constraints);
 
         JPanel sideBarItems = new JPanel(new GridBagLayout()){
             @Override
@@ -160,7 +172,7 @@ public class SyncJamUI implements KeyListener
         //Network Button
         constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
         TextButton networkButton = new TextButton("C", 12, 12){
-            protected void clicked() { togglePanel(networkPanel); }
+            protected void clicked() { togglePanel(_networkPanel); }
         };
 
         sideBarItems.add(networkButton, constraints);
@@ -173,32 +185,50 @@ public class SyncJamUI implements KeyListener
 
         //= = = = = = = = = = Side Panels = = = = = = = = = =//
 
-        JPanel tray = new JPanel(){
+        _tray = new JPanel(new GridBagLayout()){
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 setBackground(Colors.get(Colors.Background1));
             }
         };
+        GridBagConstraints trayConstraints = new GridBagConstraints();
+        trayConstraints.anchor = GridBagConstraints.SOUTH;
+        trayConstraints.fill = GridBagConstraints.VERTICAL;
+        trayConstraints.weightx = 1.0;
+        trayConstraints.weighty = 1.0;
 
+        _networkPanel = new NetworkPanel(services);
+        trayConstraints.gridx = 0;
+        _tray.add(_networkPanel, trayConstraints);
+        _networkPanel.validate();
 
-        networkPanel = new NetworkPanel(services);
-        tray.add(networkPanel);
-        networkPanel.validate();
+        _settingsPanel = new SettingsPanel(services);
+        trayConstraints.gridx = 1;
+        trayConstraints.insets = new Insets(8,8,8,8);
+        _tray.add(_settingsPanel, trayConstraints);
+        _settingsPanel.validate();
 
+        _userListPanel = new UserListPanel(services);
+        trayConstraints.gridx = 2;
+        trayConstraints.insets = new Insets(8,8,8,8);
+        _tray.add(_userListPanel, trayConstraints);
+        _userListPanel.validate();
 
         constraints.anchor = GridBagConstraints.EAST;
         constraints = setGrid(2, 0, 0.0f, 1.0f);
         constraints.fill = GridBagConstraints.BOTH;
-        window.cm.registerComponent(tray);
-        window.getContentPanel().add(tray, constraints);
+        _window.cm.registerComponent(_tray);
+        _window.getContentPanel().add(_tray, constraints);
 
 
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
-        window.open();
+        _window.open();
 
-        networkPanel.setVisible(false);
+        _networkPanel.setVisible(false);
+        _settingsPanel.setVisible(false);
+        _userListPanel.setVisible(false);
     }
 
     public void keyTyped(KeyEvent e) {}
@@ -212,11 +242,15 @@ public class SyncJamUI implements KeyListener
         switch(e.getKeyCode())
         {
             case KeyEvent.VK_SPACE:
-                controlUI.pressPlayButton();
+                _controlUI.pressPlayButton();
+                break;
+            case KeyEvent.VK_TAB:
+                if(_lastPanel == null) _lastPanel = _networkPanel;
+                if(!_lastPanel.isVisible()) togglePanel(_lastPanel);
                 break;
             case KeyEvent.VK_U:
-                colorToggle++;
-                switch(colorToggle % 3) {
+                _colorToggle++;
+                switch(_colorToggle % 3) {
                     case 0: Colors.setColorScheme(Colors.defaultColors); break;
                     case 1: Colors.setColorScheme(Colors.lightColors); break;
                     case 2: Colors.setColorScheme(Colors.test); break;
@@ -225,9 +259,11 @@ public class SyncJamUI implements KeyListener
             case KeyEvent.VK_E:
                 DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 break;
-            case KeyEvent.VK_TAB:
-                if(lastPanel == null) lastPanel = networkPanel;
-                if(!lastPanel.isVisible()) togglePanel(lastPanel);
+            case KeyEvent.VK_T:
+                togglePanel(_userListPanel);
+                break;
+            case KeyEvent.VK_S:
+                togglePanel(_settingsPanel);
                 break;
         }
     }
@@ -252,26 +288,39 @@ public class SyncJamUI implements KeyListener
 
     public boolean togglePanel(JPanel panel)
     {
-        lastPanel = panel;
-        int pWidth = panel.getWidth();
-        Dimension min = window.getMinimumSize();
+        if(_lastPanel != null && _lastPanel != panel) closePanel(_lastPanel);
+        _lastPanel = panel;
+        int pWidth = (int)panel.getPreferredSize().getWidth();
+        Dimension min = _window.getMinimumSize();
         if(panel.isVisible())
         {
-            window.setMinimumSize(new Dimension((int)min.getWidth() - pWidth, (int)min.getHeight()));
-            window.setSize(window.getWidth() - pWidth, window.getHeight());
-            panel.setVisible(false);
+            closePanel(panel);
         }
         else if(!panel.isVisible())
         {
-            window.setSize(window.getWidth() + pWidth, window.getHeight());
-            window.setMinimumSize(new Dimension((int)min.getWidth() + pWidth, (int)min.getHeight()));
+            _window.setSize(_window.getWidth() + pWidth, _window.getHeight());
+            _window.setMinimumSize(new Dimension((int)min.getWidth() + pWidth, (int)min.getHeight()));
             panel.setVisible(true);
+            panel.repaint();
         }
         return panel.isVisible();
     }
 
+    private void closePanel(JPanel panel)
+    {
+        int pWidth = (int)panel.getPreferredSize().getWidth();
+        Dimension min = _window.getMinimumSize();
+        if(panel.isVisible())
+        {
+            _window.setMinimumSize(new Dimension((int)min.getWidth() - pWidth, (int)min.getHeight()));
+            _window.setSize(_window.getWidth() - pWidth, _window.getHeight());
+            panel.setVisible(false);
+        }
+    }
+
+
     public void repaint()
     {
-        window.repaint();
+        _window.repaint();
     }
 }

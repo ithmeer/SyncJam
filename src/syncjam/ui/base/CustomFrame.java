@@ -3,6 +3,8 @@ package syncjam.ui.base;
 // vim:set fileencoding=utf-8:
 
 import syncjam.ui.Colors;
+import syncjam.ui.DialogWindow;
+import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,10 +14,15 @@ import java.awt.event.WindowEvent;
 
 public class CustomFrame extends JFrame
 {
-    private JPanel contentPanel;
+    private JPanel titleBar, contentPanel;
     private ComponentResizer cr;
     public ComponentMover   cm;
-    private JButton minimizeButton;
+    private JButton _minimizeButton, _infoButton;
+
+    public CustomFrame(int minW, int minH, String title) {
+        this(minW, minH);
+        titleBar.add(new TextLabelUI(title, SwingConstants.CENTER), BorderLayout.CENTER);
+    }
 
     public CustomFrame(int minW, int minH)
     {
@@ -44,7 +51,7 @@ public class CustomFrame extends JFrame
         this.add(mainPanel, BorderLayout.CENTER);
 
         ////////titleBar////////
-        JPanel titleBar = new JPanel(new BorderLayout()){
+        titleBar = new JPanel(new BorderLayout()){
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -63,8 +70,10 @@ public class CustomFrame extends JFrame
             }
         };
         titleButtons.add(makeCloseButton(), BorderLayout.EAST);
-        titleButtons.add(minimizeButton = makeMinimizeButton(), BorderLayout.CENTER);
+        titleButtons.add(_minimizeButton = makeMinimizeButton(), BorderLayout.CENTER);
         titleBar.add(titleButtons, BorderLayout.EAST);
+
+        titleBar.add(_infoButton = makeInfoButton(), BorderLayout.WEST);
 
         mainPanel.add(titleBar, BorderLayout.NORTH);
 
@@ -100,7 +109,14 @@ public class CustomFrame extends JFrame
     }
     protected void close() {}
 
-    public void allowMinimizing(boolean allow) { minimizeButton.setVisible(allow); }
+    protected void clickedInfoButton() {
+    }
+
+    public void allowMinimizing(boolean allow)
+    {
+        _minimizeButton.setVisible(allow);
+    }
+
     public void allowResizing(boolean allow)
     {
         if(allow)
@@ -130,10 +146,23 @@ public class CustomFrame extends JFrame
         return contentPanel;
     }
 
+    private JButton makeInfoButton() {
+        JButton button = new JButton(new SyncJamIcon());
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setFocusable(false);
+        button.setBorder(BorderFactory.createEmptyBorder());
+        button.setOpaque(true);
+        button.addActionListener(e -> {
+            clickedInfoButton();
+        });
+        return button;
+    }
     private JButton makeCloseButton() {
         JButton button = new JButton(new CloseIcon());
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
+        button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
         button.addActionListener(e -> {
@@ -150,6 +179,7 @@ public class CustomFrame extends JFrame
         JButton button = new JButton(new MinimizeIcon());
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
+        button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
         button.addActionListener(e -> {
@@ -161,6 +191,38 @@ public class CustomFrame extends JFrame
             }
         });
         return button;
+    }
+}
+
+class SyncJamIcon implements Icon {
+    @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.translate(x, y);
+        g2.setPaint(Colors.get(Colors.Background1));
+        g2.fillRect(0, 0, getIconWidth(), getIconHeight());
+        g2.setPaint(Colors.get(Colors.Foreground1));
+        g2.drawLine(0,  5, 5, 0);
+        g2.drawLine(1,  5, 6, 0);
+        g2.drawLine(1,  6, 7, 0);
+        g2.drawLine(2,  6, 7, 1);
+        g2.drawLine(2,  7, 8, 1);
+        g2.drawLine(3,  7, 8, 2);
+        g2.drawLine(3,  8, 8, 3);
+        
+        g2.drawLine(5, 10, 8, 7);
+        g2.drawLine(5, 11, 8, 8);
+        g2.drawLine(5, 12, 9, 8);
+        g2.drawLine(6, 12, 9, 9);
+        g2.drawLine(6, 13,10, 9);
+        g2.drawLine(7, 13,10,10);
+        g2.drawLine(8, 13,11,10);
+        g2.dispose();
+    }
+    @Override public int getIconWidth() {
+        return 16;
+    }
+    @Override public int getIconHeight() {
+        return 16;
     }
 }
 

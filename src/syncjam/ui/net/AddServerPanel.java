@@ -1,25 +1,22 @@
 package syncjam.ui.net;
 
 import syncjam.ui.Colors;
-import syncjam.ui.base.DialogWindow;
+import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.base.TextFieldUI;
+import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 public class AddServerPanel extends JPanel
 {
     private final String defaultPort = "9982";
     //private final NetTextField addressField, portField, passField;
-    private final NetTextField[] fields;
-    private final NetButton addButton, cancelButton;
+    private final TextFieldUI[] fields;
+    private final ButtonUI addButton, cancelButton;
     private NetworkPanel networkPanel;
 
     private KeyAdapter keys = new KeyAdapter() {
@@ -30,14 +27,14 @@ public class AddServerPanel extends JPanel
             {
                 switch (key) {
                     case KeyEvent.VK_ENTER:
-                        addButton.clicked();
+                        addButton.doClick();
                         break;
                     case KeyEvent.VK_ESCAPE:
-                        cancelButton.clicked();
+                        cancelButton.doClick();
                         break;
                     case KeyEvent.VK_TAB:
                         boolean selected = false;
-                        for (NetTextField f : fields)
+                        for (TextFieldUI f : fields)
                             if (f.hasFocus())
                                 selected = true;
                         if (!selected)
@@ -58,7 +55,7 @@ public class AddServerPanel extends JPanel
 
         UIServices.getMainWindow().addKeyListener(keys);
 
-        NetLabel title = new NetLabel("Add Server", JLabel.CENTER);
+        TextLabelUI title = new TextLabelUI("Add Server", JLabel.CENTER);
         constraints.insets = new Insets(4,4,4,4);
         constraints.gridx = 0;
         constraints.gridy = 0;
@@ -70,15 +67,20 @@ public class AddServerPanel extends JPanel
 
         String[] labels = {"Name", "IP Address", "Port", "Password"};
         int numPairs = labels.length;
-        fields = new NetTextField[numPairs];
+        fields = new TextFieldUI[numPairs];
 
         //Create and populate the panel.
-        JPanel p1 = new JPanel(new SpringLayout());
-        p1.setBackground(Colors.get(Colors.Background2));
+        JPanel p1 = new JPanel(new SpringLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background2));
+            }
+        };
         for (int i = 0; i < numPairs; i++) {
-            NetLabel l = new NetLabel(labels[i], JLabel.TRAILING);
+            TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
             p1.add(l);
-            NetTextField textField = new NetTextField(10, "", keys);
+            TextFieldUI textField = new TextFieldUI(10, "", keys);
             l.setLabelFor(textField);
             p1.add(textField);
             fields[i] = textField;
@@ -107,10 +109,15 @@ public class AddServerPanel extends JPanel
         this.add(p1, constraints);
 
 
-        JPanel p2 = new JPanel(new SpringLayout());
-        p2.setBackground(Colors.get(Colors.Background1));
+        JPanel p2 = new JPanel(new SpringLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
 
-        p2.add(addButton = new NetButton("Add") {
+        p2.add(addButton = new ButtonUI(0, 0, Colors.Background2, "Add") {
             @Override
             protected void clicked() {
                 String name = fields[0].getText();
@@ -134,7 +141,7 @@ public class AddServerPanel extends JPanel
             }
         });
 
-        p2.add(cancelButton = new NetButton("Cancel") {
+        p2.add(cancelButton = new ButtonUI(0, 0, Colors.Background2, "Cancel") {
             @Override
             protected void clicked() {
                 UIServices.getMainWindow().removeKeyListener(keys);
@@ -142,9 +149,9 @@ public class AddServerPanel extends JPanel
             }
         });
         makeCompactGrid(p2,
-                2, 1,        //rows, cols
-                0, 0,        //initX, initY
-                0, 8);       //xPad, yPad
+                2, 1,       //rows, cols
+                0, 0,       //initX, initY
+                0, 8);      //xPad, yPad
 
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.insets = new Insets(4,20,4,20);
@@ -157,6 +164,11 @@ public class AddServerPanel extends JPanel
 
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background1));
+    }
 
     protected SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
     {
@@ -220,53 +232,3 @@ public class AddServerPanel extends JPanel
     }
 }
 
-class NetTextField extends TextField
-{
-    protected NetTextField(int length, String default_text)
-    {
-        setColumns(length);
-        setText(default_text);
-        setBackground(Colors.get(Colors.Background1));
-        setForeground(Colors.get(Colors.Foreground1));
-        addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                super.focusGained(e);
-                selectAll();
-            }
-        });
-    }
-    protected NetTextField(int length, String default_text, KeyAdapter key)
-    {
-        this(length, default_text);
-        addKeyListener(key);
-    }
-}
-class NetLabel extends JLabel
-{
-    protected NetLabel(String text)
-    {
-        super(text);
-    }
-    protected NetLabel(String text, int trailing)
-    {
-        super(text, trailing);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        setForeground(Colors.get(Colors.Foreground1));
-    }
-}
-class NetButton extends ButtonUI
-{
-    protected NetButton(String text)
-    {
-        super(0, 0, Colors.Background2);
-        setText(text);
-        setMargin(new Insets(0,0,0,0));
-    }
-    @Override
-    protected void clicked() {}
-}

@@ -6,6 +6,7 @@ import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
 import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.base.TextLabelUI;
 import syncjam.utilities.ServerInfo;
 
 import javax.swing.*;
@@ -67,21 +68,20 @@ public class NetworkPanel extends JPanel
         super.setVisible(aFlag);
         if(aFlag)
             UIServices.getMainWindow().addKeyListener(keys);
-        else
+        else {
             UIServices.getMainWindow().removeKeyListener(keys);
+            if(mainPanel != visiblePanel)
+                back();
+        }
     }
 
     public NetworkPanel(ServiceContainer services)
     {
         _network = services.getService(NetworkController.class);
+        this.setOpaque(false);
 
-        mainPanel = new JPanel(){
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(Colors.get(Colors.Background1));
-            }
-        };
+        mainPanel = new JPanel();
+        mainPanel.setOpaque(false);
         this.add(mainPanel);
         visiblePanel = mainPanel;
 
@@ -90,7 +90,7 @@ public class NetworkPanel extends JPanel
 
         constraints.gridwidth = 2;
 
-        NetLabel title = new NetLabel("Connection Settings", JLabel.CENTER);
+        TextLabelUI title = new TextLabelUI("Connection Settings", JLabel.CENTER);
         constraints.gridy = 0;
         constraints.insets = new Insets(4,4,4,4);
         constraints.ipadx = 120;
@@ -241,7 +241,6 @@ public class NetworkPanel extends JPanel
 
     public void paintComponent(Graphics g)
     {
-        setBackground(Colors.get(Colors.Background1));
         if(serverList.getSelectedItemIndex() == -1)
         {
             removeButton.setEnabled(false);

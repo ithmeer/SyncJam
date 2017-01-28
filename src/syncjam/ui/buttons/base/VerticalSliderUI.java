@@ -33,7 +33,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
     {
         this(startValue, maxValue, true);
         /*
-        startValue is the default value the slider starts on
+        startValue is the default _value the slider starts on
          */
     }
 

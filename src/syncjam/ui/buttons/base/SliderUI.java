@@ -132,7 +132,7 @@ public abstract class SliderUI extends JPanel implements MouseListener, MouseMot
         {
             dragging = false;
             setValue(posOnBar);
-            //value = posOnBar;
+            //_value = posOnBar;
         }
 
     }

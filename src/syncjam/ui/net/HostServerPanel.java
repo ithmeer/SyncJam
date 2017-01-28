@@ -2,7 +2,10 @@ package syncjam.ui.net;
 
 import syncjam.ui.Colors;
 import syncjam.ui.UIServices;
-import syncjam.ui.base.DialogWindow;
+import syncjam.ui.DialogWindow;
+import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.base.TextFieldUI;
+import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,8 +18,8 @@ public class HostServerPanel extends JPanel
 {
     private final String defaultPort = "9982";
     //private final NetTextField addressField, portField, passField;
-    private final NetTextField[] fields;
-    private final NetButton hostButton, cancelButton;
+    private final TextFieldUI[] fields;
+    private final ButtonUI hostButton, cancelButton;
 
     private KeyAdapter keys = new KeyAdapter() {
         @Override
@@ -25,14 +28,14 @@ public class HostServerPanel extends JPanel
             switch(key)
             {
                 case KeyEvent.VK_ENTER:
-                    hostButton.clicked();
+                    hostButton.doClick();
                     break;
                 case KeyEvent.VK_ESCAPE:
-                    cancelButton.clicked();
+                    cancelButton.doClick();
                     break;
                 case KeyEvent.VK_TAB:
                     boolean selected = false;
-                    for(NetTextField f : fields)
+                    for(TextFieldUI f : fields)
                         if(f.hasFocus())
                             selected = true;
                     if(!selected)
@@ -52,7 +55,7 @@ public class HostServerPanel extends JPanel
 
         UIServices.getMainWindow().addKeyListener(keys);
 
-        NetLabel title = new NetLabel("Host Server", JLabel.CENTER);
+        TextLabelUI title = new TextLabelUI("Host Server", JLabel.CENTER);
         constraints.insets = new Insets(4,4,4,4);
         constraints.gridx = 0;
         constraints.gridy = 0;
@@ -64,15 +67,20 @@ public class HostServerPanel extends JPanel
 
         String[] labels = {"Password", "Port"};
         int numPairs = labels.length;
-        fields = new NetTextField[numPairs];
+        fields = new TextFieldUI[numPairs];
 
         //Create and populate the panel.
-        JPanel p1 = new JPanel(new SpringLayout());
-        p1.setBackground(Colors.get(Colors.Background2));
+        JPanel p1 = new JPanel(new SpringLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background2));
+            }
+        };
         for (int i = 0; i < numPairs; i++) {
-            NetLabel l = new NetLabel(labels[i], JLabel.TRAILING);
+            TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
             p1.add(l);
-            NetTextField textField = new NetTextField(10, "", keys);
+            TextFieldUI textField = new TextFieldUI(10, "", keys);
             l.setLabelFor(textField);
             p1.add(textField);
             fields[i] = textField;
@@ -100,9 +108,14 @@ public class HostServerPanel extends JPanel
         this.add(p1, constraints);
 
         //Panel for action buttons
-        JPanel p2 = new JPanel(new SpringLayout());
-        p2.setBackground(Colors.get(Colors.Background1));
-        p2.add(hostButton = new NetButton("Host") {
+        JPanel p2 = new JPanel(new SpringLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background1));
+            }
+        };
+        p2.add(hostButton = new ButtonUI(0, 0, Colors.Background2, "Host") {
             @Override
             protected void clicked() {
                 String password = fields[0].getText();
@@ -122,7 +135,7 @@ public class HostServerPanel extends JPanel
             }
         });
 
-        p2.add(cancelButton = new NetButton("Cancel") {
+        p2.add(cancelButton = new ButtonUI(0, 0, Colors.Background2, "Cancel") {
             @Override
             protected void clicked() {
                 UIServices.getMainWindow().removeKeyListener(keys);
@@ -144,6 +157,11 @@ public class HostServerPanel extends JPanel
         repaint();
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        setBackground(Colors.get(Colors.Background1));
+    }
 
     private SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
     {

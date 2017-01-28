@@ -256,7 +256,7 @@ public class ComponentMover extends MouseAdapter
 
         if (changeCursor)
         {
-            originalCursor = source.getCursor();
+            originalCursor = Cursor.getDefaultCursor();
             source.setCursor( Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR) );
         }
 
