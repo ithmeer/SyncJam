@@ -49,7 +49,17 @@ public class SyncJam
 
         mainWindow = new SyncJamUI(servCon);
 
-        Timer timer = new Timer(1000/120, event -> mainWindow.repaint());
+        Timer timer = new Timer(1000 / 120, e ->
+        {
+            try
+            {
+                mainWindow.repaint();
+            }
+            finally
+            {
+                settings.saveToDisk();
+            }
+        });
 
         timer.setRepeats(true);
         timer.start();

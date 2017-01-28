@@ -33,8 +33,25 @@ public class ServerListUI extends ItemList<ServerInfo>
     {
         ServerInfo server = new ServerInfo(name, ip, port, pass);
         add(server);
-        _settings.addServer(server);
-        _settings.saveToDisk();
+        _settings.setSavedServers(items);
+    }
+
+    public void removeSelected()
+    {
+        int index = getSelectedItemIndex();
+        if(index > -1)
+        {
+            if(items.size() > 1)
+            {
+                if (index + 1 < items.size())
+                    selectedItem = getItem(index+1);
+                else if (index - 1 >= 0)
+                    selectedItem = getItem(index-1);
+            }
+            else selectedItem = null;
+            remove(index);
+            _settings.setSavedServers(items);
+        }
     }
 
     @Override
@@ -87,23 +104,6 @@ public class ServerListUI extends ItemList<ServerInfo>
         if(selectedItem != null)
             return items.indexOf(selectedItem);
         return -1;
-    }
-
-    public void removeSelected()
-    {
-        int index = getSelectedItemIndex();
-        if(index > -1)
-        {
-            if(items.size() > 1)
-            {
-                if (index + 1 < items.size())
-                    selectedItem = getItem(index+1);
-                else if (index - 1 >= 0)
-                    selectedItem = getItem(index-1);
-            }
-            else selectedItem = null;
-            remove(index);
-        }
     }
 
     public void moveSelection(String dir)

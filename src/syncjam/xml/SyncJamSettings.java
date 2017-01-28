@@ -9,6 +9,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,11 +58,13 @@ public class SyncJamSettings implements Settings
     }
 
     @Override
-    public void addServer(ServerInfo svr)
+    @XmlTransient
+    public void setSavedServers(List<ServerInfo> servers)
     {
         synchronized (SyncJamSettings.class)
         {
-            _servers.add(new XmlServerInfo(svr));
+            _servers.clear();
+            servers.stream().forEach(s -> _servers.add(new XmlServerInfo(s)));
         }
     }
 
@@ -85,6 +88,7 @@ public class SyncJamSettings implements Settings
             {
                 JAXBContext context = JAXBContext.newInstance(SyncJamSettings.class);
                 Marshaller pickler = context.createMarshaller();
+                pickler.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
                 pickler.marshal(_instance, new File(_savePath));
             }
             catch (JAXBException e)

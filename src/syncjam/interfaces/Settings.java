@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface Settings
 {
-    void addServer(ServerInfo svr);
+    void setSavedServers(List<ServerInfo> servers);
 
     List<ServerInfo> getSavedServers();
 
