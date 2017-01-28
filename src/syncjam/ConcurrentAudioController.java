@@ -228,16 +228,7 @@ public class ConcurrentAudioController implements AudioController
     {
         // Create the container for the client/host
         IContainer container = IContainer.make();
-        if (!isServer)
-        {
-            IContainerFormat f = IContainerFormat.make();
-            f.setInputFormat("mp3");
-            openContainer(container, url, IContainer.Type.READ, f);
-        }
-        else
-        {
-            openContainer(container, url, IContainer.Type.READ, null);
-        }
+        openContainer(container, url, IContainer.Type.READ, null);
 
         int numStreams = container.getNumStreams();
 
@@ -288,9 +279,7 @@ public class ConcurrentAudioController implements AudioController
                 {
                     try
                     {
-                        openContainer(container, client);
-                        IStream c = container.addNewStream(ICodec.ID.CODEC_ID_MP3);
-                        IStreamCoder coder = c.getStreamCoder();
+                        openContainer(container, audioCoder, client);
                     }
                     catch (Exception ex)
                     {
@@ -400,7 +389,7 @@ public class ConcurrentAudioController implements AudioController
         }
     }
 
-    public void openContainer(IContainer orig, XugglerClient client)
+    public void openContainer(IContainer orig, IStreamCoder origCoder, XugglerClient client)
     {
         IContainerFormat format = orig.getContainerFormat();
         format.setOutputFormat(format.getInputFormatShortName(), "", "");
@@ -420,7 +409,7 @@ public class ConcurrentAudioController implements AudioController
             }
         }
 
-        client.container.addNewStream(ICodec.ID.CODEC_ID_MP3);
+        client.container.addNewStream(origCoder.copyReference());
         client.container.writeHeader();
     }
 
