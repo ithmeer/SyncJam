@@ -55,7 +55,7 @@ public class SyncJam
             {
                 mainWindow.repaint();
             }
-            finally
+            catch (Exception ex)
             {
                 settings.saveToDisk();
             }
