@@ -11,7 +11,6 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -22,6 +21,8 @@ public class PlaylistUI extends ItemList
     private final NetworkController _networkController;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
+
+    //private final String[] _ignoredFileTypes = {"jpg", "png", "bmp", "gif"};
 
     public PlaylistUI(final ServiceContainer services)
     {
@@ -37,6 +38,11 @@ public class PlaylistUI extends ItemList
             {
                 try
                 {
+                    /*String fileType = "";
+                    int x = files[i].getName().lastIndexOf('.');
+                    if (x > 0) {
+                        fileType = files[i].getName().substring(x+1);
+                    }*/
                     songs[i] = new BytesSong(files[i]);
                 }
                 catch (SyncJamException e)
@@ -85,9 +91,16 @@ public class PlaylistUI extends ItemList
             }
 
             if(curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
-            {
                 drawSong(g, xOffset, curItemYPos, i, curSong);
+
+            /*
+            if(i == _playlist.getCurrentSongIndex())
+                scrollbar.moveToMarker(itemHeight);
+            */
+            if(i == _playlist.getCurrentSongIndex() && scrollbar.is_markerMoved()){
+                scrollbar.moveToItem(i, itemHeight);
             }
+
             i++;
         }
 
@@ -132,8 +145,8 @@ public class PlaylistUI extends ItemList
         if(index == _playlist.getCurrentSongIndex())
         {
             g.setColor(Colors.get(Colors.Highlight));
-            g.drawRect(x,  y,   getWidth() - scrollbar.getWidth() - xOffset - 1, itemHeight);
-            g.drawRect(x+1,y+1, getWidth() - scrollbar.getWidth() - xOffset - 3, itemHeight-2);
+            g.drawRect(x,  y,   getRight() - 3, itemHeight);
+            g.drawRect(x+1,y+1, getRight() - 5, itemHeight-2);
         }
     }
 
@@ -158,6 +171,7 @@ public class PlaylistUI extends ItemList
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
                 g2.fillRect(x, y, (int)progWidth, itemHeight);
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+                g2.dispose();
             }
         }
     }
@@ -336,7 +350,7 @@ public class PlaylistUI extends ItemList
         int textHeight = g.getFontMetrics().getHeight();
         int textWidth = g.getFontMetrics().stringWidth(song.getLengthString());
 
-        int thisItemXPos = getWidth() - scrollbar.getWidth() - textWidth - 4;
+        int thisItemXPos = getRight() - textWidth - 4;
         int thisItemYPos = y + itemHeight / 4 + textHeight / 2 - 3;
 
         g.setColor(Colors.get(Colors.Foreground2));
@@ -396,6 +410,8 @@ public class PlaylistUI extends ItemList
     public void remove(int index)
     {
         _playlist.remove(index);
+        if(index < _playlist.getCurrentSongIndex())
+            scrollbar.adjustMarker();
         updateScrollbar();
     }
     public void clear()
@@ -409,25 +425,27 @@ public class PlaylistUI extends ItemList
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if(itemDragIndex >= 0)
-        {
-            if(itemDropIndex == -1)
-                itemDropIndex = itemDragIndex;
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            if(itemDragIndex >= 0)
+            {
+                if(itemDropIndex == -1)
+                    itemDropIndex = itemDragIndex;
 
-            if(itemDragIndex != itemDropIndex-1)
-                _playlist.moveSong(itemDragIndex, itemDropIndex);
-            itemDragIndex  = -1;
-            itemDropIndex  = -1;
-            itemHoverIndex = -1;
-            mouseX = -1;
-            mouseY = -itemHeight;
-        }
-        else
-        {
-            if (artHoverIndex >= 0)
-                _playlist.setCurrentSong(artHoverIndex);
-            else if (removeHoverIndex >= 0)
-                remove(removeHoverIndex);
+                if(itemDragIndex != itemDropIndex-1)
+                    _playlist.moveSong(itemDragIndex, itemDropIndex);
+                itemDragIndex  = -1;
+                itemDropIndex  = -1;
+                itemHoverIndex = -1;
+                mouseX = -1;
+                mouseY = -itemHeight;
+            }
+            else
+            {
+                if (artHoverIndex >= 0)
+                    _playlist.setCurrentSong(artHoverIndex);
+                else if (removeHoverIndex >= 0)
+                    remove(removeHoverIndex);
+            }
         }
     }
 
@@ -442,18 +460,19 @@ public class PlaylistUI extends ItemList
     @Override
     public void mouseDragged(MouseEvent e)
     {
-        mouseX = e.getX();
-        mouseY = e.getY();
-        double dist = Math.hypot(clickStartX-mouseX, clickStartY-mouseY);
-        if(isDraggingEnabled() && dist > 8)
-        {
-            if (itemDragIndex == -1 &&
-                    itemHoverIndex != -1 &&
-                    itemHoverIndex != artHoverIndex &&
-                    itemHoverIndex != removeHoverIndex) {
-                itemDragIndex = itemHoverIndex;
-                for (int i = itemDragIndex; i < splits.length - 1; i++) {
-                    splits[i] = itemHeight + 6;
+        if(SwingUtilities.isLeftMouseButton(e)) {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            double dist = Math.hypot(clickStartX - mouseX, clickStartY - mouseY);
+            if (isDraggingEnabled() && dist > 8) {
+                if (itemDragIndex == -1 &&
+                        itemHoverIndex != -1 &&
+                        itemHoverIndex != artHoverIndex &&
+                        itemHoverIndex != removeHoverIndex) {
+                    itemDragIndex = itemHoverIndex;
+                    for (int i = itemDragIndex; i < splits.length - 1; i++) {
+                        splits[i] = itemHeight + 6;
+                    }
                 }
             }
         }

@@ -1,7 +1,6 @@
-package syncjam.ui.base;
+package syncjam.ui;
 
-import syncjam.ui.Colors;
-import syncjam.ui.UIServices;
+import syncjam.ui.base.CustomFrame;
 import syncjam.ui.buttons.TextButton;
 
 import javax.swing.*;
@@ -19,14 +18,12 @@ import java.awt.event.KeyEvent;
  */
 public class DialogWindow
 {
-    public static void showErrorMessage(String message)
-    {
-        //final JFrame window = new JFrame("Error");
-        final CustomFrame window = new CustomFrame(350, 80);
-        window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        window.setAlwaysOnTop(true);
-        window.allowMinimizing(false);
-        window.allowResizing(false);
+    public static CustomFrame showErrorMessage(String message) {
+        return showErrorMessage(message, "Error");
+    }
+    public static CustomFrame showErrorMessage(String message, String title) {
+
+        CustomFrame window = createWindow(title);
 
         // Panel
         JPanel panel = createPanel();
@@ -59,9 +56,19 @@ public class DialogWindow
         });
 
         window.open();
-        window.setLocationRelativeTo(UIServices.getMainWindow());
+        return window;
     }
 
+    private static CustomFrame createWindow(String title) {
+        CustomFrame w = new CustomFrame(350, 80, title);
+        w.setLocationRelativeTo(UIServices.getMainWindow());
+        w.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        w.setAlwaysOnTop(true);
+        w.allowMinimizing(false);
+        w.allowResizing(false);
+
+        return w;
+    }
     private static JPanel createPanel() {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -71,8 +78,7 @@ public class DialogWindow
 
         return p;
     }
-    private static JTextPane createText(String m)
-    {
+    private static JTextPane createText(String m) {            
         JTextPane t = new JTextPane();
         t.setText(m);
         t.setEditable(false);

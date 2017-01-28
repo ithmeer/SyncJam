@@ -122,6 +122,10 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
 
     //====  UTILITY METHODS  ====
 
+    public int getItemHeight() {
+        return itemHeight;
+    }
+    
     protected int getYPosInUI(int i)
     {
         int yValue = getTop() + (i * itemHeight) - scrollbar.getValue();
@@ -233,31 +237,33 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     @Override
     public void mousePressed(MouseEvent e)
     {
-        clickStartX = e.getX();
-        clickStartY = e.getY();
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            clickStartX = e.getX();
+            clickStartY = e.getY();
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if(itemDragIndex >= 0)
-        {
-            if(itemDropIndex == -1)
-                itemDropIndex = itemDragIndex;
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            if (itemDragIndex >= 0) {
+                if (itemDropIndex == -1)
+                    itemDropIndex = itemDragIndex;
 
-            if(itemDragIndex != itemDropIndex-1)
-            {
-                Item o = items.remove(itemDragIndex);
-                if (itemDropIndex > itemDragIndex)
-                    itemDropIndex--;
-                items.add(itemDropIndex, o);
+                if (itemDragIndex != itemDropIndex - 1) {
+                    Item o = items.remove(itemDragIndex);
+                    if (itemDropIndex > itemDragIndex)
+                        itemDropIndex--;
+                    items.add(itemDropIndex, o);
+                }
+                splits[itemDragIndex] = 0;
+                itemDragIndex = -1;
+                itemDropIndex = -1;
+                itemHoverIndex = -1;
+                mouseX = -1;
+                mouseY = -itemHeight;
             }
-            splits[itemDragIndex] = 0;
-            itemDragIndex  = -1;
-            itemDropIndex  = -1;
-            itemHoverIndex = -1;
-            mouseX = -1;
-            mouseY = -itemHeight;
         }
     }
 
@@ -274,17 +280,16 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     @Override
     public void mouseDragged(MouseEvent e)
     {
-        mouseX = e.getX();
-        mouseY = e.getY();
-        double dist = Math.hypot(clickStartX-mouseX, clickStartY-mouseY);
-        if(isDraggingEnabled() && dist > 8)
-        {
-            if(itemDragIndex == -1 && itemHoverIndex != -1)
-            {
-                itemDragIndex = itemHoverIndex;
-                for(int i = itemDragIndex; i < splits.length-1; i++)
-                {
-                    splits[i] = itemHeight+6;
+        if(SwingUtilities.isLeftMouseButton(e)) {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            double dist = Math.hypot(clickStartX - mouseX, clickStartY - mouseY);
+            if (isDraggingEnabled() && dist > 8) {
+                if (itemDragIndex == -1 && itemHoverIndex != -1) {
+                    itemDragIndex = itemHoverIndex;
+                    for (int i = itemDragIndex; i < splits.length - 1; i++) {
+                        splits[i] = itemHeight + 6;
+                    }
                 }
             }
         }

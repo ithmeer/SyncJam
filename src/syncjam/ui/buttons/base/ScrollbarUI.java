@@ -8,27 +8,29 @@ import java.awt.event.*;
 
 public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionListener, ComponentListener, MouseWheelListener
 {
-    protected int myW, myH;
-    private final Colors background;
-    private int inset = 5;
-    protected int value = 0;
-    protected final int snapspeed = 8;
-    protected int rawmax = 100, max = 100;
+    protected int _myW, _myH;
+    private final Colors _background;
+    private int _inset = 5;
+    protected int _value = 0;
+    protected final int _snapspeed = 6;
+    protected int _rawmax = 100, _max = 100;
 
-    private int pos = 0, length = 0, target = value;
+    private int pos = 0, length = 0, target = _value;
 
-    protected boolean dragging = false, scrolling = false;
-    private double marker = -1;
+                protected boolean _dragging = false, _scrolling = false;
+    private double _marker = -1;
+    private int _markedItemNumber = -1;
+    private boolean _markerMoved = false;
 
     public ScrollbarUI() { this(Colors.Background1); }
 
     public ScrollbarUI(Colors bg)
     {
-        myW = 8;
-        myH = 0;
+        _myW = 8;
+        _myH = 0;
 
-        background = bg;
-        this.setPreferredSize(new Dimension(myW+inset*2, myH));
+        _background = bg;
+        this.setPreferredSize(new Dimension(_myW + _inset *2, _myH));
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
@@ -42,88 +44,121 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
 
     public void setValue(int v)
     {
-        value = v;
+        _value = v;
         target = v;
     }
 
-    public int getValue() { return value; }
+    public int getValue() { return _value; }
 
     public void setMaxValue(int n)
     {
-        rawmax = n;
-        max = rawmax - getHeight();
+        _rawmax = n;
+        _max = _rawmax - getHeight();
     }
 
-    public int getMaxValue() { return max; }
+    public int getMaxValue() { return _max; }
 
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        setBackground(Colors.get(background));
+        setBackground(Colors.get(_background));
 
-        double viewRatio = (float)getHeight() / (float)( rawmax );
+        double viewRatio = (float)getHeight() / (float)(_rawmax);
 
         if(viewRatio < 1)
         {
             drawMarker(g);
-            //System.out.println("" + myH + " - " + max + " - " + length);
 
             //only turn off scrolling when half a scroll off the edge of list
-            if(scrolling && value < target / 4 || value-max > (target-max) / 4)
-                scrolling = false;
+            if(_scrolling && _value < target / 4 || _value - _max > (target- _max) / 4)
+                _scrolling = false;
 
             //smooth bar movement
-            if (value != target)
+            if (_value != target)
             {
-                value -= (value - target) / snapspeed + (int)Math.signum(value - target);
+                _value -= (_value - target) / _snapspeed + (int)Math.signum(_value - target);
             }
 
             //allows scrolling past the edges for snapback effect
-            if(!dragging && !scrolling)
+            if(!_dragging && !_scrolling)
             {
                 if(target < 0)
                     target = 0;
-                else if(target > max)
-                    target = max;
+                else if(target > _max)
+                    target = _max;
             }
 
-            if (dragging)
+            if (_dragging)
             {
-                if (value < 0)
-                    value = (value / 4);
-                else if (value > max)
-                    value = max + (value - max) / 4;
+                if (_value < 0)
+                    _value = (_value / 4);
+                else if (_value > _max)
+                    _value = _max + (_value - _max) / 4;
 
                 g.setColor(Colors.get(Colors.Foreground1));
             }
             else
                 g.setColor(Colors.get(Colors.Foreground2));
 
-            length = Math.max(20, (int)(myH * viewRatio));
+            length = Math.max(20, (int)(_myH * viewRatio));
 
-            pos = (int) (((float) value / (float) max) * (myH - length));   //to get the scroll bar length and pos
-            g.fillRect(inset, inset + pos, myW, length);
+            pos = (int) (((float) _value / (float) _max) * (_myH - length));   //to get the scroll bar length and pos
+            g.fillRect(_inset, _inset + pos, _myW, length);
         }
         else
         {
-            value = 0;
+            _value = 0;
         }
     }
 
     public void setMarker(int item, int numItems)
     {
+        if(_markedItemNumber != item)
+            _markerMoved = true;
+        else
+            _markerMoved = false;
+        _markedItemNumber = item;
+
         if(item == -1) //item -1 means no marker
-            marker = -1;
+            _marker = -1;
         else if(numItems > item) //as long as there are songs
-            marker = (double)item/(double)(numItems-1);
+            _marker = (double) item / (double) (numItems - 1);
     }
     public void drawMarker(Graphics g)
     {
-        if(marker > -1) {
-            double viewRatio = (float)getHeight() / (float)( rawmax );
+        if(_marker > -1) {
+            double viewRatio = (float)getHeight() / (float)(_rawmax);
             g.setColor(Colors.get(Colors.Highlight));
-            g.fillRect(inset, inset + (int)(marker * (myH-inset)), myW, 4);
+            g.fillRect(_inset, _inset + (int)(_marker * (_myH - _inset)), _myW, 4);
         }
+    }
+    public void moveToItem(int item, int itemHeight)
+    {
+        int itemPosition = item*itemHeight;
+
+        int dist = -1;
+        if (itemPosition < _value) {
+            dist = 0;
+        }
+        else if (itemPosition + itemHeight > _value + getHeight()) {
+            dist = -(getHeight() - itemHeight) + 11;
+        }
+
+        if(dist != -1) setTargetValue(itemPosition + dist);
+    }
+    public void adjustMarker() //i don't know how to else make it not think the marker moved when removing an item above it
+    {
+        _markedItemNumber--;
+    }
+    public void moveToMarker(){
+        if(_markerMoved) {
+            setTargetValue((int) (_marker * _max));
+            _markerMoved = false;
+        }
+    }
+    public boolean is_markerMoved()
+    {
+        return _markerMoved;
     }
 
     @Override
@@ -133,9 +168,9 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
         {
             if(e.getY() > 0 && e.getY() < getHeight())
             {
-                dragging = true;
-                //weird math for getting the scrollbar value of the mouse pos
-                float  p = (e.getY() - length/2) * max / (myH - length);
+                _dragging = true;
+                //weird math for getting the scrollbar _value of the mouse pos
+                float  p = (e.getY() - length/2) * _max / (_myH - length);
                 setTargetValue((int) p);
             }
         }
@@ -143,20 +178,20 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        dragging = false;
+        _dragging = false;
 
         if (target < 0)
-            target = value;
-        else if (target > max)
-            target = value;
+            target = _value;
+        else if (target > _max)
+            target = _value;
     }
     @Override
     public void mouseDragged(MouseEvent e)
     {
-        if(dragging)
+        if(_dragging)
         {
-            //weird math for getting the scrollbar value of the mouse pos
-            float  p = (e.getY() - length/2) * max / (myH - length);
+            //weird math for getting the scrollbar _value of the mouse pos
+            float  p = (e.getY() - length/2) * _max / (_myH - length);
             setTargetValue((int) p);
         }
     }
@@ -165,22 +200,22 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void componentResized(ComponentEvent e)
     {
         //update with JPanel size changes
-        int pu = myH; //pre-update value
-        myH = (int)getSize().getHeight() - inset*2;
-        max = rawmax - getHeight();
+        int pu = _myH; //pre-update _value
+        _myH = (int)getSize().getHeight() - _inset *2;
+        _max = _rawmax - getHeight();
 
-        int temp = (pu-myH); //the change in size, positive or negative (i think they're reversed? idk)
+        int temp = (pu- _myH); //the change in size, positive or negative (i think they're reversed? idk)
 
-        while(value > 0 && temp != 0) //Makes resizing make sense!
+        while(_value > 0 && temp != 0) //Makes resizing make sense!
         {
             if(temp < 0)
             {
-                setValue(value-1); //as the window gets larger, the position shifts down
+                setValue(_value -1); //as the window gets larger, the position shifts down
                 temp += 1;
             }
             else if(temp > 0)
             {
-                setValue(value+1); //as the window gets smaller, the position shifts up
+                setValue(_value +1); //as the window gets smaller, the position shifts up
                 temp -= 1;
             }
         } //these do not take effect if the scroll position is at the top, this is good!
@@ -195,10 +230,10 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void scrollEvent(MouseWheelEvent e)
     {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            int sc = target + e.getUnitsToScroll() * getHeight() / snapspeed;
+            int sc = target + e.getUnitsToScroll() * getHeight() / _snapspeed;
 
             setTargetValue(sc);
-            scrolling = true;
+            _scrolling = true;
         }
     }
 
