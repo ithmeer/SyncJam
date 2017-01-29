@@ -1,7 +1,5 @@
 package syncjam;
 
-import syncjam.ui.UIServices;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -34,9 +32,6 @@ public class SongMetadata implements Externalizable {
         _albumName = album;
         _songTitle = title;
         _songLength.set(length);
-
-        _scaledAlbumArt[0] = getScaledAlbumArt(120, 120);
-        _scaledAlbumArt[1] = getScaledAlbumArt(49, 49);
     }
 
     public BufferedImage getAlbumArt() {
@@ -60,6 +55,15 @@ public class SongMetadata implements Externalizable {
     }
 
     public BufferedImage getPrescaledAlbumArt(int num) {
+        if(_scaledAlbumArt[num] == null) {
+            switch (num){
+                case 0: _scaledAlbumArt[0] = getScaledAlbumArt(120, 120);
+                    break;
+                case 1: _scaledAlbumArt[1] = getScaledAlbumArt(49, 49);
+                    break;
+            }
+        }
+
         return _scaledAlbumArt[num];
     }
 
