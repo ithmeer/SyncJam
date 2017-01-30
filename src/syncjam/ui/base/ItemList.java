@@ -11,39 +11,40 @@ import java.util.ArrayList;
 /**
  * Created by Marty on 6/7/2016
  */
-public class ItemList<Item> extends JPanel implements MouseListener, MouseMotionListener
+public abstract class ItemList<Item> extends JPanel implements MouseListener, MouseMotionListener
 {
-    private int myW, myH;
-    protected int mouseX = -1, mouseY = -1;
-    protected int clickStartX, clickStartY;
+    private int _myW, _myH;
+    protected int _mouseX = -1, _mouseY = -1;
+    protected int _clickStartX, _clickStartY;
 
-    protected final int xOffset = 4, yOffset = 6;
+    protected final int _xOffset = 4, _yOffset = 6;
 
     protected int itemHeight = 60;
 
-    protected final ScrollbarUI scrollbar = new ScrollbarUI();
+    protected final ScrollbarUI _scrollbar = new ScrollbarUI();
 
-    protected int itemHoverIndex = -1;
-    protected int itemDragIndex = -1;
-    protected int itemDropIndex = -1;
-    private boolean allowDragging = true;
+    private int _selectedItem = -1;
+    protected int _itemHoverIndex = -1;
+    protected int _itemDragIndex = -1;
+    protected int _itemDropIndex = -1;
 
-    protected int lastDropIndex = 0;
+    private boolean _allowDragging = true;
+    protected int _lastDropIndex = 0;
     protected ArrayList<Item> items = new ArrayList<>();
-    protected int[] splits;
 
-    private boolean enableCustomDrawing = false;
+    protected int[] _splits;
+    private boolean _enableCustomDrawing = false;
 
     public ItemList()
     {
         this.setLayout(new BorderLayout());
-        this.add(scrollbar, BorderLayout.EAST);
+        this.add(_scrollbar, BorderLayout.EAST);
 
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e)
             {
-                scrollbar.scrollEvent(e);
+                _scrollbar.scrollEvent(e);
             }
         });
         this.addMouseListener(this);
@@ -52,9 +53,9 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     public ItemList(int w, int h)
     {
         this();
-        myW = 350;
-        myH = 0;
-        setMinimumSize(new Dimension(myW, myH));
+        _myW = 350;
+        _myH = 0;
+        setMinimumSize(new Dimension(_myW, _myH));
     }
     public ItemList(int itemH)
     {
@@ -67,16 +68,16 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
         super.paintComponent(g);
         setBackground(Colors.get(Colors.Background2));
 
-        if (itemDragIndex >= 0)
+        if (_itemDragIndex >= 0)
             scrollNearEdges();
         else
             buildSplitArray();
 
-        if(!enableCustomDrawing)
+        if(!_enableCustomDrawing)
         {
             for(int i = 0; i < items.size(); i++)
             {
-                if(itemDragIndex == i)
+                if(_itemDragIndex == i)
                 {
                     continue;
                 }
@@ -93,25 +94,25 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
             }
 
             //Draw Dragged Item & Determine Drop Position
-            if(itemDragIndex != -1)
+            if(_itemDragIndex != -1)
             {
-                int dragY = mouseY-itemHeight/2;
+                int dragY = _mouseY -itemHeight/2;
 
                 ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
-                drawItem(getItem(itemDragIndex), g, getLeft(), dragY);
+                drawItem(getItem(_itemDragIndex), g, getLeft(), dragY);
                 ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
-                if(itemHoverIndex != -1)
+                if(_itemHoverIndex != -1)
                 {
-                    int hoverItemYPos = getYPosInUI(itemHoverIndex);
-                    if(mouseY < hoverItemYPos + itemHeight/2)
-                        itemDropIndex = itemHoverIndex;
-                    else if(mouseY >= hoverItemYPos - itemHeight/2)
-                        itemDropIndex = itemHoverIndex+1;
+                    int hoverItemYPos = getYPosInUI(_itemHoverIndex);
+                    if(_mouseY < hoverItemYPos + itemHeight/2)
+                        _itemDropIndex = _itemHoverIndex;
+                    else if(_mouseY >= hoverItemYPos - itemHeight/2)
+                        _itemDropIndex = _itemHoverIndex +1;
                 }
-                if(lastDropIndex != itemDropIndex)
+                if(_lastDropIndex != _itemDropIndex)
                 {
-                    lastDropIndex = itemDropIndex;
+                    _lastDropIndex = _itemDropIndex;
                 }
             }
         }
@@ -128,59 +129,59 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
     
     protected int getYPosInUI(int i)
     {
-        int yValue = getTop() + (i * itemHeight) - scrollbar.getValue();
+        int yValue = getTop() + (i * itemHeight) - _scrollbar.getValue();
 
-        if (itemDragIndex != -1 && i >= itemDragIndex)
+        if (_itemDragIndex != -1 && i >= _itemDragIndex)
             yValue -= itemHeight;
 
-        if(splits.length > i)
-            yValue += splits[i];
+        if(_splits.length > i)
+            yValue += _splits[i];
         return yValue;
     }
 
-    public int getTop() { return yOffset; }
-    public int getBottom() { return getHeight() - yOffset; }
-    public int getLeft() { return xOffset; }
-    public int getRight() { return getWidth() - xOffset - scrollbar.getWidth(); }
+    public int getTop() { return _yOffset; }
+    public int getBottom() { return getHeight() - _yOffset; }
+    public int getLeft() { return _xOffset; }
+    public int getRight() { return getWidth() - _xOffset - _scrollbar.getWidth(); }
 
     protected void checkHoverIndex(int i)
     {
         Rectangle itemRect = new Rectangle(
                 0,
                 getYPosInUI(i),
-                (getWidth() - scrollbar.getWidth()),
+                (getWidth() - _scrollbar.getWidth()),
                 itemHeight);
 
-        if(itemHoverIndex == i && !itemRect.contains(mouseX,mouseY))
-            itemHoverIndex = -1;
-        else if(itemDragIndex != i && mouseY > itemRect.getY() && mouseY < itemRect.getY()+itemRect.getHeight())
-            itemHoverIndex = i;
+        if(_itemHoverIndex == i && !itemRect.contains(_mouseX, _mouseY))
+            _itemHoverIndex = -1;
+        else if(_itemDragIndex != i && _mouseY > itemRect.getY() && _mouseY < itemRect.getY()+itemRect.getHeight())
+            _itemHoverIndex = i;
 
-        if(itemDragIndex >= 0)
+        if(_itemDragIndex >= 0)
         {
-            if(mouseY > getHeight() && i < items.size()-1)
-                itemHoverIndex = items.size()-1;
-            else if(mouseY < 0 && i > 0)
-                itemHoverIndex = 0;
+            if(_mouseY > getHeight() && i < items.size()-1)
+                _itemHoverIndex = items.size()-1;
+            else if(_mouseY < 0 && i > 0)
+                _itemHoverIndex = 0;
         }
     }
 
     protected void updateSplit(int i)
     {
-        if(splits.length > i) {
-            if (itemDropIndex != -1 && i >= itemDropIndex)
-                splits[i] = slerp(splits[i], itemHeight);
+        if(_splits.length > i) {
+            if (_itemDropIndex != -1 && i >= _itemDropIndex)
+                _splits[i] = slerp(_splits[i], itemHeight);
             else
-                splits[i] = slerp(splits[i], 0);
+                _splits[i] = slerp(_splits[i], 0);
         }
     }
 
     private void buildSplitArray()
     {
-        splits = new int[items.size()+1];
+        _splits = new int[items.size()+1];
     }
 
-    protected int slerp(int start, int target)
+    private int slerp(int start, int target)
     {
         int t = 6;
         float value = start + (target-start)/t;
@@ -189,33 +190,33 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
         return (int)value;
     }
 
-    protected void scrollNearEdges()
+    private void scrollNearEdges()
     {
         int distFromEdge = Math.round(itemHeight*1.5f);
 
-        if(mouseY > getHeight()-distFromEdge &&
-                scrollbar.getValue() < scrollbar.getMaxValue())
+        if(_mouseY > getHeight()-distFromEdge &&
+                _scrollbar.getValue() < _scrollbar.getMaxValue())
         {
-            int mvSpeed = (distFromEdge-(getHeight()-mouseY))/2;
-            scrollbar.setTargetValue((scrollbar.getValue() + Math.max(0, mvSpeed)));
+            int mvSpeed = (distFromEdge-(getHeight()- _mouseY))/2;
+            _scrollbar.setTargetValue((_scrollbar.getValue() + Math.max(0, mvSpeed)));
         }
-        else if(mouseY < distFromEdge &&
-                scrollbar.getValue() > 0)
+        else if(_mouseY < distFromEdge &&
+                _scrollbar.getValue() > 0)
         {
-            int mvSpeed = (distFromEdge-mouseY)/2;
-            scrollbar.setTargetValue((scrollbar.getValue() - Math.max(0, mvSpeed)));
+            int mvSpeed = (distFromEdge- _mouseY)/2;
+            _scrollbar.setTargetValue((_scrollbar.getValue() - Math.max(0, mvSpeed)));
         }
     }
 
-    protected void setDraggingEnabled(boolean set)  { allowDragging = set; }
-    public boolean isDraggingEnabled()              { return allowDragging; }
-    public void setEnableCustomDrawing(boolean set) { enableCustomDrawing = set; }
+    protected void setDraggingEnabled(boolean set)     { _allowDragging = set; }
+    protected boolean isDraggingEnabled()              { return _allowDragging; }
+    protected void setEnableCustomDrawing(boolean set) { _enableCustomDrawing = set; }
 
     //====  LIST METHODS ====
 
     protected void updateScrollbar()
     {
-        scrollbar.setMaxValue(items.size() * itemHeight + yOffset*2);
+        _scrollbar.setMaxValue(items.size() * itemHeight + _yOffset *2);
     }
     public void add(Item i)
     {
@@ -227,78 +228,94 @@ public class ItemList<Item> extends JPanel implements MouseListener, MouseMotion
         items.remove(index);
         updateScrollbar();
     }
-    public Item getItem(int index) { return items.get(index); }
+
+    protected Item getItem(int index) { return items.get(index); }
+
+    protected void setSelectedItem(Item i) {
+        _selectedItem = items.indexOf(i);
+    }
+    public Item getSelectedItem() {
+        if(_selectedItem > -1)
+            return getItem(_selectedItem);
+        else return null;
+    }
+    public void moveSelection(String dir)
+    {
+        if(items.size() > 0) {
+            int cur = _selectedItem;
+            if (dir.equals("up") && cur > -1)
+                _selectedItem--;
+            else if (dir.equals("down") && cur < items.size()-1)
+                _selectedItem++;
+        }
+    }
 
     //====  LISTENERS  ====
 
     @Override
     public void mouseClicked(MouseEvent e){}
-
     @Override
     public void mousePressed(MouseEvent e)
     {
         if(e.getButton() == MouseEvent.BUTTON1) {
-            clickStartX = e.getX();
-            clickStartY = e.getY();
+            _clickStartX = e.getX();
+            _clickStartY = e.getY();
         }
     }
-
     @Override
     public void mouseReleased(MouseEvent e)
     {
         if(e.getButton() == MouseEvent.BUTTON1) {
-            if (itemDragIndex >= 0) {
-                if (itemDropIndex == -1)
-                    itemDropIndex = itemDragIndex;
+            if (_itemDragIndex >= 0) {
+                if (_itemDropIndex == -1)
+                    _itemDropIndex = _itemDragIndex;
 
-                if (itemDragIndex != itemDropIndex - 1) {
-                    Item o = items.remove(itemDragIndex);
-                    if (itemDropIndex > itemDragIndex)
-                        itemDropIndex--;
-                    items.add(itemDropIndex, o);
+                if (_itemDragIndex != _itemDropIndex - 1) {
+                    Item o = items.remove(_itemDragIndex);
+                    if (_itemDropIndex > _itemDragIndex)
+                        _itemDropIndex--;
+                    items.add(_itemDropIndex, o);
                 }
-                splits[itemDragIndex] = 0;
-                itemDragIndex = -1;
-                itemDropIndex = -1;
-                itemHoverIndex = -1;
-                mouseX = -1;
-                mouseY = -itemHeight;
+                _splits[_itemDragIndex] = 0;
+                _itemDragIndex = -1;
+                _itemDropIndex = -1;
+                _itemHoverIndex = -1;
+                _mouseX = -1;
+                _mouseY = -itemHeight;
             }
         }
     }
-
     @Override
     public void mouseEntered(MouseEvent e){}
-
     @Override
     public void mouseExited(MouseEvent e)
     {
-        mouseX = -1;
-        mouseY = -1;
+        _mouseX = -1;
+        _mouseY = -1;
     }
-
     @Override
     public void mouseDragged(MouseEvent e)
     {
         if(SwingUtilities.isLeftMouseButton(e)) {
-            mouseX = e.getX();
-            mouseY = e.getY();
-            double dist = Math.hypot(clickStartX - mouseX, clickStartY - mouseY);
+            _mouseX = e.getX();
+            _mouseY = e.getY();
+            double dist = Math.hypot(_clickStartX - _mouseX, _clickStartY - _mouseY);
             if (isDraggingEnabled() && dist > 8) {
-                if (itemDragIndex == -1 && itemHoverIndex != -1) {
-                    itemDragIndex = itemHoverIndex;
-                    for (int i = itemDragIndex; i < splits.length - 1; i++) {
-                        splits[i] = itemHeight + 6;
+                if (_itemDragIndex == -1 && _itemHoverIndex != -1) {
+                    _itemDragIndex = _itemHoverIndex;
+                    for (int i = _itemDragIndex; i < _splits.length - 1; i++) {
+                        _splits[i] = itemHeight + 6;
                     }
                 }
             }
         }
     }
-
     @Override
     public void mouseMoved(MouseEvent e)
     {
-        mouseX = e.getX();
-        mouseY = e.getY();
+        _mouseX = e.getX();
+        _mouseY = e.getY();
+        if(_itemHoverIndex != -1)
+            _selectedItem = -1;
     }
 }

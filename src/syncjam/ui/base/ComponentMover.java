@@ -1,9 +1,10 @@
 package syncjam.ui.base;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 
 /**
  *  This class allows you to move a Component by using a mouse. The Component
@@ -55,7 +56,7 @@ public class ComponentMover extends MouseAdapter
      *  will be passed to the first ancestor of this specified class.
      *
      *  @param destinationClass  the Class of the ancestor component
-     *  @param component         the Components to be registered for forwarding
+     *  @param components        the Components to be registered for forwarding
      *                           drag events to the ancestor Component.
      */
     public ComponentMover(Class destinationClass, Component... components)
@@ -360,7 +361,7 @@ public class ComponentMover extends MouseAdapter
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice gd : localGE.getScreenDevices()) {
             for (GraphicsConfiguration graphicsConfiguration : gd.getConfigurations()) {
-                result.union(result, graphicsConfiguration.getBounds(), result);
+                Rectangle2D.union(result, graphicsConfiguration.getBounds(), result);
             }
         }
         return result;
@@ -391,7 +392,7 @@ public class ComponentMover extends MouseAdapter
         {
             if (destination instanceof JComponent)
             {
-                ((JComponent)destination).revalidate();
+                destination.revalidate();
             }
             else
             {

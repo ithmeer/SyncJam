@@ -4,16 +4,18 @@ import syncjam.ui.Colors;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 public class VerticalSliderUI extends JPanel implements MouseListener, MouseMotionListener
 {
     protected int value = 0;
-    protected int max = 0;
-    protected int posOnBar = 0;
+    private int max = 0;
+    private int posOnBar = 0;
 
-    protected int barXOffset = 0;
-    protected int barYOffset = 0;
+    private int barXOffset = 0;
+    private int barYOffset = 0;
 
     private int myW, myH;
     private boolean updateWhileDragging = true;
@@ -106,7 +108,7 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
         }
     }
 
-    protected void drawValue(Graphics g)
+    private void drawValue(Graphics g)
     {
         g.setColor(Colors.get(Colors.Highlight));
         g.drawString("" + posOnBar,

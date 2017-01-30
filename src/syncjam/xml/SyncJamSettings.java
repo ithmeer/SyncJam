@@ -25,6 +25,14 @@ public class SyncJamSettings implements Settings
 
     @XmlElement(name="server")
     private List<XmlServerInfo> _servers;
+    @XmlElement(name="username")
+    private String _userName = "default";
+    @XmlElement(name="default_port")
+    private String _defaultPort = "9433";
+    @XmlElement(name="show_marker")
+    private boolean _showMarker = true;
+    @XmlElement(name="follow_marker")
+    private boolean _followMarker = true;
 
     private static SyncJamSettings _instance;
 
@@ -67,7 +75,6 @@ public class SyncJamSettings implements Settings
             servers.stream().forEach(s -> _servers.add(new XmlServerInfo(s)));
         }
     }
-
     @Override
     public List<ServerInfo> getSavedServers()
     {
@@ -77,6 +84,58 @@ public class SyncJamSettings implements Settings
                                                              s.getPort(), s.getPassword()))
                                     .collect(Collectors.toList());
         }
+    }
+
+    @Override
+    @XmlTransient
+    public void setUserName(String name) {
+        synchronized (SyncJamSettings.class)
+        {
+            _userName = name;
+        }
+    }
+    @Override
+    public String getUserName()
+    {
+        return _userName;
+    }
+
+    @Override
+    @XmlTransient
+    public void setDefaultPort(String port) {
+        synchronized (SyncJamSettings.class)
+        {
+            _defaultPort = port;
+        }
+    }
+    @Override
+    public String getDefaultPort()
+    {
+        return _defaultPort;
+    }
+
+    @Override
+    @XmlTransient
+    public void setShowMarker(boolean set) {
+        synchronized (SyncJamSettings.class) {
+            _showMarker = set;
+        }
+    }
+    @Override
+    public boolean getShowMarker() {
+        return _showMarker;
+    }
+
+    @Override
+    @XmlTransient
+    public void setFollowMarker(boolean set) {
+        synchronized (SyncJamSettings.class) {
+            _followMarker = set;
+        }
+    }
+    @Override
+    public boolean getFollowMarker() {
+        return _followMarker;
     }
 
     @Override

@@ -42,5 +42,6 @@ public class TextFieldUI extends JTextField
         super.paintComponent(g);
         setBackground(Colors.get(_bg));
         setForeground(Colors.get(_fg));
+        setCaretColor(Colors.get(Colors.Foreground2));
     }
 }

@@ -10,8 +10,19 @@ import java.util.List;
 public interface Settings
 {
     void setSavedServers(List<ServerInfo> servers);
-
     List<ServerInfo> getSavedServers();
+
+    void setUserName(String name);
+    String getUserName();
+
+    void setDefaultPort(String port);
+    String getDefaultPort();
+
+    void setShowMarker(boolean set);
+    boolean getShowMarker();
+
+    void setFollowMarker(boolean set);
+    boolean getFollowMarker();
 
     void saveToDisk();
 }

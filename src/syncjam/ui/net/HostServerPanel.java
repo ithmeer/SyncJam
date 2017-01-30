@@ -1,8 +1,10 @@
 package syncjam.ui.net;
 
+import syncjam.interfaces.ServiceContainer;
+import syncjam.interfaces.Settings;
 import syncjam.ui.Colors;
-import syncjam.ui.UIServices;
 import syncjam.ui.DialogWindow;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.ButtonUI;
 import syncjam.ui.buttons.base.TextFieldUI;
 import syncjam.ui.buttons.base.TextLabelUI;
@@ -14,9 +16,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class HostServerPanel extends JPanel
+class HostServerPanel extends JPanel
 {
-    private final String defaultPort = "9982";
+    private final String defaultPort;
     //private final NetTextField addressField, portField, passField;
     private final TextFieldUI[] fields;
     private final ButtonUI hostButton, cancelButton;
@@ -46,9 +48,10 @@ public class HostServerPanel extends JPanel
     };
 
 
-    public HostServerPanel(final NetworkPanel networkPanel) {
+    HostServerPanel(final NetworkPanel networkPanel, ServiceContainer services) {
         super();
         setOpaque(false);
+        defaultPort = services.getService(Settings.class).getDefaultPort();
 
         GridBagConstraints constraints = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
@@ -108,13 +111,8 @@ public class HostServerPanel extends JPanel
         this.add(p1, constraints);
 
         //Panel for action buttons
-        JPanel p2 = new JPanel(new SpringLayout()){
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                setBackground(Colors.get(Colors.Background1));
-            }
-        };
+        JPanel p2 = new JPanel(new SpringLayout());
+        p2.setOpaque(false);
         p2.add(hostButton = new ButtonUI(0, 0, Colors.Background2, "Host") {
             @Override
             protected void clicked() {

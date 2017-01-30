@@ -8,6 +8,14 @@ import syncjam.ui.buttons.base.TextLabelUI;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Created by Marty on 1/24/2017.
@@ -18,7 +26,46 @@ public class SettingsPanel extends JPanel
     private final SettingsListUI settingsList;
     private final Settings _syncJamSettings;
 
-    public SettingsPanel(ServiceContainer services) {
+    private boolean enterToggle = false;
+    private KeyAdapter keys = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            super.keyReleased(e);
+            if(isVisible()) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_ENTER:
+                        if(settingsList.getSelectedItem() != null && !enterToggle) settingsList.getSelectedItem().clicked();
+                        if(settingsList.getSelectedItem() instanceof SettingsString) enterToggle = !enterToggle;
+                        break;
+                    case KeyEvent.VK_UP:
+                        do settingsList.moveSelection("up");
+                        while(settingsList.getSelectedItem() != null && !settingsList.getSelectedItem().highlightItem());
+                        enterToggle = false;
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        do settingsList.moveSelection("down");
+                        while(settingsList.getSelectedItem() != null && !settingsList.getSelectedItem().highlightItem());
+                        enterToggle = false;
+                        break;
+                    case KeyEvent.VK_TAB:
+                        UIServices.getSyncJamUI().togglePanel(SettingsPanel.this);
+                        enterToggle = false;
+                        break;
+                }
+            }
+        }
+    };
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        if(aFlag)
+            UIServices.getMainWindow().addKeyListener(keys);
+        else {
+            UIServices.getMainWindow().removeKeyListener(keys);
+        }
+    }
+
+    SettingsPanel(ServiceContainer services) {
         _syncJamSettings = services.getService(Settings.class);
 
         this.setPreferredSize(new Dimension(250, 500));
@@ -36,46 +83,54 @@ public class SettingsPanel extends JPanel
         this.add(settingsList, BorderLayout.CENTER);
 
         new SettingsItem("General:", settingsList);
-        SettingsString usernameField = new SettingsString("Username", settingsList){  //TODO: _syncJamSettings.getUserName()
+        SettingsString usernameField = new SettingsString("Username", settingsList, _syncJamSettings.getUserName()){
             @Override
             public void output() {
-                //TODO: _syncJamSettings.setUserName(getValue());
+                super.output();
+                _syncJamSettings.setUserName(getValue());
             }
         };
-
+        SettingsString defaultPortField = new SettingsString("Default Port", settingsList, _syncJamSettings.getDefaultPort()){
+            @Override
+            public void output() {
+                super.output();
+                _syncJamSettings.setDefaultPort(getValue());
+            }
+        };
         new SettingsItem("", settingsList);
+
+        SettingsCheckbox fastScaling = new SettingsCheckbox("Use Fast Image Scaling", settingsList){ //TODO: , _syncJamSettings.getUseFastScaling()){
+            @Override
+            public void output() {
+                super.output();
+                //TODO: _syncJamSettings.setUseFastScaling(getCheckboxOn());
+            }
+        };
+        new SettingsItem("", settingsList);
+
         new SettingsItem("Playlist:", settingsList);
-        SettingsCheckbox showMarker = new SettingsCheckbox("Show Marker", settingsList){ //TODO: _syncJamSettings.getShowMarker()
+        SettingsCheckbox showMarker = new SettingsCheckbox("Show Marker", settingsList, _syncJamSettings.getShowMarker()){
             @Override
             public void output() {
-                //TODO: _syncJamSettings.setShowMarker(getCheckboxOn());
+                super.output();
+                _syncJamSettings.setShowMarker(getCheckboxOn());
             }
         };
-        SettingsCheckbox followMarker = new SettingsCheckbox("Follow Marker", settingsList){ //TODO: _syncJamSettings.getFollowMarker()
+        SettingsCheckbox followMarker = new SettingsCheckbox("Follow Marker", settingsList, _syncJamSettings.getFollowMarker()){
             @Override
             public void output() {
-                //TODO: _syncJamSettings.setFollowMarker(getCheckboxOn());
+                super.output();
+                _syncJamSettings.setFollowMarker(getCheckboxOn());
             }
         };
-
-        /*
-        JPanel settings1 = new JPanel(new GridLayout(5,1,0,4));
-        settings1.setOpaque(false);
-
-        settings1.setBorder(new EmptyBorder(20,8,8,8));
-        this.add(settings1, BorderLayout.PAGE_START);
-
-        settings1.add(new TextLabelUI("Username"));
-        TextFieldUI userName = new TextFieldUI(30, "default_user");
-        userName.setBGColor(Colors.Background2);
-        settings1.add(userName);
-        */
     }
-    public class SettingsItem
-    {
+
+    public class SettingsItem {
         final String _label;
         final ItemList _list;
-        protected boolean _highlightItem = false;
+        boolean _highlightItem = false;
+        final int rightOffset = 16;
+
         private SettingsItem(ItemList l) {
             _label = "";
             _list = l;
@@ -90,22 +145,24 @@ public class SettingsPanel extends JPanel
             return _highlightItem;
         }
         
-        public void draw(Graphics g, int x, int y)
-        {
+        public void draw(Graphics g, int x, int y){
             int itemHeight = _list.getItemHeight();
-            int fontSize = g.getFontMetrics().getHeight();
+            int fontHeight = g.getFontMetrics().getHeight();
             
-            g.setColor(Colors.get(Colors.Foreground1));
-            g.drawString(_label, _list.getLeft()+4, y+itemHeight/2 + fontSize/3);
+            g.setColor(Colors.get(_highlightItem ? Colors.Foreground1 : Colors.Foreground2));
+            g.drawString(_label, _list.getLeft()+4, y+itemHeight/2 + fontHeight/3);
         }
         public void clicked() {
             output();
         }
-        public void output() {};
+        public void output() {}
     }
-    private class SettingsString extends SettingsItem
-    {
+    public class SettingsString extends SettingsItem {
         private String _value;
+        private final int _maxLength = 20;
+        private int _pointer = 0;
+        private int _selectStart = -1, _selectEnd = -1;
+        
         private SettingsString(String label, ItemList l) {
             this(label, l, "default");
         }
@@ -115,11 +172,222 @@ public class SettingsPanel extends JPanel
             _highlightItem = true;
         }
 
+        private KeyAdapter _input = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
 
+                int keyCode = e.getKeyCode();
 
+                if(e.isControlDown())
+                {
+                    if (keyCode == KeyEvent.VK_BACK_SPACE)
+                    {
+                        while(_pointer < _value.length())
+                            backspace();
+                    }
+                    else if (keyCode == KeyEvent.VK_DELETE)
+                    {
+                        while (_pointer > 0) {
+                            _pointer--;
+                            backspace();
+                        }
+                    }
+                    else if(keyCode == KeyEvent.VK_A)
+                        selectAll();
+                    else if(keyCode == KeyEvent.VK_C)
+                        copySelection();
+                    else if(keyCode == KeyEvent.VK_V)
+                        pasteSelection();
+                    else if(keyCode == KeyEvent.VK_X) {
+                        copySelection();
+                        backspace();
+                    }
+                }
+                if(!e.isAltDown())
+                {
+                    if ((keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_HOME) && _pointer < _value.length())
+                        if (e.isControlDown() || keyCode == KeyEvent.VK_HOME)
+                            left(_value.length() - _pointer, e.isShiftDown());
+                        else
+                            left(1, e.isShiftDown());
+                    else if ((keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_END) && _pointer > 0)
+                        if (e.isControlDown() || keyCode == KeyEvent.VK_END)
+                            right(_pointer, e.isShiftDown());
+                        else
+                            right(1, e.isShiftDown());
+                }
+            }
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+
+                if(!e.isActionKey() &! e.isControlDown())
+                {
+                    char key = e.getKeyChar();
+                    switch (key){
+                        case KeyEvent.VK_BACK_SPACE:
+                            backspace();
+                            break;
+                        case KeyEvent.VK_ESCAPE:
+                        case KeyEvent.VK_ENTER:
+                            output();
+                            _list.removeKeyListener(_input);
+                            _list.transferFocusBackward();
+                            break;
+                        case KeyEvent.VK_DELETE:
+                            if(_pointer > 0) {
+                                _pointer--;
+                                backspace();
+                            }
+                            break;
+                        default:
+                            if(_selectStart > -1)
+                                backspace();
+                            if(_value.length() < _maxLength) {
+                                int pointerPos = _value.length()-_pointer;
+                                _value = _value.substring(0, pointerPos) + key + _value.substring(pointerPos);
+                            }
+                    }
+                }
+            }
+        };
+
+        public String getValue(){
+            return _value;
+        }
+
+        private void left(int amt, boolean sel) {
+            if(sel && _selectStart == -1)
+                _selectStart = _pointer;
+            _pointer += amt;
+            if(sel)
+                _selectEnd = _pointer;
+            else
+                clearSelection();
+        }
+        private void right(int amt, boolean sel) {
+            if(sel && _selectStart == -1)
+                _selectStart = _pointer;
+            _pointer -= amt;
+            if(sel)
+                _selectEnd = _pointer;
+            else
+                clearSelection();
+        }
+        private void backspace() {
+            if(_value.length() > 0)
+            {
+                if(_selectStart > -1 && _selectEnd > -1)
+                {
+                    int p1 = _value.length() - Math.max(_selectStart, _selectEnd);
+                    int p2 = _value.length() - Math.min(_selectStart, _selectEnd);
+                    _value = _value.substring(0, p1) + _value.substring(p2);
+                    _pointer = _value.length() - p1;
+                    clearSelection();
+                }
+                else
+                {
+                    int pointerPos = _value.length()-_pointer;
+                    _value = _value.substring(0, pointerPos-1) + _value.substring(pointerPos);
+                }
+            }
+        }
+        private void copySelection() {
+            if(_selectStart > -1) {
+                int p1 = _value.length() - Math.max(_selectStart, _selectEnd);
+                int p2 = _value.length() - Math.min(_selectStart, _selectEnd);
+
+                Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                StringSelection stringSelection = new StringSelection(_value.substring(p1, p2));
+                systemClipboard.setContents(stringSelection, null);
+            }
+        }
+        private void pasteSelection() {
+            String paste = "";
+            DataFlavor dataFlavor = DataFlavor.stringFlavor;
+            Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            if(systemClipboard.isDataFlavorAvailable(dataFlavor)) {
+                try {
+                    paste = (String) systemClipboard.getData(dataFlavor);
+
+                } catch (UnsupportedFlavorException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(paste.length() > 0)
+                _value = _value.substring(0, _value.length()-_pointer) + paste + _value.substring(_pointer);
+        }
+        private void selectAll() {
+            _selectStart = _value.length();
+            _selectEnd = 0;
+        }
+        private void clearSelection() {
+            if(_selectStart > -1)
+            {
+                _selectStart = -1;
+                _selectEnd = -1;
+            }
+        }
+
+        @Override
+        public void clicked() {
+            _list.addKeyListener(_input);
+            _pointer = 0;
+            selectAll();
+            _list.grabFocus();
+        }
+        @Override
+        public void draw(Graphics g, int x, int y) {
+            super.draw(g, x, y);
+            if(!_list.hasFocus() && Arrays.asList(_list.getKeyListeners()).contains(_input))
+            {
+                _list.removeKeyListener(_input);
+                output();
+            }
+
+            int middle = y + _list.getItemHeight()/2;
+            int fontHeight = g.getFontMetrics().getHeight();
+            int stringX = x + _list.getRight() - rightOffset - g.getFontMetrics().stringWidth(_value);
+
+            //Selection Highlight
+            if(_selectStart > -1 && _selectEnd > -1)
+            {
+                g.setColor(Colors.get(Colors.Highlight));
+                int p1 = _value.length() - Math.max(_selectStart, _selectEnd);
+                int p2 = _value.length() - Math.min(_selectStart, _selectEnd);
+                int startOffset = _value.length() > 0 ? g.getFontMetrics().stringWidth(_value.substring(p1)) : 0;
+                int highlighLength = _value.length() > 0 ? g.getFontMetrics().stringWidth(_value.substring(p1, p2)) : 0;
+                g.fillRect(x + _list.getRight() - rightOffset - startOffset , middle + fontHeight / 2, highlighLength, -fontHeight);
+            }
+
+            //Draw String
+            g.setColor(Colors.get(Colors.Foreground2));
+            g.drawString(_value, stringX, middle + fontHeight/3);
+
+            //Pointer
+            if(Arrays.asList(_list.getKeyListeners()).contains(_input))
+            {
+                long time = System.currentTimeMillis() % 1000;
+
+                g.setColor(Colors.get(Colors.Foreground1));
+                if(time < 500) {
+                    int pointerPos = _value.length()-_pointer;
+                    int trailingSpace = _value.length() > 0 ? g.getFontMetrics().stringWidth(_value.substring(pointerPos)) : 0;
+                    g.drawString("|", x + _list.getRight() - rightOffset - trailingSpace , middle + fontHeight / 3);
+                }
+            }
+        }
+        @Override
+        public void output() {
+            clearSelection();
+            _value = _value.trim();
+            if(_value.equals("")) _value = "default";
+            super.output();
+            _list.transferFocusBackward();
+        }
     }
-    private class SettingsCheckbox extends SettingsItem
-    {
+    public class SettingsCheckbox extends SettingsItem {
         private boolean _enabled = false;
         private int _boxSize = 18;
 
@@ -146,7 +414,7 @@ public class SettingsPanel extends JPanel
         public void draw(Graphics g, int x, int y) {
             super.draw(g, x, y);
 
-            int boxX = x + _list.getRight() - _boxSize - 6;
+            int boxX = x + _list.getRight() - rightOffset - _boxSize;
             int middle = y + _list.getItemHeight()/2;
 
             g.drawRect(boxX, middle - _boxSize /2, _boxSize, _boxSize);

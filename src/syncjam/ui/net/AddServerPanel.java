@@ -1,5 +1,7 @@
 package syncjam.ui.net;
 
+import syncjam.interfaces.ServiceContainer;
+import syncjam.interfaces.Settings;
 import syncjam.ui.Colors;
 import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
@@ -9,11 +11,14 @@ import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-public class AddServerPanel extends JPanel
+class AddServerPanel extends JPanel
 {
-    private final String defaultPort = "9982";
+    private final String defaultPort;
     //private final NetTextField addressField, portField, passField;
     private final TextFieldUI[] fields;
     private final ButtonUI addButton, cancelButton;
@@ -45,9 +50,10 @@ public class AddServerPanel extends JPanel
         }
     };
 
-    public AddServerPanel(final NetworkPanel np) {
+    AddServerPanel(final NetworkPanel np, ServiceContainer services) {
         super();
         networkPanel = np;
+        defaultPort = services.getService(Settings.class).getDefaultPort();
         setOpaque(false);
 
         GridBagConstraints constraints = new GridBagConstraints();
@@ -70,8 +76,13 @@ public class AddServerPanel extends JPanel
         fields = new TextFieldUI[numPairs];
 
         //Create and populate the panel.
-        JPanel p1 = new JPanel(new SpringLayout());
-        p1.setOpaque(false);
+        JPanel p1 = new JPanel(new SpringLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                setBackground(Colors.get(Colors.Background2));
+            }
+        };
         
         for (int i = 0; i < numPairs; i++) {
             TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
@@ -155,14 +166,14 @@ public class AddServerPanel extends JPanel
 
     }
 
-    protected SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
+    private SpringLayout.Constraints getConstraintsForCell(int row, int col, Container parent, int cols)
     {
         SpringLayout layout = (SpringLayout) parent.getLayout();
         Component c = parent.getComponent(row * cols + col);
         return layout.getConstraints(c);
     }
 
-    protected void makeCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
+    private void makeCompactGrid(Container parent, int rows, int cols, int initialX, int initialY,
                                  int xPad, int yPad)
     {
         SpringLayout layout;

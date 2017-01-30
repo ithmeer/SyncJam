@@ -1,15 +1,14 @@
 package syncjam.ui;
 
-import com.sun.awt.AWTUtilities;
 import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Settings;
 import syncjam.ui.base.CustomFrame;
+import syncjam.ui.buttons.SongPositionSlider;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
 import syncjam.ui.buttons.base.SliderUI;
-import syncjam.ui.buttons.SongPositionSlider;
 import syncjam.ui.net.NetworkIndicator;
 import syncjam.ui.net.NetworkPanel;
 import syncjam.ui.net.UserListPanel;

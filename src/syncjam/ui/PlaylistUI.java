@@ -9,7 +9,7 @@ import syncjam.ui.base.ItemList;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -18,6 +18,7 @@ public class PlaylistUI extends ItemList
 {
     private final Playlist _playlist;
     private final SongQueue _songQueue;
+    private final Settings _settings;
     private final NetworkController _networkController;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
@@ -28,6 +29,7 @@ public class PlaylistUI extends ItemList
     {
         _playlist = services.getService(Playlist.class);
         _songQueue = services.getService(SongQueue.class);
+        _settings = services.getService(Settings.class);
         _networkController = services.getService(NetworkController.class);
         this.setEnableCustomDrawing(true);
 
@@ -70,10 +72,13 @@ public class PlaylistUI extends ItemList
         Iterator<Song> songIter = _playlist.iterator();
         Song draggedSong = null;
         int draggedIndex = -1;
+
+        _scrollbar.setDrawMarker(_settings.getShowMarker());
         if(_playlist.getCurrentSongIndex() < _playlist.size())
-            scrollbar.setMarker(_playlist.getCurrentSongIndex(), _playlist.size());
+            _scrollbar.setMarker(_playlist.getCurrentSongIndex(), _playlist.size());
         else
-            scrollbar.setMarker(-1, 0);
+            _scrollbar.setMarker(-1, 0);
+        
         while (songIter.hasNext())
         {
             Song curSong = songIter.next();
@@ -82,7 +87,7 @@ public class PlaylistUI extends ItemList
             updateSplit(i);
             updateScrollbar();
 
-            if(itemDragIndex == i && draggedSong == null)
+            if(_itemDragIndex == i && draggedSong == null)
             {
                 draggedSong = curSong;
                 draggedIndex = i;
@@ -91,14 +96,10 @@ public class PlaylistUI extends ItemList
             }
 
             if(curItemYPos+itemHeight > 0 && curItemYPos < getHeight())
-                drawSong(g, xOffset, curItemYPos, i, curSong);
+                drawSong(g, _xOffset, curItemYPos, i, curSong);
 
-            /*
-            if(i == _playlist.getCurrentSongIndex())
-                scrollbar.moveToMarker(itemHeight);
-            */
-            if(i == _playlist.getCurrentSongIndex() && scrollbar.is_markerMoved()){
-                scrollbar.moveToItem(i, itemHeight);
+            if(i == _playlist.getCurrentSongIndex() && _scrollbar.is_markerMoved() && _settings.getFollowMarker()){
+                _scrollbar.moveToItem(i, itemHeight);
             }
 
             i++;
@@ -107,23 +108,23 @@ public class PlaylistUI extends ItemList
         //Draw Dragged Song & Determine Drop Position
         if(draggedSong != null)
         {
-            int dragY = mouseY-itemHeight/2;
+            int dragY = _mouseY -itemHeight/2;
 
             ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
-            drawSong(g, xOffset, dragY, draggedIndex, draggedSong);
+            drawSong(g, _xOffset, dragY, draggedIndex, draggedSong);
             ((Graphics2D)g).setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 
-            if(itemHoverIndex != -1)
+            if(_itemHoverIndex != -1)
             {
-                int hoverItemYPos = getYPosInUI(itemHoverIndex);
-                if(mouseY < hoverItemYPos + itemHeight/2)
-                    itemDropIndex = itemHoverIndex;
-                else if(mouseY >= hoverItemYPos - itemHeight/2)
-                    itemDropIndex = itemHoverIndex+1;
+                int hoverItemYPos = getYPosInUI(_itemHoverIndex);
+                if(_mouseY < hoverItemYPos + itemHeight/2)
+                    _itemDropIndex = _itemHoverIndex;
+                else if(_mouseY >= hoverItemYPos - itemHeight/2)
+                    _itemDropIndex = _itemHoverIndex +1;
             }
-            if(lastDropIndex != itemDropIndex)
+            if(_lastDropIndex != _itemDropIndex)
             {
-                lastDropIndex = itemDropIndex;
+                _lastDropIndex = _itemDropIndex;
             }
         }
         else
@@ -159,13 +160,13 @@ public class PlaylistUI extends ItemList
         if(progress < 100)
         {
             g.setColor(Colors.get(Colors.Background1));
-            g.fillRect(x, y, getWidth() - scrollbar.getWidth(), itemHeight);
+            g.fillRect(x, y, getWidth() - _scrollbar.getWidth(), itemHeight);
 
             if(progress > 0)
             {
                 g.setColor(Colors.get(Colors.Highlight));
 
-                float progWidth = (float)progress/100 * (getWidth() - scrollbar.getWidth());
+                float progWidth = (float)progress/100 * (getWidth() - _scrollbar.getWidth());
 
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
@@ -197,11 +198,11 @@ public class PlaylistUI extends ItemList
         Rectangle itemRect = new Rectangle(
                 0,
                 getYPosInUI(i),
-                getWidth()-scrollbar.getWidth(),
+                getWidth()- _scrollbar.getWidth(),
                 itemHeight);
 
 
-        if(itemRect.contains(mouseX, mouseY) && itemHoverIndex == i && itemDragIndex == -1)
+        if(itemRect.contains(_mouseX, _mouseY) && _itemHoverIndex == i && _itemDragIndex == -1)
         {
             g.setColor(Colors.get(Colors.Highlight2));
             g.fillRect(xRect.x, xRect.y, xRect.width, xRect.height);
@@ -220,7 +221,7 @@ public class PlaylistUI extends ItemList
                     x - textWidth + 20,
                     y + itemHeight/2 + textHeight/4);
         }
-        if(xRect.contains(mouseX, mouseY))
+        if(xRect.contains(_mouseX, _mouseY))
             removeHoverIndex = i;
         else if(removeHoverIndex == i)
             removeHoverIndex = -1;
@@ -271,7 +272,7 @@ public class PlaylistUI extends ItemList
                 itemHeight);
 
 
-        if(itemRect.contains(mouseX, mouseY) && itemHoverIndex == i && itemDragIndex == -1)
+        if(itemRect.contains(_mouseX, _mouseY) && _itemHoverIndex == i && _itemDragIndex == -1)
         {
             g.setColor(Colors.get(Colors.Background1));
             Graphics2D g2 = (Graphics2D) g;
@@ -292,7 +293,7 @@ public class PlaylistUI extends ItemList
             g.fillPolygon(playShape);
         }
 
-        if(artRect.contains(mouseX, mouseY))
+        if(artRect.contains(_mouseX, _mouseY))
             artHoverIndex = i;
         else if(artHoverIndex == i)
             artHoverIndex = -1;
@@ -315,7 +316,7 @@ public class PlaylistUI extends ItemList
         String artistName = cutStringToWidth(
                 song.getArtistName(),
                 g.getFontMetrics(),
-                getWidth() - thisItemXPos - scrollbar.getWidth() - 48);
+                getWidth() - thisItemXPos - _scrollbar.getWidth() - 48);
 
         g.drawString(artistName, thisItemXPos, thisItemYPos);
     }
@@ -336,7 +337,7 @@ public class PlaylistUI extends ItemList
         String songName = cutStringToWidth(
                 song.getTitle(),
                 g.getFontMetrics(),
-                getWidth() - thisItemXPos - scrollbar.getWidth());
+                getWidth() - thisItemXPos - _scrollbar.getWidth());
 
         g.drawString(songName, thisItemXPos, thisItemYPos);
     }
@@ -365,20 +366,20 @@ public class PlaylistUI extends ItemList
         Rectangle itemRect = new Rectangle(
                 0,
                 getYPosInUI(i),
-                (getWidth() - scrollbar.getWidth()),
+                (getWidth() - _scrollbar.getWidth()),
                 itemHeight);
 
-        if(itemHoverIndex == i && !itemRect.contains(mouseX,mouseY))
-            itemHoverIndex = -1;
-        else if(itemDragIndex != i && mouseY > itemRect.getY() && mouseY < itemRect.getY()+itemRect.getHeight())
-            itemHoverIndex = i;
+        if(_itemHoverIndex == i && !itemRect.contains(_mouseX, _mouseY))
+            _itemHoverIndex = -1;
+        else if(_itemDragIndex != i && _mouseY > itemRect.getY() && _mouseY < itemRect.getY()+itemRect.getHeight())
+            _itemHoverIndex = i;
 
-        if(itemDragIndex >= 0)
+        if(_itemDragIndex >= 0)
         {
-            if(mouseY > getHeight() && i < _playlist.size())
-                itemHoverIndex = _playlist.size()-1;
-            else if(mouseY < 0 && i > 0)
-                itemHoverIndex = 0;
+            if(_mouseY > getHeight() && i < _playlist.size())
+                _itemHoverIndex = _playlist.size()-1;
+            else if(_mouseY < 0 && i > 0)
+                _itemHoverIndex = 0;
         }
     }
 
@@ -399,19 +400,19 @@ public class PlaylistUI extends ItemList
     }
 
     @Override
-    protected void updateScrollbar() { scrollbar.setMaxValue(_playlist.size() * itemHeight + yOffset*2); }
+    protected void updateScrollbar() { _scrollbar.setMaxValue(_playlist.size() * itemHeight + _yOffset *2); }
 
     private void buildSplitArray()
     {
-        splits = new int[_playlist.size()+1];
+        _splits = new int[_playlist.size()+1];
     }
 
     @Override
     public void remove(int index)
     {
         _playlist.remove(index);
-        if(index < _playlist.getCurrentSongIndex())
-            scrollbar.adjustMarker();
+        if(index < _playlist.getCurrentSongIndex() && _settings.getFollowMarker())
+            _scrollbar.adjustMarker(-1);
         updateScrollbar();
     }
     public void clear()
@@ -426,18 +427,24 @@ public class PlaylistUI extends ItemList
     public void mouseReleased(MouseEvent e)
     {
         if(e.getButton() == MouseEvent.BUTTON1) {
-            if(itemDragIndex >= 0)
+            if(_itemDragIndex >= 0)
             {
-                if(itemDropIndex == -1)
-                    itemDropIndex = itemDragIndex;
+                if(_itemDropIndex == -1)
+                    _itemDropIndex = _itemDragIndex;
 
-                if(itemDragIndex != itemDropIndex-1)
-                    _playlist.moveSong(itemDragIndex, itemDropIndex);
-                itemDragIndex  = -1;
-                itemDropIndex  = -1;
-                itemHoverIndex = -1;
-                mouseX = -1;
-                mouseY = -itemHeight;
+                if(_itemDragIndex != _itemDropIndex -1) {
+                    int curSongPos = _playlist.getCurrentSongIndex();
+
+                    _playlist.moveSong(_itemDragIndex, _itemDropIndex);
+
+                    int newSongPos = _playlist.getCurrentSongIndex();
+                    _scrollbar.adjustMarker(newSongPos - curSongPos);  //if the song position changes, adjust scrollbar marker to reflect
+                }
+                _itemDragIndex = -1;
+                _itemDropIndex = -1;
+                _itemHoverIndex = -1;
+                _mouseX = -1;
+                _mouseY = -itemHeight;
             }
             else
             {
@@ -452,8 +459,8 @@ public class PlaylistUI extends ItemList
     @Override
     public void mouseExited(MouseEvent e)
     {
-        mouseX = -1;
-        mouseY = -1;
+        _mouseX = -1;
+        _mouseY = -1;
         artHoverIndex = -1;
     }
 
@@ -461,17 +468,17 @@ public class PlaylistUI extends ItemList
     public void mouseDragged(MouseEvent e)
     {
         if(SwingUtilities.isLeftMouseButton(e)) {
-            mouseX = e.getX();
-            mouseY = e.getY();
-            double dist = Math.hypot(clickStartX - mouseX, clickStartY - mouseY);
+            _mouseX = e.getX();
+            _mouseY = e.getY();
+            double dist = Math.hypot(_clickStartX - _mouseX, _clickStartY - _mouseY);
             if (isDraggingEnabled() && dist > 8) {
-                if (itemDragIndex == -1 &&
-                        itemHoverIndex != -1 &&
-                        itemHoverIndex != artHoverIndex &&
-                        itemHoverIndex != removeHoverIndex) {
-                    itemDragIndex = itemHoverIndex;
-                    for (int i = itemDragIndex; i < splits.length - 1; i++) {
-                        splits[i] = itemHeight + 6;
+                if (_itemDragIndex == -1 &&
+                        _itemHoverIndex != -1 &&
+                        _itemHoverIndex != artHoverIndex &&
+                        _itemHoverIndex != removeHoverIndex) {
+                    _itemDragIndex = _itemHoverIndex;
+                    for (int i = _itemDragIndex; i < _splits.length - 1; i++) {
+                        _splits[i] = itemHeight + 6;
                     }
                 }
             }

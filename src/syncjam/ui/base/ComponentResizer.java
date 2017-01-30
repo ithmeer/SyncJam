@@ -1,12 +1,12 @@
 package syncjam.ui.base;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 
 /**
  *  The ComponentResizer allows you to resize a component by dragging a border
@@ -171,7 +171,7 @@ public class ComponentResizer extends MouseAdapter
     /**
      *  Remove listeners from the specified component
      *
-     *  @param component  the component the listeners are removed from
+     *  @param components the components the listeners are removed from
      */
     public void deregisterComponent(Component... components)
     {
@@ -185,7 +185,7 @@ public class ComponentResizer extends MouseAdapter
     /**
      *  Add the required listeners to the specified component
      *
-     *  @param component  the component the listeners are added to
+     *  @param components the components the listeners are added to
      */
     public void registerComponent(Component... components)
     {
@@ -480,7 +480,7 @@ public class ComponentResizer extends MouseAdapter
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice gd : localGE.getScreenDevices()) {
             for (GraphicsConfiguration graphicsConfiguration : gd.getConfigurations()) {
-                result.union(result, graphicsConfiguration.getBounds(), result);
+                Rectangle2D.union(result, graphicsConfiguration.getBounds(), result);
             }
         }
         return result;

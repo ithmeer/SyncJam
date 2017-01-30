@@ -114,7 +114,7 @@ public class NetworkPanel extends JPanel
         addButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
             protected void clicked() {
-                openPanel(new AddServerPanel(NetworkPanel.this));
+                openPanel(new AddServerPanel(NetworkPanel.this, services));
             }
         };
         addButton.setText("Add");
@@ -172,7 +172,7 @@ public class NetworkPanel extends JPanel
         constraints.gridwidth = 2;
         hostButton = new ButtonUI(0, 0, Colors.Background2) {
             @Override
-            protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this)); }
+            protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this, services)); }
         };
         hostButton.setText("Host");
         hostButton.setMargin(new Insets(0,0,0,0));
@@ -191,29 +191,29 @@ public class NetworkPanel extends JPanel
         this.updateUI();
         this.repaint();
     }
-    public void back()
+    void back()
     {
         openPanel(mainPanel);
     }
 
-    public void addServer(String name, String ip, int port, String pass)
+    void addServer(String name, String ip, int port, String pass)
     {
         serverList.addServer(name, ip, port, pass);
     }
 
-    public void connect()
+    private void connect()
     {
         serverList.connect(_network);
         statusEnableButtons();
     }
-    public void disconnect()
+    private void disconnect()
     {
         _network.disconnect();
         serverList.disconnected();
         statusEnableButtons();
     }
 
-    public void hostServer(int port, String password)
+    void hostServer(int port, String password)
     {
         _network.startServer(new ServerInfo(port, password));
         statusEnableButtons();
@@ -241,7 +241,7 @@ public class NetworkPanel extends JPanel
 
     public void paintComponent(Graphics g)
     {
-        if(serverList.getSelectedItemIndex() == -1)
+        if(serverList.getSelectedItem() == null)
         {
             removeButton.setEnabled(false);
             connectButton.setEnabled(false);

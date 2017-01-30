@@ -3,7 +3,6 @@ package syncjam.ui.base;
 // vim:set fileencoding=utf-8:
 
 import syncjam.ui.Colors;
-import syncjam.ui.DialogWindow;
 import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
@@ -201,14 +200,18 @@ class SyncJamIcon implements Icon {
         g2.setPaint(Colors.get(Colors.Background1));
         g2.fillRect(0, 0, getIconWidth(), getIconHeight());
         g2.setPaint(Colors.get(Colors.Foreground1));
-        g2.drawLine(0,  5, 5, 0);
-        g2.drawLine(1,  5, 6, 0);
-        g2.drawLine(1,  6, 7, 0);
-        g2.drawLine(2,  6, 7, 1);
-        g2.drawLine(2,  7, 8, 1);
-        g2.drawLine(3,  7, 8, 2);
-        g2.drawLine(3,  8, 8, 3);
-        
+        g2.drawLine( 0, 5, 5, 0);
+        g2.drawLine( 1, 5, 6, 0);
+        g2.drawLine( 1, 6, 7, 0);
+        g2.drawLine( 2, 6, 7, 1);
+        g2.drawLine( 2, 7, 8, 1);
+        g2.drawLine( 3, 7, 8, 2);
+        g2.drawLine( 3, 8, 8, 3);
+
+        g2.drawLine(10, 4,13, 4);
+
+        g2.drawLine( 0,10, 3, 10);
+
         g2.drawLine(5, 10, 8, 7);
         g2.drawLine(5, 11, 8, 8);
         g2.drawLine(5, 12, 9, 8);
@@ -216,6 +219,8 @@ class SyncJamIcon implements Icon {
         g2.drawLine(6, 13,10, 9);
         g2.drawLine(7, 13,10,10);
         g2.drawLine(8, 13,11,10);
+
+        g2.drawLine(13,10,13,10);
         g2.dispose();
     }
     @Override public int getIconWidth() {
