@@ -25,7 +25,7 @@ public class CustomFrame extends JFrame
 
     public CustomFrame(int minW, int minH)
     {
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){
                 close();

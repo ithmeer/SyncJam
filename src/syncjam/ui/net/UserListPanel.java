@@ -30,7 +30,7 @@ public class UserListPanel extends JPanel
         userListUI.validate();
 
         String[] name1 = {"Toast", "Eagle", "Reggae", "Anime", "Gross & Terrible", "Hot Pocket", "Nose", "Amazing", "Dog", "Slime", "Swamp", "Salmon", "Horse", "Jam", "Skeleton", "Furry", "Nerd", "Artist"};
-        String[] name2 = {"Boy", "Lady", "Lover", "Taster", "Connoisseur", "Bones", "Man", "Mess", "Nose", "Pete", "Speed", "Swamp", "Berg", "Gravy", "Nerd", "Master", "Artist", "Loser", "Furry", "Wizard"};
+        String[] name2 = {"Boy", "Lady", "Lover", "Taster", "Connoisseur", "Bones", "Man", "Mess", "Nose", "Pete", "Speed", "Swamp", "Berg", "Gravy", "Nerd", "Master", "Artist", "Loser", "Wizard"};
 
         java.util.Random r = new java.util.Random();
         for(int i = 0; i < 30; i++) {

@@ -315,7 +315,7 @@ public abstract class ItemList<Item> extends JPanel implements MouseListener, Mo
     {
         _mouseX = e.getX();
         _mouseY = e.getY();
-        if(_itemHoverIndex != -1)
+        if(_itemHoverIndex != -1 && _itemHoverIndex != _selectedItem)
             _selectedItem = -1;
     }
 }

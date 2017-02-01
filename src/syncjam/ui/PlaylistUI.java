@@ -7,7 +7,7 @@ import syncjam.interfaces.*;
 import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
-import javax.swing.border.Border;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -20,6 +20,7 @@ public class PlaylistUI extends ItemList
     private final SongQueue _songQueue;
     private final Settings _settings;
     private final NetworkController _networkController;
+    private MatteBorder fileDropBorder;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
 
@@ -33,7 +34,7 @@ public class PlaylistUI extends ItemList
         _networkController = services.getService(NetworkController.class);
         this.setEnableCustomDrawing(true);
 
-        final Border fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
+        fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
         new FileDrop(this, fileDropBorder, files -> {
             BytesSong[] songs = new BytesSong[files.length];
             for(int i = 0; i < files.length; i++)
@@ -67,6 +68,8 @@ public class PlaylistUI extends ItemList
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        if(fileDropBorder.getMatteColor() != Colors.get(Colors.Highlight))
+            fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
 
         int i = 0;
         Iterator<Song> songIter = _playlist.iterator();

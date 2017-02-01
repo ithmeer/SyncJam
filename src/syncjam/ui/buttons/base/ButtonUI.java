@@ -18,11 +18,6 @@ public abstract class ButtonUI extends JButton implements ActionListener
         this(w, h, Colors.Background1);
     }
 
-    public ButtonUI(int w, int h, Colors bg, String text){
-        this(w, h, bg);
-        setText(text);
-    }
-
     public ButtonUI(int w, int h, Colors bg)
     {
         myW = w;

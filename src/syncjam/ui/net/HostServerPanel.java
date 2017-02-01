@@ -5,6 +5,7 @@ import syncjam.interfaces.Settings;
 import syncjam.ui.Colors;
 import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
+import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.base.ButtonUI;
 import syncjam.ui.buttons.base.TextFieldUI;
 import syncjam.ui.buttons.base.TextLabelUI;
@@ -113,7 +114,7 @@ class HostServerPanel extends JPanel
         //Panel for action buttons
         JPanel p2 = new JPanel(new SpringLayout());
         p2.setOpaque(false);
-        p2.add(hostButton = new ButtonUI(0, 0, Colors.Background2, "Host") {
+        p2.add(hostButton = new TextButton(0, 0, "Host") {
             @Override
             protected void clicked() {
                 String password = fields[0].getText();
@@ -133,7 +134,7 @@ class HostServerPanel extends JPanel
             }
         });
 
-        p2.add(cancelButton = new ButtonUI(0, 0, Colors.Background2, "Cancel") {
+        p2.add(cancelButton = new TextButton(0, 0, "Cancel") {
             @Override
             protected void clicked() {
                 UIServices.getMainWindow().removeKeyListener(keys);

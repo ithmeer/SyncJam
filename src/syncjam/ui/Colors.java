@@ -1,6 +1,5 @@
 package syncjam.ui;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.font.TransformAttribute;
@@ -33,16 +32,32 @@ public enum Colors
             new Color(44, 130, 226), //Highlight
             new Color(226, 82, 61),  //Highlight2
     };
-    public static final Color[] test = {
-            new Color(17, 22, 27),//Background1
-            new Color(31, 39, 49),//Background2
-            new Color(87, 225, 255),      //Foreground1
-            new Color(52, 118, 172),   //Foreground2
-            new Color(255, 255, 255), //Highlight
+    public static final Color[] blueberry = {
+            new Color(29, 43, 59),   //Background1
+            new Color(24, 36, 51),   //Background2
+            new Color(87, 225, 255), //Foreground1
+            new Color(170, 211, 247),//Foreground2
+            new Color(255, 255, 255),//Highlight
+            new Color(226, 82, 61),  //Highlight2
+    };
+    public static final Color[] plum = {
+            new Color(68, 26, 50),   //Background1
+            new Color(53, 23, 39),   //Background2
+            new Color(255, 255, 255),//Foreground1
+            new Color(188, 188, 188),//Foreground2
+            new Color(225, 190, 65), //Highlight
+            new Color(226, 82, 61),  //Highlight2
+    };
+    public static final Color[] test2 = {
+            new Color(17, 22, 27),   //Background1
+            new Color(31, 39, 49),   //Background2
+            new Color(87, 225, 255), //Foreground1
+            new Color(52, 118, 172), //Foreground2
+            new Color(255, 255, 255),//Highlight
             new Color(226, 82, 61),  //Highlight2
     };
 
-    private static Color[] currentColors = defaultColors;
+    private static Color[] currentColors = defaultColors.clone();
 
     public static Color get(Colors c)
     {
@@ -51,8 +66,13 @@ public enum Colors
 
     public static void setColorScheme(Color[] colors)
     {
-        currentColors = colors;
-        UIManager.put("Button.disabledText", Colors.get(Colors.Background1));
+        currentColors = colors.clone();
+        UIServices.updateLookAndFeel();
+    }
+    public static void setColor(Colors which, Color newColor)
+    {
+         currentColors[which.ordinal()] = newColor;
+        UIServices.updateLookAndFeel();
     }
 
     public static void setFont(Graphics g, int size)

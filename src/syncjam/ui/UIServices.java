@@ -23,4 +23,10 @@ public class UIServices
     public static void setSyncJamUI(SyncJamUI syncJamUI) {
         UIServices._syncJamUI = syncJamUI;
     }
+
+    public static void updateLookAndFeel() {
+        UIManager.put("Button.disabledText", Colors.get(Colors.Background1).darker());
+        UIManager.put("Label.foreground", Colors.get(Colors.Foreground1));
+        UIManager.put("RadioButton.background", Colors.get(Colors.Background1));
+    }
 }

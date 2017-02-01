@@ -3,9 +3,8 @@ package syncjam.ui.net;
 import syncjam.ConnectionStatus;
 import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
-import syncjam.ui.Colors;
 import syncjam.ui.UIServices;
-import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.base.TextLabelUI;
 import syncjam.utilities.ServerInfo;
 
@@ -23,7 +22,7 @@ public class NetworkPanel extends JPanel
     private final JPanel mainPanel;
     private JPanel visiblePanel;
     private final NetworkController _network;
-    private ButtonUI connectButton, disconnectButton, hostButton, addButton, removeButton;
+    private TextButton connectButton, disconnectButton, hostButton, addButton, removeButton;
 
     private KeyAdapter keys = new KeyAdapter() {
         @Override
@@ -111,13 +110,12 @@ public class NetworkPanel extends JPanel
         //----- Add / Remove -----//
 
         constraints.gridwidth = 1;
-        addButton = new ButtonUI(0, 0, Colors.Background2) {
+        addButton = new TextButton(0, 0, "Add") {
             @Override
             protected void clicked() {
                 openPanel(new AddServerPanel(NetworkPanel.this, services));
             }
         };
-        addButton.setText("Add");
         addButton.setMargin(new Insets(0,0,0,0));
         constraints.insets = new Insets(4,20,4,4);
         constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -129,11 +127,10 @@ public class NetworkPanel extends JPanel
         constraints.weighty = .5;
         mainPanel.add(addButton, constraints);
 
-        removeButton = new ButtonUI(0, 0, Colors.Background2) {
+        removeButton = new TextButton(0, 0, "Remove") {
             @Override
             protected void clicked() { serverList.removeSelected(); }
         };
-        removeButton.setText("Remove");
         removeButton.setMargin(new Insets(0,0,0,0));
         constraints.insets = new Insets(4,4,4,20);
         constraints.gridx = 1;
@@ -143,11 +140,10 @@ public class NetworkPanel extends JPanel
         //----- Connect / Disconnect -----//
 
         constraints.gridwidth = 1;
-        connectButton = new ButtonUI(0, 0, Colors.Background2) {
+        connectButton = new TextButton(0, 0, "Connect") {
             @Override
             protected void clicked() { connect(); }
         };
-        connectButton.setText("Connect");
         connectButton.setMargin(new Insets(0,0,0,0));
         constraints.insets = new Insets(4,20,4,4);
         constraints.gridx = 0;
@@ -155,11 +151,10 @@ public class NetworkPanel extends JPanel
         mainPanel.add(connectButton, constraints);
         connectButton.setEnabled(false);
 
-        disconnectButton = new ButtonUI(0, 0, Colors.Background2) {
+        disconnectButton = new TextButton(0, 0, "Disconnect") {
             @Override
             protected void clicked() { disconnect(); }
         };
-        disconnectButton.setText("Disconnect");
         disconnectButton.setMargin(new Insets(0,0,0,0));
         constraints.insets = new Insets(4,4,4,20);
         constraints.gridx = 1;
@@ -170,11 +165,10 @@ public class NetworkPanel extends JPanel
         //----- Host  -----//
 
         constraints.gridwidth = 2;
-        hostButton = new ButtonUI(0, 0, Colors.Background2) {
+        hostButton = new TextButton(0, 0, "Host") {
             @Override
             protected void clicked() { openPanel(new HostServerPanel(NetworkPanel.this, services)); }
         };
-        hostButton.setText("Host");
         hostButton.setMargin(new Insets(0,0,0,0));
         constraints.insets = new Insets(4,20,4,20);
         constraints.gridx = 0;

@@ -36,8 +36,6 @@ public class SyncJamUI implements KeyListener
 
     public SyncJamUI(ServiceContainer services)
     {
-
-        //new WindowObject(360, 500, services);
         _window = new CustomFrame(340, 500) {
             private JFrame _infoWindow = null;
             @Override
@@ -61,6 +59,7 @@ public class SyncJamUI implements KeyListener
 
         //= = = = = = = = = = Window Stuff = = = = = = = = = =//
 
+        _window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         _window.setFocusTraversalKeysEnabled(false);
         _window.addKeyListener(this);
         _window.setFocusable(true);
@@ -170,7 +169,7 @@ public class SyncJamUI implements KeyListener
 
         //Network Button
         constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
-        TextButton networkButton = new TextButton("C", 12, 12){
+        TextButton networkButton = new TextButton(12, 12, "C"){
             protected void clicked() { togglePanel(_networkPanel); }
         };
 
@@ -224,6 +223,7 @@ public class SyncJamUI implements KeyListener
         //= = = = = = = = = = = = = = = = = = = = = = = =//
 
         _window.open();
+        UIServices.updateLookAndFeel();
 
         _networkPanel.setVisible(false);
         _settingsPanel.setVisible(false);
@@ -247,14 +247,29 @@ public class SyncJamUI implements KeyListener
                 if(_lastPanel == null) _lastPanel = _networkPanel;
                 if(!_lastPanel.isVisible()) togglePanel(_lastPanel);
                 break;
+                
             case KeyEvent.VK_U:
                 _colorToggle++;
-                switch(_colorToggle % 3) {
+                switch(_colorToggle %= 4) {
                     case 0: Colors.setColorScheme(Colors.defaultColors); break;
                     case 1: Colors.setColorScheme(Colors.lightColors); break;
-                    case 2: Colors.setColorScheme(Colors.test); break;
+                    case 2: Colors.setColorScheme(Colors.blueberry); break;
+                    case 3: Colors.setColorScheme(Colors.plum); break;
                 }
                 break;
+            case KeyEvent.VK_1:
+                DialogWindow.openColorPicker(Colors.Background1); break;
+            case KeyEvent.VK_2:
+                DialogWindow.openColorPicker(Colors.Background2); break;
+            case KeyEvent.VK_3:
+                DialogWindow.openColorPicker(Colors.Foreground1); break;
+            case KeyEvent.VK_4:
+                DialogWindow.openColorPicker(Colors.Foreground2); break;
+            case KeyEvent.VK_5:
+                DialogWindow.openColorPicker(Colors.Highlight); break;
+            case KeyEvent.VK_6:
+                DialogWindow.openColorPicker(Colors.Highlight2); break;
+
             case KeyEvent.VK_E:
                 DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 break;

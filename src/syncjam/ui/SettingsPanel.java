@@ -417,7 +417,9 @@ public class SettingsPanel extends JPanel
             int boxX = x + _list.getRight() - rightOffset - _boxSize;
             int middle = y + _list.getItemHeight()/2;
 
+            g.setColor(Colors.get(Colors.Foreground2));
             g.drawRect(boxX, middle - _boxSize /2, _boxSize, _boxSize);
+            g.setColor(Colors.get(Colors.Foreground1));
             if(_enabled)
                 g.fillRect(boxX + 3, middle - _boxSize /2 + 3, _boxSize - 5, _boxSize - 5);
         }

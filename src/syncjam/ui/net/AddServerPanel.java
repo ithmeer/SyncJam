@@ -5,6 +5,7 @@ import syncjam.interfaces.Settings;
 import syncjam.ui.Colors;
 import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
+import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.base.ButtonUI;
 import syncjam.ui.buttons.base.TextFieldUI;
 import syncjam.ui.buttons.base.TextLabelUI;
@@ -119,7 +120,7 @@ class AddServerPanel extends JPanel
         JPanel p2 = new JPanel(new SpringLayout());
         p2.setOpaque(false);
 
-        p2.add(addButton = new ButtonUI(0, 0, Colors.Background2, "Add") {
+        p2.add(addButton = new TextButton(0, 0, "Add") {
             @Override
             protected void clicked() {
                 String name = fields[0].getText();
@@ -143,7 +144,7 @@ class AddServerPanel extends JPanel
             }
         });
 
-        p2.add(cancelButton = new ButtonUI(0, 0, Colors.Background2, "Cancel") {
+        p2.add(cancelButton = new TextButton(0, 0, "Cancel") {
             @Override
             protected void clicked() {
                 UIServices.getMainWindow().removeKeyListener(keys);

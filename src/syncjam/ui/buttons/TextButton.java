@@ -11,17 +11,24 @@ import java.awt.*;
 
 public class TextButton extends ButtonUI
 {
-    protected TextButton(String text)
-    {
-        this(text, 0, 0);
+    protected TextButton(int w, int y, String text){
+        this(w, y, text, Colors.Background2);
     }
-    protected TextButton(String text, int w, int y)
+    protected TextButton(int w, int y, String text, Colors bg)
     {
         super(w, y);
         background = Colors.Background2;
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Colors.get(background).brighter());
+        g.drawRect(0, 0, getWidth(), getHeight());
+    }
+
     @Override
     protected void clicked()
     {
