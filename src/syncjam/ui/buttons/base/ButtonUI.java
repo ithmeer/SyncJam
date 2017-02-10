@@ -11,7 +11,8 @@ import java.awt.event.ActionListener;
 public abstract class ButtonUI extends JButton implements ActionListener
 {
     private int myW, myH;
-    protected Colors background;
+    protected Colors _background, _foreground, _rollover, _pressed;
+    protected boolean _drawOutline = false;
 
     public ButtonUI(int w, int h)
     {
@@ -22,7 +23,10 @@ public abstract class ButtonUI extends JButton implements ActionListener
     {
         myW = w;
         myH = h;
-        background = bg;
+        _background = bg;
+        _foreground = Colors.Foreground2;
+        _rollover = Colors.Foreground1;
+        _pressed = Colors.Highlight;
 
         validate();
         addActionListener(this);
@@ -33,7 +37,7 @@ public abstract class ButtonUI extends JButton implements ActionListener
         this.setFocusPainted(false);
         this.setFocusable(false);
         this.setUI(new ButtonUIStyle());
-        super.setBackground(Colors.get(background));
+        super.setBackground(Colors.get(_background));
 
     }
 
@@ -58,20 +62,25 @@ public abstract class ButtonUI extends JButton implements ActionListener
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        super.setBackground(Colors.get(background));
+        super.setBackground(Colors.get(_background));
 
         if (getModel().isPressed()) {
-            g.setColor(Colors.get(Colors.Highlight));
-            setForeground(Colors.get(Colors.Highlight));
+            g.setColor(Colors.get(_pressed));
+            setForeground(Colors.get(_pressed));
         }
         else if (getModel().isRollover()) {
-            g.setColor(Colors.get(Colors.Foreground1));
-            setForeground(Colors.get(Colors.Foreground1));
+            g.setColor(Colors.get(_rollover));
+            setForeground(Colors.get(_rollover));
         }
         else
         {
-            g.setColor(Colors.get(Colors.Foreground2));
-            setForeground(Colors.get(Colors.Foreground2));
+            g.setColor(Colors.get(_foreground));
+            setForeground(Colors.get(_foreground));
+        }
+
+        if(_drawOutline) {
+            g.setColor(Colors.get(_background).brighter());
+            g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         }
     }
 }

@@ -5,6 +5,7 @@ import syncjam.interfaces.NetworkController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.interfaces.Settings;
 import syncjam.ui.base.CustomFrame;
+import syncjam.ui.buttons.ImageButton;
 import syncjam.ui.buttons.SongPositionSlider;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.VolumeSlider;
@@ -15,6 +16,7 @@ import syncjam.ui.net.UserListPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -143,9 +145,11 @@ public class SyncJamUI implements KeyListener
         constraints = setGrid(1, 0, 0.0f, 1.0f);
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
+        constraints.insets = new Insets(12,0,12,0);
         _window.cm.registerComponent(sideBar);
         _window.getContentPanel().add(sideBar, constraints);
 
+        //Sidebar Items Panel
         JPanel sideBarItems = new JPanel(new GridBagLayout()){
             @Override
             protected void paintComponent(Graphics g) {
@@ -154,8 +158,9 @@ public class SyncJamUI implements KeyListener
             }
         };
 
+        //constraints = setGrid(0, 0, 0.0f, 1.0f);
+        constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.NONE;
-        constraints.insets = new Insets(12,0,12,0);
         sideBar.add(sideBarItems, constraints);
 
 
@@ -169,7 +174,7 @@ public class SyncJamUI implements KeyListener
 
         //Network Button
         constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
-        TextButton networkButton = new TextButton(12, 12, "C"){
+        ImageButton networkButton = new ImageButton(12, 12, "net_button2.png", Colors.Foreground1, Colors.Background1){
             protected void clicked() { togglePanel(_networkPanel); }
         };
 
@@ -180,6 +185,52 @@ public class SyncJamUI implements KeyListener
         constraints.fill = GridBagConstraints.NONE;
 
         sideBarItems.add(new VolumeSlider(50, 100, services), constraints);
+
+        //Clear Playlist Button
+        constraints = setGrid(0, 3, 0.0f, 0.0f, 10, 10);
+        TextButton clearPlaylistButton = new TextButton(11, 11, "", Colors.Highlight2){
+            @Override public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Colors.get(Colors.Foreground1));
+                int cX = getWidth()/2;  //center xPos
+                int cY = getHeight()/2; //center yPos
+                int xS = 3;             //size of 'X'
+                g.drawLine(cX - xS, cY - xS, cX + xS, cY + xS);
+                g.drawLine(cX - xS, cY + xS, cX + xS, cY - xS);
+            }
+
+            @Override protected void clicked() {
+                _playlistUI.clear();
+            }
+        };
+        sideBarItems.add(clearPlaylistButton, constraints);
+
+        //Add Songs Button
+        constraints = setGrid(0, 4, 0.0f, 0.0f, 10, 10);
+        constraints.insets = new Insets(8,0,0,0);
+        TextButton addSongsButton = new TextButton(11, 11, "", Colors.Background2){
+            @Override public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Colors.get(Colors.Foreground1));
+                int cX = getWidth()/2;  //center xPos
+                int cY = getHeight()/2; //center yPos
+                int xS = 3;             //size of 'X'
+                g.drawLine(cX, cY - xS, cX, cY + xS);
+                g.drawLine(cX - xS, cY, cX + xS, cY);
+            }
+            @Override protected void clicked() {
+                super.clicked();
+                JFileChooser fileChooser = DialogWindow.openFileChooser();
+                fileChooser.addActionListener(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        _playlistUI.addAll(fileChooser.getSelectedFiles());
+                    }
+                });
+            }
+        };
+
+        sideBarItems.add(addSongsButton, constraints);
 
         //= = = = = = = = = = Side Panels = = = = = = = = = =//
 
@@ -230,61 +281,74 @@ public class SyncJamUI implements KeyListener
         _userListPanel.setVisible(false);
     }
 
-    public void keyTyped(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {}
 
-    @Override
-    public void keyPressed(KeyEvent e) { }
+    @Override public void keyPressed(KeyEvent e) { }
 
-    @Override
-    public void keyReleased(KeyEvent e)
+    @Override public void keyReleased(KeyEvent e)
     {
-        switch(e.getKeyCode())
-        {
-            case KeyEvent.VK_SPACE:
-                _controlUI.pressPlayButton();
-                break;
-            case KeyEvent.VK_TAB:
-                if(_lastPanel == null) _lastPanel = _networkPanel;
-                if(!_lastPanel.isVisible()) togglePanel(_lastPanel);
-                break;
-                
-            case KeyEvent.VK_U:
-                _colorToggle++;
-                switch(_colorToggle %= 4) {
-                    case 0: Colors.setColorScheme(Colors.defaultColors); break;
-                    case 1: Colors.setColorScheme(Colors.lightColors); break;
-                    case 2: Colors.setColorScheme(Colors.blueberry); break;
-                    case 3: Colors.setColorScheme(Colors.plum); break;
-                }
-                break;
-            case KeyEvent.VK_1:
-                DialogWindow.openColorPicker(Colors.Background1); break;
-            case KeyEvent.VK_2:
-                DialogWindow.openColorPicker(Colors.Background2); break;
-            case KeyEvent.VK_3:
-                DialogWindow.openColorPicker(Colors.Foreground1); break;
-            case KeyEvent.VK_4:
-                DialogWindow.openColorPicker(Colors.Foreground2); break;
-            case KeyEvent.VK_5:
-                DialogWindow.openColorPicker(Colors.Highlight); break;
-            case KeyEvent.VK_6:
-                DialogWindow.openColorPicker(Colors.Highlight2); break;
+        if(!(e.isControlDown() || e.isShiftDown() || e.isAltDown())) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_SPACE:
+                    _controlUI.pressPlayButton();
+                    break;
+                case KeyEvent.VK_TAB:
+                    if (_lastPanel == null) _lastPanel = _networkPanel;
+                    if (!_lastPanel.isVisible()) togglePanel(_lastPanel);
+                    break;
 
-            case KeyEvent.VK_E:
-                DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                break;
-            case KeyEvent.VK_T:
-                togglePanel(_userListPanel);
-                break;
-            case KeyEvent.VK_S:
-                togglePanel(_settingsPanel);
-                break;
+                case KeyEvent.VK_U:
+                    _colorToggle++;
+                    switch (_colorToggle %= 4) {
+                        case 0:
+                            Colors.setColorScheme(Colors.defaultColors);
+                            break;
+                        case 1:
+                            Colors.setColorScheme(Colors.lightColors);
+                            break;
+                        case 2:
+                            Colors.setColorScheme(Colors.blueberry);
+                            break;
+                        case 3:
+                            Colors.setColorScheme(Colors.plum);
+                            break;
+                    }
+                    break;
+                case KeyEvent.VK_1:
+                    DialogWindow.openColorPicker(Colors.Background1);
+                    break;
+                case KeyEvent.VK_2:
+                    DialogWindow.openColorPicker(Colors.Background2);
+                    break;
+                case KeyEvent.VK_3:
+                    DialogWindow.openColorPicker(Colors.Foreground1);
+                    break;
+                case KeyEvent.VK_4:
+                    DialogWindow.openColorPicker(Colors.Foreground2);
+                    break;
+                case KeyEvent.VK_5:
+                    DialogWindow.openColorPicker(Colors.Highlight);
+                    break;
+                case KeyEvent.VK_6:
+                    DialogWindow.openColorPicker(Colors.Highlight2);
+                    break;
+
+                case KeyEvent.VK_E:
+                    DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                    break;
+                case KeyEvent.VK_T:
+                    togglePanel(_userListPanel);
+                    break;
+                case KeyEvent.VK_S:
+                    togglePanel(_settingsPanel);
+                    break;
+            }
         }
     }
 
     private GridBagConstraints setGrid(int gridX, int gridY, float weightX, float weightY)
     {
-        return setGrid(gridX, gridY, weightX, weightY, 0, 0);
+        return setGrid(gridX, gridY, weightX, weightY, -1, -1);
     }
     private GridBagConstraints setGrid(int gridX, int gridY, float weightX, float weightY, int padX, int padY)
     {
@@ -294,8 +358,10 @@ public class SyncJamUI implements KeyListener
         gbc.gridy = gridY;
         gbc.weightx = weightX;
         gbc.weighty = weightY;
-        gbc.ipadx = padX;
-        gbc.ipady = padY;
+        if(padX != -1)
+            gbc.ipadx = padX;
+        if(padY != -1)
+            gbc.ipady = padY;
 
         return gbc;
     }

@@ -14,10 +14,11 @@ public class TextButton extends ButtonUI
     protected TextButton(int w, int y, String text){
         this(w, y, text, Colors.Background2);
     }
-    protected TextButton(int w, int y, String text, Colors bg)
+    public TextButton(int w, int y, String text, Colors bg)
     {
         super(w, y);
-        background = Colors.Background2;
+        _background = bg;
+        _drawOutline = true;
         setText(text);
         setMargin(new Insets(0,0,0,0));
     }
@@ -25,8 +26,8 @@ public class TextButton extends ButtonUI
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(Colors.get(background).brighter());
-        g.drawRect(0, 0, getWidth(), getHeight());
+        g.setColor(Colors.get(_background).brighter());
+        g.drawRect(0, 0, getWidth()-1, getHeight()-1);
     }
 
     @Override

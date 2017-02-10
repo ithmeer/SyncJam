@@ -7,21 +7,19 @@ import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.base.PasswordFieldUI;
 import syncjam.ui.buttons.base.TextFieldUI;
 import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 class HostServerPanel extends JPanel
 {
     private final String defaultPort;
     //private final NetTextField addressField, portField, passField;
-    private final TextFieldUI[] fields;
+    private final JTextField[] fields;
     private final ButtonUI hostButton, cancelButton;
 
     private KeyAdapter keys = new KeyAdapter() {
@@ -38,7 +36,7 @@ class HostServerPanel extends JPanel
                     break;
                 case KeyEvent.VK_TAB:
                     boolean selected = false;
-                    for(TextFieldUI f : fields)
+                    for(JTextField f : fields)
                         if(f.hasFocus())
                             selected = true;
                     if(!selected)
@@ -69,9 +67,9 @@ class HostServerPanel extends JPanel
         constraints.weighty = .5;
         this.add(title, constraints);
 
-        String[] labels = {"Password", "Port"};
+        String[] labels = {"Port", "Password"};
         int numPairs = labels.length;
-        fields = new TextFieldUI[numPairs];
+        fields = new JTextField[numPairs];
 
         //Create and populate the panel.
         JPanel p1 = new JPanel(new SpringLayout()){
@@ -84,24 +82,41 @@ class HostServerPanel extends JPanel
         for (int i = 0; i < numPairs; i++) {
             TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
             p1.add(l);
-            TextFieldUI textField = new TextFieldUI(10, "", keys);
+            JTextField textField;
+            if(i == 1)
+                textField = new PasswordFieldUI(10, "", keys);
+            else
+                textField = new TextFieldUI(10, "", keys);
             l.setLabelFor(textField);
             p1.add(textField);
             fields[i] = textField;
         }
 
-        fields[1].setText(defaultPort);
-        fields[1].addFocusListener(new FocusAdapter() {
+        TextLabelUI l = new TextLabelUI("Show P/W", JLabel.TRAILING);
+        p1.add(l);
+        JCheckBox passwordCheckbox = new JCheckBox(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JCheckBox check = (JCheckBox)e.getSource();
+                ((PasswordFieldUI)fields[1]).showPassword(check.isSelected());
+            }
+        });
+        passwordCheckbox.setOpaque(false);
+        passwordCheckbox.addKeyListener(keys);
+        p1.add(passwordCheckbox);
+
+        fields[0].setText(defaultPort);
+        fields[0].addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 super.focusLost(e);
-                fields[1].setText(fields[1].getText().replaceAll("[^\\d]", ""));
+                fields[0].setText(fields[0].getText().replaceAll("[^\\d]", ""));
             }
         });
 
         //Lay out the panel.
         makeCompactGrid(p1,
-                numPairs, 2, //rows, cols
+                numPairs+1, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 10);       //xPad, yPad
 
@@ -117,10 +132,10 @@ class HostServerPanel extends JPanel
         p2.add(hostButton = new TextButton(0, 0, "Host") {
             @Override
             protected void clicked() {
-                String password = fields[0].getText();
-                fields[1].setText(fields[1].getText().replaceAll("[^\\d]", ""));
-                String portText = fields[1].getText();
+                fields[0].setText(fields[0].getText().replaceAll("[^\\d]", ""));
+                String portText = fields[0].getText();
                 int port = portText.equals("") ? 0 : Integer.parseInt(portText);
+                String password = fields[1].getText();
 
                 if(port == 0)
                     DialogWindow.showErrorMessage("No port set");

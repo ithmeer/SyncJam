@@ -7,21 +7,19 @@ import syncjam.ui.DialogWindow;
 import syncjam.ui.UIServices;
 import syncjam.ui.buttons.TextButton;
 import syncjam.ui.buttons.base.ButtonUI;
+import syncjam.ui.buttons.base.PasswordFieldUI;
 import syncjam.ui.buttons.base.TextFieldUI;
 import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 class AddServerPanel extends JPanel
 {
     private final String defaultPort;
     //private final NetTextField addressField, portField, passField;
-    private final TextFieldUI[] fields;
+    private final JTextField[] fields;
     private final ButtonUI addButton, cancelButton;
     private NetworkPanel networkPanel;
 
@@ -40,7 +38,7 @@ class AddServerPanel extends JPanel
                         break;
                     case KeyEvent.VK_TAB:
                         boolean selected = false;
-                        for (TextFieldUI f : fields)
+                        for (JTextField f : fields)
                             if (f.hasFocus())
                                 selected = true;
                         if (!selected)
@@ -74,7 +72,7 @@ class AddServerPanel extends JPanel
 
         String[] labels = {"Name", "IP Address", "Port", "Password"};
         int numPairs = labels.length;
-        fields = new TextFieldUI[numPairs];
+        fields = new JTextField[numPairs];
 
         //Create and populate the panel.
         JPanel p1 = new JPanel(new SpringLayout()){
@@ -88,13 +86,29 @@ class AddServerPanel extends JPanel
         for (int i = 0; i < numPairs; i++) {
             TextLabelUI l = new TextLabelUI(labels[i], JLabel.TRAILING);
             p1.add(l);
-            TextFieldUI textField = new TextFieldUI(10, "", keys);
+            JTextField textField;
+            if(i == 3)
+                textField = new PasswordFieldUI(10, "", keys);
+            else
+                textField = new TextFieldUI(10, "", keys);
             l.setLabelFor(textField);
             p1.add(textField);
             fields[i] = textField;
         }
 
-        //fields[2].setNumbersOnly(true);
+        TextLabelUI l = new TextLabelUI("Show P/W", JLabel.TRAILING);
+        p1.add(l);
+        JCheckBox passwordCheckbox = new JCheckBox(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JCheckBox check = (JCheckBox)e.getSource();
+                ((PasswordFieldUI)fields[3]).showPassword(check.isSelected());
+            }
+        });
+        passwordCheckbox.setOpaque(false);
+        passwordCheckbox.addKeyListener(keys);
+        p1.add(passwordCheckbox);
+
         fields[2].setText(defaultPort);
         fields[2].addFocusListener(new FocusAdapter() {
             @Override
@@ -106,7 +120,7 @@ class AddServerPanel extends JPanel
 
         //Lay out the panel.
         makeCompactGrid(p1,
-                numPairs, 2, //rows, cols
+                numPairs+1, 2, //rows, cols
                 6, 6,        //initX, initY
                 6, 10);       //xPad, yPad
 

@@ -35,7 +35,7 @@ public enum Colors
     public static final Color[] blueberry = {
             new Color(29, 43, 59),   //Background1
             new Color(24, 36, 51),   //Background2
-            new Color(87, 225, 255), //Foreground1
+            new Color(202, 235, 255), //Foreground1
             new Color(170, 211, 247),//Foreground2
             new Color(255, 255, 255),//Highlight
             new Color(226, 82, 61),  //Highlight2

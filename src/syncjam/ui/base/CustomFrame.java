@@ -3,6 +3,7 @@ package syncjam.ui.base;
 // vim:set fileencoding=utf-8:
 
 import syncjam.ui.Colors;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.TextLabelUI;
 
 import javax.swing.*;
@@ -46,7 +47,7 @@ public class CustomFrame extends JFrame
                 g.drawRect(1,1,super.getWidth()-3, super.getHeight()-3);
             }
         };
-        mainPanel.setBorder( new EmptyBorder(4, 4, 4, 4) );
+        mainPanel.setBorder( new EmptyBorder(6, 6, 6, 6) );
         this.add(mainPanel, BorderLayout.CENTER);
 
         ////////titleBar////////
@@ -99,6 +100,17 @@ public class CustomFrame extends JFrame
 
     public void open()
     {
+        /*try {
+            //URL url = new URL("");
+            //Toolkit kit = Toolkit.getDefaultToolkit();
+            //Image img = kit.createImage(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }*/
+
+        Image img = UIServices.loadImage("SJLogo128.png");
+        this.setIconImage(img);
+
         this.setUndecorated(true);
         this.pack();
         this.setVisible(true);
@@ -146,12 +158,12 @@ public class CustomFrame extends JFrame
     }
 
     private JButton makeInfoButton() {
-        JButton button = new JButton(new SyncJamIcon());
+        JButton button = new JButton(UIServices.loadIcon("SJLogo14.png", Colors.Foreground1));
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
-        button.setOpaque(true);
+        button.setOpaque(false);
         button.addActionListener(e -> {
             clickedInfoButton();
         });
@@ -190,44 +202,6 @@ public class CustomFrame extends JFrame
             }
         });
         return button;
-    }
-}
-
-class SyncJamIcon implements Icon {
-    @Override public void paintIcon(Component c, Graphics g, int x, int y) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.translate(x, y);
-        g2.setPaint(Colors.get(Colors.Background1));
-        g2.fillRect(0, 0, getIconWidth(), getIconHeight());
-        g2.setPaint(Colors.get(Colors.Foreground1));
-        g2.drawLine( 0, 5, 5, 0);
-        g2.drawLine( 1, 5, 6, 0);
-        g2.drawLine( 1, 6, 7, 0);
-        g2.drawLine( 2, 6, 7, 1);
-        g2.drawLine( 2, 7, 8, 1);
-        g2.drawLine( 3, 7, 8, 2);
-        g2.drawLine( 3, 8, 8, 3);
-
-        g2.drawLine(10, 4,13, 4);
-
-        g2.drawLine( 0,10, 3, 10);
-
-        g2.drawLine(5, 10, 8, 7);
-        g2.drawLine(5, 11, 8, 8);
-        g2.drawLine(5, 12, 9, 8);
-        g2.drawLine(6, 12, 9, 9);
-        g2.drawLine(6, 13,10, 9);
-        g2.drawLine(7, 13,10,10);
-        g2.drawLine(8, 13,11,10);
-
-        g2.drawLine(13,10,13,10);
-        g2.dispose();
-    }
-    @Override public int getIconWidth() {
-        return 16;
-    }
-    @Override public int getIconHeight() {
-        return 16;
     }
 }
 

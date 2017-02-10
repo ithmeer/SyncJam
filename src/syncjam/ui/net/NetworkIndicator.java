@@ -11,22 +11,20 @@ import java.awt.*;
 public class NetworkIndicator extends JPanel
 {
     private NetworkController _network;
-    public NetworkIndicator(ServiceContainer services) { _network = services.getService(NetworkController.class); }
+    public NetworkIndicator(ServiceContainer services) {
+        _network = services.getService(NetworkController.class);
+        setOpaque(false);
+    }
     @Override
     protected void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        this.setBackground(Colors.get(Colors.Background1));
-
-        g.setColor(Colors.get(Colors.Foreground1));
-        g.drawOval(6,3,13,13);
-
 
         ConnectionStatus status = _network.getStatus();
         switch(status)
         {
             case Hosted:
-                g.setColor(Color.green);
+                g.setColor(Color.cyan);
                 break;
             case Connected:
                 g.setColor(Color.green);
@@ -38,12 +36,17 @@ public class NetworkIndicator extends JPanel
                 g.setColor(new Color(209, 72, 58));
                 break;
             case Unconnected:
-                g.setColor(Colors.get(Colors.Background2));
+                g.setColor(Colors.get(Colors.Background1));
                 break;
             default:
-                g.setColor(Colors.get(Colors.Background2));
+                g.setColor(Colors.get(Colors.Background1));
                 break;
         }
-        g.fillOval(7,4,11,11);
+        g.fillOval(6,3,13,13);
+        //g.fillOval(7,4,11,11);
+
+        //White Outline
+        g.setColor(Colors.get(Colors.Foreground1));
+        g.drawOval(6,3,13,13);
     }
 }

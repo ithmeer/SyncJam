@@ -1,5 +1,6 @@
 package syncjam.ui;
 
+import javax.swing.border.MatteBorder;
 import java.awt.datatransfer.DataFlavor;
 import java.io.*;
 

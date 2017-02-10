@@ -35,6 +35,7 @@ public class NetworkPanel extends JPanel
                     case KeyEvent.VK_A:
                         addButton.doClick();
                         break;
+                    case KeyEvent.VK_DELETE:
                     case KeyEvent.VK_R:
                         removeButton.doClick();
                         break;

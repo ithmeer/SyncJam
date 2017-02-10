@@ -4,6 +4,7 @@ import syncjam.BytesSong;
 import syncjam.ConnectionStatus;
 import syncjam.SyncJamException;
 import syncjam.interfaces.*;
+import syncjam.ui.base.ColorableMatteBorder;
 import syncjam.ui.base.ItemList;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -20,7 +22,8 @@ public class PlaylistUI extends ItemList
     private final SongQueue _songQueue;
     private final Settings _settings;
     private final NetworkController _networkController;
-    private MatteBorder fileDropBorder;
+    private final FileDrop _fileDrop;
+    private MatteBorder _fileDropBorder;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
 
@@ -34,42 +37,45 @@ public class PlaylistUI extends ItemList
         _networkController = services.getService(NetworkController.class);
         this.setEnableCustomDrawing(true);
 
-        fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
-        new FileDrop(this, fileDropBorder, files -> {
-            BytesSong[] songs = new BytesSong[files.length];
-            for(int i = 0; i < files.length; i++)
+        _fileDropBorder = new ColorableMatteBorder(2, 2, 2, 2, Colors.Highlight);
+        _fileDrop = new FileDrop(this, _fileDropBorder, files -> {
+            addAll(files);
+        });
+    }
+
+    public void addAll(File[] files) {
+        BytesSong[] songs = new BytesSong[files.length];
+        for(int i = 0; i < files.length; i++)
+        {
+            try
             {
-                try
-                {
                     /*String fileType = "";
                     int x = files[i].getName().lastIndexOf('.');
                     if (x > 0) {
                         fileType = files[i].getName().substring(x+1);
                     }*/
-                    songs[i] = new BytesSong(files[i]);
-                }
-                catch (SyncJamException e)
-                {
-                    e.printStackTrace();
-                }
+                songs[i] = new BytesSong(files[i]);
             }
-
-            _songQueue.addAll(Arrays.asList(songs));
-
-            ConnectionStatus st = _networkController.getStatus();
-            if (st == ConnectionStatus.Hosted || st == ConnectionStatus.Unconnected ||
-                st == ConnectionStatus.Disconnected)
+            catch (SyncJamException e)
             {
-                _playlist.addAll(songs);
+                e.printStackTrace();
             }
-        });
+        }
+
+        _songQueue.addAll(Arrays.asList(songs));
+
+        ConnectionStatus st = _networkController.getStatus();
+        if (st == ConnectionStatus.Hosted || st == ConnectionStatus.Unconnected ||
+                st == ConnectionStatus.Disconnected)
+        {
+            _playlist.addAll(songs);
+        }
     }
+
     @Override
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        if(fileDropBorder.getMatteColor() != Colors.get(Colors.Highlight))
-            fileDropBorder = BorderFactory.createMatteBorder(2, 2, 2, 2, Colors.get(Colors.Highlight));
 
         int i = 0;
         Iterator<Song> songIter = _playlist.iterator();
@@ -420,8 +426,8 @@ public class PlaylistUI extends ItemList
     }
     public void clear()
     {
-        //_playlist.clear();
-        //updateScrollbar();
+        _playlist.clear();
+        updateScrollbar();
     }
 
     //====  LISTENERS  ====

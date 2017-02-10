@@ -74,7 +74,8 @@ public class VerticalSliderUI extends JPanel implements MouseListener, MouseMoti
 
     public void setValue(int n)
     {
-        value = n;
+        value = Math.max(n, 0);
+        value = Math.min(value, max);
         if(!dragging) posOnBar = value;
     }
     public int  getValue()      { return value; }

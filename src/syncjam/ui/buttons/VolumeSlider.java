@@ -4,6 +4,9 @@ import syncjam.interfaces.PlayController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.buttons.base.VerticalSliderUI;
 
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+
 /**
  * Created by Marty on 3/15/2015.
  */
@@ -15,6 +18,12 @@ public class VolumeSlider extends VerticalSliderUI
     {
         super(startValue, maxValue, true);
         _player = services.getService(PlayController.class);
+        addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                setValue(getValue() - e.getUnitsToScroll());
+            }
+        });
     }
 
     public void setValue(int n)

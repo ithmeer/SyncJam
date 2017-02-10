@@ -6,11 +6,12 @@ import syncjam.ui.buttons.TextButton;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
@@ -60,43 +61,38 @@ public class DialogWindow
         window.open();
         return window;
     }
-/*
-    //https://javagraphics.java.net
-    public static void openColorPicker(Colors originalColor)
+
+    static JFileChooser openFileChooser()
     {
-        CustomFrame colorWindow = createWindow("Pick Color");
-        colorWindow.addKeyListener(new KeyAdapter() {
+        CustomFrame chooserWindow = createWindow("Select Files");
+        JFileChooser fileChooser = new JFileChooser(){
             @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                if(e.getKeyCode() == KeyEvent.VK_ESCAPE || e.getKeyCode() == KeyEvent.VK_ENTER)
-                    colorWindow.dispose();
+            public void cancelSelection() {
+                super.cancelSelection();
+                chooserWindow.dispose();
+            }
+        };
+        fileChooser.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chooserWindow.dispose();
             }
         });
-        colorWindow.setAlwaysOnTop(false);
+        fileChooser.setMultiSelectionEnabled(true);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Audio Files", "mp3", "m4a", "wav", "flac", "wma");
+        fileChooser.setFileFilter(filter);
 
-        ColorPicker colorPicker = new ColorPicker(true, false);
-        colorPicker.setMode(ColorPicker.HUE);
-        colorPicker.setFocusable(false);
-        //colorPicker.setOpaque(true);
-
-        colorPicker.setColor(Colors.get(originalColor));
-        PropertyChangeListener c = e -> {
-            Color newColor = colorPicker.getColor();
-            Colors.setColor(originalColor, newColor);
-            colorWindow.repaint();
-        };
-        colorPicker.addPropertyChangeListener(ColorPicker.SELECTED_COLOR_PROPERTY, c);
-
-        colorWindow.getContentPanel().add(colorPicker);
-        colorWindow.open();
+        JPanel whitePanel = new JPanel();
+        whitePanel.add(fileChooser);
+        chooserWindow.getContentPanel().add(whitePanel);
+        chooserWindow.open();
+        return fileChooser;
     }
-*/
-    public static CustomFrame openColorPicker(Colors color)
+
+
+    static CustomFrame openColorPicker(Colors color)
     {
-        CustomFrame colorWindow = new CustomFrame(500, 300, "Select Color");
-        colorWindow.setLocationRelativeTo(UIServices.getMainWindow());
-        colorWindow.allowResizing(false);
+        CustomFrame colorWindow = createWindow("Select Color");
 
         ColorPickerUI colorChooser = new ColorPickerUI(Colors.get(color));
 
@@ -111,17 +107,15 @@ public class DialogWindow
         return colorWindow;
     }
 
-
-    public static void openColorPickerOld(Colors color)
+    /*public static void openColorPickerOld(Colors color)
     {
-        CustomFrame colorWindow = new CustomFrame(500,300, "Pick Color");
-        colorWindow.setLocationRelativeTo(UIServices.getMainWindow());
+        CustomFrame colorWindow = createWindow("Pick Color");
         JColorChooser colorChooser = new JColorChooser(Colors.get(color));
         colorChooser.setOpaque(false);
 
         ChangeListener c = e -> {
             Color t = colorChooser.getColor();
-            Color newColor = new Color(t.getRed(), t.getGreen(), t.getBlue()); //choose allows transparency, NO
+            Color newColor = new Color(t.getRed(), t.getGreen(), t.getBlue()); //remove transparency, NO THANKS DUDER
             Colors.setColor(color, newColor);
             colorWindow.repaint();
         };
@@ -129,7 +123,8 @@ public class DialogWindow
 
         colorWindow.getContentPanel().add(colorChooser);
         colorWindow.open();
-    }
+    }*/
+
     private static CustomFrame createWindow(String title) {
         CustomFrame w = new CustomFrame(350, 80, title);
         w.setLocationRelativeTo(UIServices.getMainWindow());
@@ -140,6 +135,7 @@ public class DialogWindow
 
         return w;
     }
+
     private static JPanel createPanel() {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
