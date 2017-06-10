@@ -138,7 +138,8 @@ public class SocketNetworkController implements NetworkController
 
             LinkedList<Socket> sockets = new LinkedList<Socket>(
                     Arrays.asList(commandSocket, dataSocket));
-            ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets, streamSocket,
+            ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets,
+                                                       new NonClosingSocket(streamSocket),
                                                        commandSocket.getRemoteSocketAddress());
 
             cs.sendCommand(serverInfo.password);
@@ -261,7 +262,7 @@ public class SocketNetworkController implements NetworkController
             {
                 Socket commandSocket = _socketList.get(0);
                 Socket dataSocket = _socketList.get(1);
-                Socket streamSocket = _socketList.get(2);
+                Socket streamSocket = new NonClosingSocket(_socketList.get(2));
 
                 ServerSideSocket ss = new ServerSideSocket(_exec, _services, _clients,
                                                            _socketList, streamSocket,

@@ -31,22 +31,12 @@ public class ClientDataSocketConsumer extends SocketConsumer
     @Override
     public void run()
     {
-        ObjectInputStream socketObjectReader;
-
-        try
-        {
-            socketObjectReader = new ObjectInputStream(_inputStream);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            throw new SyncJamException(e.getMessage());
-        }
-
         while (!terminated)
         {
+
             try
             {
+                ObjectInputStream socketObjectReader = new ObjectInputStream(_inputStream);
                 SongMetadata metadata = (SongMetadata) socketObjectReader.readObject();
                 DatagramChannelSong song = new DatagramChannelSong(metadata);
 

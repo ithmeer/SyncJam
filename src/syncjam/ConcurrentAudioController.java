@@ -2,18 +2,15 @@ package syncjam;
 
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
+import com.xuggle.xuggler.io.InputOutputStreamHandler;
 import com.xuggle.xuggler.io.XugglerIO;
 import syncjam.interfaces.*;
 import syncjam.net.NetworkSocket;
-import syncjam.net.client.ClientSideSocket;
-import syncjam.net.server.ServerSideSocket;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketAddress;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +29,7 @@ public class ConcurrentAudioController implements AudioController
 
     private final AtomicInteger volumeLevel = new AtomicInteger(50);
 
-    private final AtomicBoolean interrupted = new AtomicBoolean(false);
+    private final AtomicBoolean _interrupted = new AtomicBoolean(false);
 
     private final Playlist playlist;
 
@@ -64,6 +61,8 @@ public class ConcurrentAudioController implements AudioController
         {
             playing = false;
         }
+
+        //Global.setFFmpegLoggingLevel(-1);
     }
 
     public void addClient(NetworkSocket client)
@@ -154,7 +153,7 @@ public class ConcurrentAudioController implements AudioController
     {
         // if already playing, does nothing
         play();
-        interrupted.set(true);
+        _interrupted.set(true);
     }
 
     @Override
@@ -186,6 +185,7 @@ public class ConcurrentAudioController implements AudioController
             catch (InterruptedException e)
             {
                 // quit if interrupted
+                e.printStackTrace();
                 return;
             }
         }
@@ -246,6 +246,7 @@ public class ConcurrentAudioController implements AudioController
                 break;
             }
         }
+
         if (audioStreamId == -1)
         {
             throw new RuntimeException("could not find audio stream in container: " +
@@ -273,7 +274,7 @@ public class ConcurrentAudioController implements AudioController
 
             synchronized (_clientMap)
             {
-                List<XugglerClient> deadClients = new LinkedList<XugglerClient>();
+                List<XugglerClient> deadClients = new LinkedList<>();
 
                 for (XugglerClient client : _clientMap.values())
                 {
@@ -305,13 +306,13 @@ public class ConcurrentAudioController implements AudioController
                 // stream to all client containers
                 if (isServer)
                 {
-                    List<XugglerClient> deadClients = new LinkedList<XugglerClient>();
+                    List<XugglerClient> deadClients = new LinkedList<>();
 
                     for (XugglerClient client : _clientMap.values())
                     {
                         try
                         {
-                            client.container.writePacket(IPacket.make(packet, true));
+                            client.getContainer().writePacket(IPacket.make(packet, true));
                         }
                         catch (Exception ex)
                         {
@@ -362,15 +363,15 @@ public class ConcurrentAudioController implements AudioController
                     if (samples.isComplete())
                     {
                         playJavaSound(samples);
-                        if (interrupted.get())
+                        if (_interrupted.get())
                             break outer;
                     }
                 }
             }
         }
 
-        interrupted.set(false);
-        closeJavaSound();
+        _interrupted.set(false);
+        closeJavaSound(isServer);
         audioCoder.close();
         container.close();
     }
@@ -391,17 +392,30 @@ public class ConcurrentAudioController implements AudioController
 
     public void openContainer(IContainer orig, IStreamCoder origCoder, XugglerClient client)
     {
-        IContainerFormat format = orig.getContainerFormat();
-        format.setOutputFormat(format.getInputFormatShortName(), "", "");
-        int openStatus = client.container.open(client.channel, format);
+        IContainerFormat origFormat = orig.getContainerFormat();
+        IContainerFormat format = IContainerFormat.make();
+        format.setOutputFormat(origFormat.getInputFormatShortName(), "", "");
+
+        IContainer clientContainer = client.getContainer();
+
+        if (clientContainer.isOpened())
+        {
+            //clientContainer.writeTrailer();
+            clientContainer.close();
+            clientContainer = IContainer.make();
+        }
+
+        IURLProtocolHandler handler = new InputOutputStreamHandler(null, client.channel, false);
+        int openStatus = clientContainer.open(handler, IContainer.Type.WRITE,
+                                              format, true, false);
         if (openStatus < 0)
         {
             IError err = IError.make(openStatus);
             if (err.getType() == IError.Type.ERROR_INTERRUPTED)
             {
                 throw new IllegalArgumentException("open song interrupted for: " + orig.getURL());
-            }
-            else
+
+            } else
             {
                 throw new IllegalArgumentException(String.format(
                         "could not open song: \'%s\' for client %s",
@@ -409,17 +423,31 @@ public class ConcurrentAudioController implements AudioController
             }
         }
 
-        client.container.addNewStream(origCoder.copyReference());
-        client.container.writeHeader();
+        IStreamCoder coder = IStreamCoder.make(IStreamCoder.Direction.ENCODING,
+                                               origCoder.getCodecID());
+        coder.setSampleRate(origCoder.getSampleRate());
+        coder.setChannels(origCoder.getChannels());
+        coder.setTimeBase(origCoder.getTimeBase());
+        int coderStatus = coder.open(orig.getMetaData(), IMetaData.make());
+        if (coderStatus < 0)
+        {
+            throw new IllegalArgumentException("open coder failed");
+        }
+        clientContainer.addNewStream(coder);
+
+        int status = clientContainer.writeHeader();
+        if (status < 0)
+        {
+            throw new IllegalArgumentException("write header failed");
+        }
+        client.setContainer(clientContainer);
     }
 
     private void openJavaSound(IStreamCoder aAudioCoder)
     {
         AudioFormat audioFormat = new AudioFormat(aAudioCoder.getSampleRate(),
                                                   (int) IAudioSamples.findSampleBitDepth(aAudioCoder.getSampleFormat()),
-                                                  aAudioCoder.getChannels(),
-                                                  true,
-                                                  false);
+                                                  aAudioCoder.getChannels(), true, false);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
         try
         {
@@ -434,7 +462,8 @@ public class ConcurrentAudioController implements AudioController
             }
             volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
             setVolume(volumeLevel.get());
-        } catch (LineUnavailableException e)
+        }
+        catch (LineUnavailableException e)
         {
             throw new RuntimeException("could not open audio line");
         }
@@ -452,18 +481,28 @@ public class ConcurrentAudioController implements AudioController
             try
             {
                 sem.acquire();
-            } catch (InterruptedException e)
+            }
+            catch (InterruptedException e)
             {
                 e.printStackTrace();
             }
             sem.release();
+
+            if (_interrupted.get())
+            {
+                break;
+            }
+
             written += mLine.write(rawBytes, written, length - written);
         }
     }
 
-    private void closeJavaSound()
+    private void closeJavaSound(boolean drain)
     {
-        mLine.drain();
+        if (drain)
+        {
+            mLine.drain();
+        }
         mLine.close();
     }
 

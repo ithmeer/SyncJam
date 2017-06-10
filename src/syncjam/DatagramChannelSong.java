@@ -1,5 +1,6 @@
 package syncjam;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.CountDownLatch;

@@ -57,7 +57,6 @@ public class SyncJamSettings implements Settings
                 catch (JAXBException e)
                 {
                     _instance = new SyncJamSettings();
-                    _instance._servers = new LinkedList<>();
                 }
             }
 
@@ -88,54 +87,78 @@ public class SyncJamSettings implements Settings
 
     @Override
     @XmlTransient
-    public void setUserName(String name) {
+    public void setUserName(String name)
+    {
         synchronized (SyncJamSettings.class)
         {
             _userName = name;
         }
     }
+
     @Override
     public String getUserName()
     {
-        return _userName;
+        synchronized (SyncJamSettings.class)
+        {
+            return _userName;
+        }
     }
 
     @Override
     @XmlTransient
-    public void setDefaultPort(String port) {
+    public void setDefaultPort(String port)
+    {
         synchronized (SyncJamSettings.class)
         {
             _defaultPort = port;
         }
     }
+
     @Override
     public String getDefaultPort()
     {
-        return _defaultPort;
+        synchronized (SyncJamSettings.class)
+        {
+            return _defaultPort;
+        }
     }
 
     @Override
     @XmlTransient
-    public void setShowMarker(boolean set) {
-        synchronized (SyncJamSettings.class) {
+    public void setShowMarker(boolean set)
+    {
+        synchronized (SyncJamSettings.class)
+        {
             _showMarker = set;
         }
     }
+
     @Override
-    public boolean getShowMarker() {
-        return _showMarker;
+    public boolean getShowMarker()
+    {
+        synchronized (SyncJamSettings.class)
+        {
+            return _showMarker;
+        }
     }
 
     @Override
     @XmlTransient
-    public void setFollowMarker(boolean set) {
-        synchronized (SyncJamSettings.class) {
+    public void setFollowMarker(boolean set)
+    {
+        synchronized (SyncJamSettings.class)
+        {
             _followMarker = set;
         }
     }
+
     @Override
-    public boolean getFollowMarker() {
-        return _followMarker;
+    public boolean getFollowMarker()
+    {
+        synchronized (SyncJamSettings.class)
+        {
+            return _followMarker;
+        }
     }
 
     @Override

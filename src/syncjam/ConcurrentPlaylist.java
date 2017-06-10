@@ -6,6 +6,7 @@ import syncjam.interfaces.Playlist;
 import syncjam.interfaces.Song;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A list of songs to be played. Thread-safe.
@@ -15,7 +16,7 @@ import java.util.*;
 public class ConcurrentPlaylist implements Playlist
 {
     // a thread-safe ArrayList to store the songs (synchronized on itself)
-    private final List<Song> _songList = Collections.synchronizedList(new ArrayList<Song>());
+    private final List<Song> _songList = new CopyOnWriteArrayList<>();
     private final PlayController _playController;
 
     private volatile CommandQueue _cmdQueue;
@@ -65,7 +66,6 @@ public class ConcurrentPlaylist implements Playlist
             _songList.clear();
             _playController.updateSong();
         }
-
     }
 
     @Override
@@ -115,10 +115,7 @@ public class ConcurrentPlaylist implements Playlist
     @Override
     public Iterator<Song> iterator()
     {
-        synchronized (_songList)
-        {
-            return Collections.unmodifiableList(_songList).iterator();
-        }
+        return _songList.iterator();
     }
 
     /**
