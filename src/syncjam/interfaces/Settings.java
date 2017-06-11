@@ -24,5 +24,8 @@ public interface Settings
     void setFollowMarker(boolean set);
     boolean getFollowMarker();
 
+    void setMinimizeToTray(boolean set);
+    boolean getMinimizeToTray();
+
     void saveToDisk();
 }

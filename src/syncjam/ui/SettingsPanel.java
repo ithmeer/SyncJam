@@ -68,8 +68,9 @@ public class SettingsPanel extends JPanel
     SettingsPanel(ServiceContainer services) {
         _syncJamSettings = services.getService(Settings.class);
 
-        this.setPreferredSize(new Dimension(250, 500));
-        this.setMinimumSize(new Dimension(250, 500));
+        this.setPreferredSize(new Dimension(252, 500));
+        this.setMinimumSize(new Dimension(252, 500));
+        this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.setLayout(new BorderLayout());
         this.setOpaque(false);
 
@@ -79,7 +80,7 @@ public class SettingsPanel extends JPanel
         title.validate();
 
         settingsList = new SettingsListUI();
-        settingsList.setBorder(new EmptyBorder(30,8,8,8));
+        settingsList.setBorder(new EmptyBorder(30, 8, 8, 8));
         this.add(settingsList, BorderLayout.CENTER);
 
         new SettingsItem("General:", settingsList);
@@ -106,6 +107,15 @@ public class SettingsPanel extends JPanel
                 //TODO: _syncJamSettings.setUseFastScaling(getCheckboxOn());
             }
         };
+        SettingsCheckbox minimizeToTray = new SettingsCheckbox("Minimize To Tray", settingsList, _syncJamSettings.getMinimizeToTray()){
+            @Override
+            public void output() {
+                super.output();
+                _syncJamSettings.setMinimizeToTray(getCheckboxOn());
+            }
+        };
+        
+
         new SettingsItem("", settingsList);
 
         new SettingsItem("Playlist:", settingsList);
@@ -206,14 +216,22 @@ public class SettingsPanel extends JPanel
                 }
                 if(!e.isAltDown())
                 {
-                    if ((keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_HOME) && _pointer < _value.length())
-                        if (e.isControlDown() || keyCode == KeyEvent.VK_HOME)
-                            left(_value.length() - _pointer, e.isShiftDown());
+                    if(keyCode == KeyEvent.VK_HOME)
+                        left(-1, e.isShiftDown());
+                    else if(keyCode == KeyEvent.VK_END)
+                        right(-1, e.isShiftDown());
+
+                    if (keyCode == KeyEvent.VK_LEFT) {
+                        if (e.isControlDown())
+                            do left(1, e.isShiftDown());
+                            while(_pointer < _value.length() && !Character.isSpaceChar(_value.charAt(_value.length()-_pointer-1)));
                         else
                             left(1, e.isShiftDown());
-                    else if ((keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_END) && _pointer > 0)
-                        if (e.isControlDown() || keyCode == KeyEvent.VK_END)
-                            right(_pointer, e.isShiftDown());
+                    }
+                    else if (keyCode == KeyEvent.VK_RIGHT)
+                        if (e.isControlDown())
+                            do right(1, e.isShiftDown());
+                            while(_pointer > 0 && !Character.isSpaceChar(_value.charAt(_value.length()-_pointer-1)));
                         else
                             right(1, e.isShiftDown());
                 }
@@ -258,22 +276,22 @@ public class SettingsPanel extends JPanel
         }
 
         private void left(int amt, boolean sel) {
-            if(sel && _selectStart == -1)
-                _selectStart = _pointer;
-            _pointer += amt;
-            if(sel)
-                _selectEnd = _pointer;
-            else
-                clearSelection();
+            if(amt == -1) amt = _value.length() - _pointer; //move all the way to the left side
+            if(sel && _selectStart == -1) _selectStart = _pointer;
+
+            if(_pointer < _value.length()) _pointer += amt;
+
+            if(sel) _selectEnd = _pointer;
+            else clearSelection();
         }
         private void right(int amt, boolean sel) {
-            if(sel && _selectStart == -1)
-                _selectStart = _pointer;
-            _pointer -= amt;
-            if(sel)
-                _selectEnd = _pointer;
-            else
-                clearSelection();
+            if(amt == -1) amt = _pointer; //move all the way to the right side
+            if(sel && _selectStart == -1) _selectStart = _pointer;
+
+            if(_pointer > 0) _pointer -= amt;
+
+            if(sel) _selectEnd = _pointer;
+            else clearSelection();
         }
         private void backspace() {
             if(_value.length() > 0)

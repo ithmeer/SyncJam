@@ -29,7 +29,7 @@ public class CustomFrame extends JFrame
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){
-                close();
+                exit();
             }
         });
 
@@ -100,14 +100,6 @@ public class CustomFrame extends JFrame
 
     public void open()
     {
-        /*try {
-            //URL url = new URL("");
-            //Toolkit kit = Toolkit.getDefaultToolkit();
-            //Image img = kit.createImage(url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }*/
-
         Image img = UIServices.loadImage("SJLogo128.png");
         this.setIconImage(img);
 
@@ -118,7 +110,14 @@ public class CustomFrame extends JFrame
         Dimension size = getSize();
         this.setLocation(new Point((int)(pos.getX() - size.getWidth()/2), (int)(pos.getY() - size.getHeight()/2)));
     }
-    protected void close() {}
+    protected void exit() {}
+    public void minimize() {
+        this.setState(JFrame.ICONIFIED);
+    }
+    public void close() {
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+
+    }
 
     protected void clickedInfoButton() {
     }
@@ -164,9 +163,7 @@ public class CustomFrame extends JFrame
         button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(false);
-        button.addActionListener(e -> {
-            clickedInfoButton();
-        });
+        button.addActionListener(e -> clickedInfoButton());
         return button;
     }
     private JButton makeCloseButton() {
@@ -176,14 +173,7 @@ public class CustomFrame extends JFrame
         button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.addActionListener(e -> {
-            JComponent b = (JComponent) e.getSource();
-            Container c = b.getTopLevelAncestor();
-            if (c instanceof Window) {
-                Window w = (Window) c;
-                w.dispatchEvent(new WindowEvent(w, WindowEvent.WINDOW_CLOSING));
-            }
-        });
+        button.addActionListener(e -> close());
         return button;
     }
     private JButton makeMinimizeButton() {
@@ -193,14 +183,7 @@ public class CustomFrame extends JFrame
         button.setFocusable(false);
         button.setBorder(BorderFactory.createEmptyBorder());
         button.setOpaque(true);
-        button.addActionListener(e -> {
-            JComponent b = (JComponent) e.getSource();
-            Container c = b.getTopLevelAncestor();
-            if (c instanceof JFrame) {
-                JFrame w = (JFrame) c;
-                w.setState(JFrame.ICONIFIED);
-            }
-        });
+        button.addActionListener(e -> minimize());
         return button;
     }
 }

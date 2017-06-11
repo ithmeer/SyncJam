@@ -64,7 +64,7 @@ public class ConcurrentPlaylist implements Playlist
         synchronized (_songList)
         {
             _songList.clear();
-            _playController.updateSong();
+            //_playController.updateSong();
         }
     }
 

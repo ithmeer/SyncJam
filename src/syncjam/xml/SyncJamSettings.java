@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +32,8 @@ public class SyncJamSettings implements Settings
     private boolean _showMarker = true;
     @XmlElement(name="follow_marker")
     private boolean _followMarker = true;
+    @XmlElement(name="minimize_to_tray")
+    private boolean _minimizeTray = false;
 
     private static SyncJamSettings _instance;
 
@@ -158,6 +159,25 @@ public class SyncJamSettings implements Settings
         synchronized (SyncJamSettings.class)
         {
             return _followMarker;
+        }
+    }
+
+    @Override
+    @XmlTransient
+    public void setMinimizeToTray(boolean set)
+    {
+        synchronized (SyncJamSettings.class)
+        {
+            _minimizeTray = set;
+        }
+    }
+
+    @Override
+    public boolean getMinimizeToTray()
+    {
+        synchronized (SyncJamSettings.class)
+        {
+            return _minimizeTray;
         }
     }
 

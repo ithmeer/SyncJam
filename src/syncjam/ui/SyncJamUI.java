@@ -17,6 +17,7 @@ import syncjam.ui.net.UserListPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -24,6 +25,7 @@ import java.awt.event.KeyListener;
 public class SyncJamUI implements KeyListener
 {
     private CustomFrame _window;
+    private Settings _syncJamSettings;
     private final InfoUI _infoUI;
     private final ControlUI _controlUI;
     private final PlaylistUI _playlistUI;
@@ -38,10 +40,11 @@ public class SyncJamUI implements KeyListener
 
     public SyncJamUI(ServiceContainer services)
     {
+        _syncJamSettings = services.getService(Settings.class);
         _window = new CustomFrame(340, 500) {
             private JFrame _infoWindow = null;
             @Override
-            protected void close()
+            protected void exit()
             {
                 NetworkController network = services.getService(NetworkController.class);
                 if(network.getStatus() != ConnectionStatus.Unconnected && network.getStatus() != ConnectionStatus.Disconnected)
@@ -70,6 +73,8 @@ public class SyncJamUI implements KeyListener
         _window.getContentPanel().setLayout(new GridBagLayout());
         _window.setBackground(Colors.get(Colors.Background1));
         //_window.setUndecorated(true);
+
+        prepareSystemTray();
 
 
         //= = = = = = = = = = Player = = = = = = = = = =//
@@ -105,7 +110,6 @@ public class SyncJamUI implements KeyListener
         //ControlUI
         _controlUI = new ControlUI(services);
         constraints = setGrid(0, 1, 1.0f, 0.0f);
-        constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.HORIZONTAL;
 
         _window.cm.registerComponent(_controlUI);
@@ -114,7 +118,6 @@ public class SyncJamUI implements KeyListener
         //Song Position Slider
         _songPosition = new SongPositionSlider(services);
         constraints = setGrid(0, 2, 1.0f, 0.0f, 0, 28);
-        constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.insets = new Insets(0,6,0,6);
 
@@ -146,8 +149,8 @@ public class SyncJamUI implements KeyListener
         constraints.anchor = GridBagConstraints.PAGE_START;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.insets = new Insets(12,0,12,0);
-        _window.cm.registerComponent(sideBar);
         _window.getContentPanel().add(sideBar, constraints);
+        _window.cm.registerComponent(sideBar);
 
         //Sidebar Items Panel
         JPanel sideBarItems = new JPanel(new GridBagLayout()){
@@ -158,8 +161,9 @@ public class SyncJamUI implements KeyListener
             }
         };
 
-        //constraints = setGrid(0, 0, 0.0f, 1.0f);
-        constraints.anchor = GridBagConstraints.PAGE_START;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.anchor = GridBagConstraints.NORTH;
         constraints.fill = GridBagConstraints.NONE;
         sideBar.add(sideBarItems, constraints);
 
@@ -168,16 +172,15 @@ public class SyncJamUI implements KeyListener
         constraints.anchor = GridBagConstraints.PAGE_START;
 
         //Network Indicator
-        constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
         NetworkIndicator indicator = new NetworkIndicator(services);
+        constraints = setGrid(0, 0, 0.0f, 0.0f, 16, 16);
         sideBarItems.add(indicator, constraints);
 
         //Network Button
-        constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
-        ImageButton networkButton = new ImageButton(12, 12, "net_button2.png", Colors.Foreground1, Colors.Background1){
+        ImageButton networkButton = new ImageButton(12, 12, "net_button.png", Colors.Foreground1, Colors.Background2){
             protected void clicked() { togglePanel(_networkPanel); }
         };
-
+        constraints = setGrid(0, 1, 0.0f, 0.0f, 16, 16);
         sideBarItems.add(networkButton, constraints);
 
         //Volume Slider
@@ -187,11 +190,11 @@ public class SyncJamUI implements KeyListener
         sideBarItems.add(new VolumeSlider(50, 100, services), constraints);
 
         //Clear Playlist Button
-        constraints = setGrid(0, 3, 0.0f, 0.0f, 10, 10);
-        TextButton clearPlaylistButton = new TextButton(11, 11, "", Colors.Highlight2){
+        TextButton clearPlaylistButton = new TextButton(11, 11, "", Colors.Background2){
             @Override public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.get(Colors.Foreground1));
+                Colors col = getModel().isRollover() ? Colors.Foreground2 : Colors.Foreground1;
+                g.setColor(Colors.get(col));
                 int cX = getWidth()/2;  //center xPos
                 int cY = getHeight()/2; //center yPos
                 int xS = 3;             //size of 'X'
@@ -203,15 +206,15 @@ public class SyncJamUI implements KeyListener
                 _playlistUI.clear();
             }
         };
+        constraints = setGrid(0, 3, 0.0f, 0.0f, 10, 10);
         sideBarItems.add(clearPlaylistButton, constraints);
 
         //Add Songs Button
-        constraints = setGrid(0, 4, 0.0f, 0.0f, 10, 10);
-        constraints.insets = new Insets(8,0,0,0);
         TextButton addSongsButton = new TextButton(11, 11, "", Colors.Background2){
             @Override public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Colors.get(Colors.Foreground1));
+                Colors col = getModel().isRollover() ? Colors.Foreground2 : Colors.Foreground1;
+                g.setColor(Colors.get(col));
                 int cX = getWidth()/2;  //center xPos
                 int cY = getHeight()/2; //center yPos
                 int xS = 3;             //size of 'X'
@@ -229,8 +232,36 @@ public class SyncJamUI implements KeyListener
                 });
             }
         };
-
+        constraints = setGrid(0, 4, 0.0f, 0.0f, 10, 10);
+        constraints.insets = new Insets(8,0,0,0);
         sideBarItems.add(addSongsButton, constraints);
+
+        //South-Oriented Buttons
+        JPanel southSideBarItems = new JPanel(new GridLayout(2, 1, 0, 8));
+        southSideBarItems.setOpaque(false);
+        southSideBarItems.setPreferredSize(new Dimension(18, 55));
+        constraints.anchor = GridBagConstraints.PAGE_END;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.gridy = 1;
+        sideBar.add(southSideBarItems, constraints);
+
+        //UserList Button
+        ImageButton userListButton = new ImageButton(28, 28, "userlist_button2.png", Colors.Foreground1, Colors.Background2){
+            protected void clicked() { togglePanel(_userListPanel); }
+        };
+
+        //Settings Button
+        ImageButton settingsButton = new ImageButton(28, 28, "settings_button.png", Colors.Foreground1, Colors.Background2){
+            protected void clicked() { togglePanel(_settingsPanel); }
+        };
+
+        /*constraints = setGrid(0, 0, 0.0f, 0.0f, 28, 28);
+        constraints.anchor = GridBagConstraints.SOUTH;
+        constraints.gridx = 1;
+        constraints.gridy = 0;*/
+        southSideBarItems.add(userListButton);//, constraints);
+
+        southSideBarItems.add(settingsButton);//, constraints);
 
         //= = = = = = = = = = Side Panels = = = = = = = = = =//
 
@@ -254,13 +285,11 @@ public class SyncJamUI implements KeyListener
 
         _settingsPanel = new SettingsPanel(services);
         trayConstraints.gridx = 1;
-        trayConstraints.insets = new Insets(8,8,8,8);
         _tray.add(_settingsPanel, trayConstraints);
         _settingsPanel.validate();
 
         _userListPanel = new UserListPanel(services);
         trayConstraints.gridx = 2;
-        trayConstraints.insets = new Insets(8,8,8,8);
         _tray.add(_userListPanel, trayConstraints);
         _userListPanel.validate();
 
@@ -279,6 +308,53 @@ public class SyncJamUI implements KeyListener
         _networkPanel.setVisible(false);
         _settingsPanel.setVisible(false);
         _userListPanel.setVisible(false);
+
+        networkButton.setHeldWithComponentVisible(_networkPanel);
+        settingsButton.setHeldWithComponentVisible(_settingsPanel);
+        userListButton.setHeldWithComponentVisible(_userListPanel);
+    }
+
+    private void prepareSystemTray() {
+        if(SystemTray.isSupported())
+        {
+            SystemTray sysTray = SystemTray.getSystemTray();
+            PopupMenu sysTrayMenu = new PopupMenu();
+
+
+            TrayIcon trayIcon = new TrayIcon(UIServices.loadImage("SJLogo14.png"), "SyncJam", sysTrayMenu);
+
+            ActionListener deIconifyListener = e -> {
+                _window.setVisible(true);
+                _window.setExtendedState(JFrame.NORMAL);
+                sysTray.remove(trayIcon);
+            };
+
+            trayIcon.addActionListener(deIconifyListener);
+
+            //System Tray Menu Items
+            MenuItem menuItem = new MenuItem("Open");
+            menuItem.addActionListener(deIconifyListener);
+            sysTrayMenu.add(menuItem);
+            //----------------------
+            menuItem = new MenuItem("Close");
+            menuItem.addActionListener(e -> _window.close());
+            sysTrayMenu.add(menuItem);
+            //======================
+
+            _window.addWindowStateListener(e -> {
+                System.out.println(e.getNewState());
+                if(e.getNewState() == 1 && _syncJamSettings.getMinimizeToTray())
+                {
+                    try {
+                        sysTray.add(trayIcon);
+                        _window.setVisible(false);
+                    } catch (AWTException e1) {
+                        System.out.println("Could not add to System Tray.");
+                    }
+                }
+            });
+            trayIcon.setImageAutoSize(false);
+        }
     }
 
     @Override public void keyTyped(KeyEvent e) {}
@@ -333,14 +409,14 @@ public class SyncJamUI implements KeyListener
                     DialogWindow.openColorPicker(Colors.Highlight2);
                     break;
 
-                case KeyEvent.VK_E:
-                    DialogWindow.showErrorMessage("SUUUUUPER BUUGGGGGSSSS!!!!! \nHELP THE BUGS????\nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                    break;
                 case KeyEvent.VK_T:
                     togglePanel(_userListPanel);
                     break;
                 case KeyEvent.VK_S:
                     togglePanel(_settingsPanel);
+                    break;
+                case KeyEvent.VK_N:
+                    togglePanel(_networkPanel);
                     break;
             }
         }

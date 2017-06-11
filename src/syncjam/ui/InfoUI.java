@@ -12,9 +12,9 @@ import java.awt.image.BufferedImage;
 
 public class InfoUI extends JPanel
 {
-    private final int _myW, _myH;
     private final int _aaWidth = 120; //album art width
     private final int _aaHeight = 120; //album art height
+    private final BufferedImage sjLogo;
     private final PlayController _playCon;
     private boolean _shouldScroll = false;
     private boolean _scrolling = false;
@@ -29,13 +29,14 @@ public class InfoUI extends JPanel
 
     public InfoUI(ServiceContainer services)
     {
-        _myW = 350;
-        _myH = 114;
+        int _myW = 350;
+        int _myH = 114;
 
         setOpaque(false);
         setMinimumSize(new Dimension(_myW, _myH));
         setMaximumSize(new Dimension(_myW, _myH));
         _playCon = services.getService(PlayController.class);
+        sjLogo = UIServices.loadBufferedImage("SJLogo64.png");
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -52,10 +53,6 @@ public class InfoUI extends JPanel
             }
         });
     }
-
-    public int getW() { return _myW; }
-
-    public int getH() { return _myH; }
 
     public void paintComponent(Graphics g)
     {
@@ -93,7 +90,7 @@ public class InfoUI extends JPanel
 
     private void updateScrolling()
     {
-        if(_scrollValue > -_scrollSpeed-.1f && _scrollValue < 0 && !_shouldScroll){
+        if(_scrollValue > -_scrollSpeed-.1f && _scrollValue < 0 && !_shouldScroll) {
             _scrollValue = 0;
             _scrolling = false;
         }

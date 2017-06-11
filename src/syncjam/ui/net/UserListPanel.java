@@ -15,8 +15,9 @@ public class UserListPanel extends JPanel
 {
     public UserListPanel(ServiceContainer services)
     {
-        this.setPreferredSize(new Dimension(250, 500));
-        this.setMinimumSize(new Dimension(250, 500));
+        this.setPreferredSize(new Dimension(252, 500));
+        this.setMinimumSize(new Dimension(252, 500));
+        this.setBorder(new EmptyBorder(8,8,8,8));
         this.setLayout(new BorderLayout());
         this.setOpaque(false);
 

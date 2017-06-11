@@ -28,6 +28,7 @@ public class ImageButton extends ButtonUI
         _foreground = fg;
         _rollover = Colors.Foreground2;
         _pressed = Colors.Highlight;
+        _drawOutline = true;
     }
 
     @Override

@@ -13,6 +13,8 @@ public abstract class ButtonUI extends JButton implements ActionListener
     private int myW, myH;
     protected Colors _background, _foreground, _rollover, _pressed;
     protected boolean _drawOutline = false;
+    private boolean _buttonHeld;
+    private JComponent _checkHoldComponent = null;
 
     public ButtonUI(int w, int h)
     {
@@ -45,6 +47,19 @@ public abstract class ButtonUI extends JButton implements ActionListener
 
     public int getH() { return myH; }
 
+    public void setOutlined(boolean outline)
+    {
+        _drawOutline = outline;
+    }
+    public void setButtonHeldIcon(boolean held)
+    {
+        _buttonHeld = held;
+    }
+    public void setHeldWithComponentVisible(JComponent comp)
+    {
+        _checkHoldComponent = comp;
+    }
+
     /**
      * Action to perform when clicked.
      */
@@ -61,12 +76,16 @@ public abstract class ButtonUI extends JButton implements ActionListener
 
     public void paintComponent(Graphics g)
     {
+        if(_checkHoldComponent != null)
+            setButtonHeldIcon(_checkHoldComponent.isVisible());
+
         super.paintComponent(g);
         super.setBackground(Colors.get(_background));
 
-        if (getModel().isPressed()) {
+        if (getModel().isPressed() || _buttonHeld) {
             g.setColor(Colors.get(_pressed));
             setForeground(Colors.get(_pressed));
+            super.setBackground(Colors.get(Colors.Background1));
         }
         else if (getModel().isRollover()) {
             g.setColor(Colors.get(_rollover));
