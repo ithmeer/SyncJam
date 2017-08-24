@@ -342,7 +342,6 @@ public class SyncJamUI implements KeyListener
             //======================
 
             _window.addWindowStateListener(e -> {
-                System.out.println(e.getNewState());
                 if(e.getNewState() == 1 && _syncJamSettings.getMinimizeToTray())
                 {
                     try {

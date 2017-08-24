@@ -1,18 +1,43 @@
 package syncjam.ui.net;
 
 import syncjam.interfaces.ServiceContainer;
+import syncjam.ui.UIServices;
 import syncjam.ui.buttons.base.TextLabelUI;
 import syncjam.utilities.UserInfo;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * Created by Marty on 1/22/2017.
  */
 public class UserListPanel extends JPanel
 {
+    private KeyAdapter keys = new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            super.keyReleased(e);
+            switch (e.getKeyCode())
+            {
+                case KeyEvent.VK_TAB:
+                    UIServices.getSyncJamUI().togglePanel(UserListPanel.this);
+                    break;
+            }
+        }
+    };
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        if (aFlag)
+            UIServices.getMainWindow().addKeyListener(keys);
+        else
+            UIServices.getMainWindow().removeKeyListener(keys);
+    }
+
     public UserListPanel(ServiceContainer services)
     {
         this.setPreferredSize(new Dimension(252, 500));

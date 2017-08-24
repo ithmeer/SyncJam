@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class PlaylistUI extends ItemList
+public class PlaylistUI extends ItemList<Song>
 {
     private final Playlist _playlist;
     private final SongQueue _songQueue;
@@ -400,7 +400,7 @@ public class PlaylistUI extends ItemList
         }
         else
         {
-            while(f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' ')
+            while(str.length() > 0 && (f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' '))
             {
                 str = str.substring(0,str.length()-1);
             }

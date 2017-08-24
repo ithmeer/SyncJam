@@ -76,6 +76,7 @@ public abstract class ButtonUI extends JButton implements ActionListener
 
     public void paintComponent(Graphics g)
     {
+
         if(_checkHoldComponent != null)
             setButtonHeldIcon(_checkHoldComponent.isVisible());
 
@@ -85,17 +86,18 @@ public abstract class ButtonUI extends JButton implements ActionListener
         if (getModel().isPressed() || _buttonHeld) {
             g.setColor(Colors.get(_pressed));
             setForeground(Colors.get(_pressed));
-            super.setBackground(Colors.get(Colors.Background1));
+            //super.setBackground(Colors.get(Colors.Background1));
         }
-        else if (getModel().isRollover()) {
+        /*else if (getModel().isRollover()) {
             g.setColor(Colors.get(_rollover));
             setForeground(Colors.get(_rollover));
-        }
+        }*/
         else
         {
             g.setColor(Colors.get(_foreground));
             setForeground(Colors.get(_foreground));
         }
+
 
         if(_drawOutline) {
             g.setColor(Colors.get(_background).brighter());

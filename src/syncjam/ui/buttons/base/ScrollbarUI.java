@@ -73,7 +73,8 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             //smooth bar movement
             if (_value != target)
             {
-                _value -= (_value - target) / _snapspeed + (int)Math.signum(_value - target);
+                int move = (_value - target) / _snapspeed + (int)Math.signum(_value - target);
+                _value -= move;
             }
 
             //allows scrolling past the edges for snapback effect
@@ -100,7 +101,27 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
             length = Math.max(20, (int)(_myH * viewRatio));
 
             pos = (int) (((float) _value / (float) _max) * (_myH - length));   //to get the scroll bar length and pos
-            g.fillRect(_inset, _inset + pos, _myW, length);
+
+            //Keep edges of bar within the panel/inset bounds
+            int finalPos = pos;
+            int finalLength = length;
+            if(pos < 0)
+            {
+                finalPos = 0; //don't let the pos be above the top of the bar
+                finalLength = Math.max(4, finalLength+pos);
+            }
+            else if(pos + length > _myH)
+            {
+                finalLength = finalLength - ((pos + length) - _myH);
+                if(finalLength <= 4) //if the bar is below the bottom of the list, constrain to 4 pixels at bottom
+                {
+                    finalPos = _myH - 4;
+                    finalLength = 4;
+                }
+            }
+            //===============================================
+
+            g.fillRect(_inset, _inset + finalPos, _myW, finalLength);
         }
         else
         {
@@ -228,9 +249,12 @@ public class ScrollbarUI extends JPanel implements MouseListener, MouseMotionLis
     public void scrollEvent(MouseWheelEvent e)
     {
         if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-            int sc = target + e.getUnitsToScroll() * getHeight() / _snapspeed;
+            int sc = (e.getUnitsToScroll() * getHeight() / _snapspeed)/2;
 
-            setTargetValue(sc);
+            if((_value <= 0 && target + sc < 0) || (_value >= _max && target + sc > _max))
+                sc /= 4;
+
+            setTargetValue(target + sc);
             _scrolling = true;
         }
     }

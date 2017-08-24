@@ -408,6 +408,7 @@ public class SettingsPanel extends JPanel
     public class SettingsCheckbox extends SettingsItem {
         private boolean _enabled = false;
         private int _boxSize = 18;
+        private int _curSize = 0;
 
         private SettingsCheckbox(String label, ItemList l) {
             this(label, l, false);
@@ -416,6 +417,8 @@ public class SettingsPanel extends JPanel
             super(label, l);
             _enabled = enabled;
             _highlightItem = true;
+
+            if(enabled) _curSize = _boxSize;
         }
 
         public boolean getCheckboxOn() {
@@ -438,8 +441,11 @@ public class SettingsPanel extends JPanel
             g.setColor(Colors.get(Colors.Foreground2));
             g.drawRect(boxX, middle - _boxSize /2, _boxSize, _boxSize);
             g.setColor(Colors.get(Colors.Foreground1));
-            if(_enabled)
-                g.fillRect(boxX + 3, middle - _boxSize /2 + 3, _boxSize - 5, _boxSize - 5);
+
+            if(_enabled && _curSize < _boxSize) _curSize = Math.min(_boxSize, _curSize + 3);
+            else if(!_enabled && _curSize > 0) _curSize = Math.max(0, _curSize - 3);
+
+                g.fillRect(boxX + 3 + _boxSize/2 - _curSize/2, middle - _curSize /2 + 3, Math.max(0,_curSize - 5), Math.max(0,_curSize - 5));
         }
     }
 }
