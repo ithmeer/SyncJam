@@ -41,7 +41,7 @@ public class ClientDataSocketProducer extends SocketProducer
             throw new SyncJamException(e.getMessage());
         }
 
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {

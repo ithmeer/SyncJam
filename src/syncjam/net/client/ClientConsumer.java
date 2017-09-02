@@ -25,7 +25,7 @@ public class ClientConsumer extends SocketConsumer
     {
         byte[] commandBuffer = new byte[3];
 
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {

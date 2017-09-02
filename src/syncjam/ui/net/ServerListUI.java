@@ -25,11 +25,7 @@ public class ServerListUI extends ItemList<ServerInfo>
         setDraggingEnabled(true);
 
         _settings = services.getService(Settings.class);
-        try
-        {
-            _settings.getSavedServers().forEach(svr -> add(svr));
-        }
-        catch(NullPointerException e) { System.out.println("Cannot Load Saved Servers"); }
+        _settings.getSavedServers().forEach(this::add);
     }
 
     void addServer(String name, String ip, int port, String pass)

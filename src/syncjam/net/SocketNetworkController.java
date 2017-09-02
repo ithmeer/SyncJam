@@ -3,6 +3,7 @@ package syncjam.net;
 import syncjam.ConnectionStatus;
 import syncjam.SyncJamException;
 import syncjam.interfaces.AudioController;
+import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.NetworkController;
 import syncjam.utilities.ServerInfo;
 import syncjam.interfaces.ServiceContainer;
@@ -26,8 +27,8 @@ public class SocketNetworkController implements NetworkController
 {
     // string constants
     private final String ackMessage = "OK";
-    private final String connectionErrorStr = "Could not connect to server {0}:{1}";
-    private final String hostingErrorStr = "Could not start server on port {0}";
+    private final String connectionErrorStr = "Could not connect to server %s:%d";
+    private final String hostingErrorStr = "Could not start server on port %d";
 
     // the service container
     private final ServiceContainer _services;
@@ -37,25 +38,28 @@ public class SocketNetworkController implements NetworkController
 
     // the executor for all tasks
     private final ExecutorService _exec = Executors.newCachedThreadPool();
+    private final InterruptableRunnable _localProducer;
 
     // true if this is a client
     private AtomicBoolean _isClient = new AtomicBoolean(true);
 
     // thread-safe list of clients
-    private final Queue<ServerSideSocket> _clients = new ConcurrentLinkedQueue<ServerSideSocket>();
+    private final Queue<ServerSideSocket> _clients = new ConcurrentLinkedQueue<>();
 
     private volatile InterruptableRunnable _gateKeeper;
 
     // the client-side socket for this client
     private volatile NetworkSocket _socket;
 
-    protected AtomicReference<ConnectionStatus> _status;
+    private AtomicReference<ConnectionStatus> _status;
 
     public SocketNetworkController(ServiceContainer services)
     {
         _services = services;
         _audioCon = services.getService(AudioController.class);
-        _status = new AtomicReference<ConnectionStatus>(ConnectionStatus.Unconnected);
+        _status = new AtomicReference<>(ConnectionStatus.Unconnected);
+        _localProducer = new LocalProducer(services);
+        _exec.execute(_localProducer);
     }
 
     public ConnectionStatus getStatus()
@@ -102,7 +106,7 @@ public class SocketNetworkController implements NetworkController
 
     /**
      * Client-to-server connection path. Connect to the given server.
-     * @throws SyncJamException
+     * @throws SyncJamException if we could not connect
      */
     @Override
     public void connectToServer(ServerInfo serverInfo) throws SyncJamException
@@ -136,7 +140,7 @@ public class SocketNetworkController implements NetworkController
             System.out.printf("Connected to %s (%s)%n",
                               info.getHostName(), info.getHostAddress());
 
-            LinkedList<Socket> sockets = new LinkedList<Socket>(
+            LinkedList<Socket> sockets = new LinkedList<>(
                     Arrays.asList(commandSocket, dataSocket));
             ClientSideSocket cs = new ClientSideSocket(_exec, _services, sockets,
                                                        new NonClosingSocket(streamSocket),
@@ -172,8 +176,8 @@ public class SocketNetworkController implements NetworkController
 
     /**
      * Server-to-clients connection path. Start the server socket and listen for connections.
-     * @param serverInfo
-     * @throws SyncJamException
+     * @param serverInfo the server
+     * @throws SyncJamException if server can't be started
      */
     @Override
     public void startServer(ServerInfo serverInfo) throws SyncJamException
@@ -190,17 +194,17 @@ public class SocketNetworkController implements NetworkController
         catch (IOException e)
         {
             // TODO: log error
-            throw new SyncJamException(String.format(hostingErrorStr, serverInfo));
+            throw new SyncJamException(String.format(hostingErrorStr, serverInfo.port));
         }
 
-        final Map<String, List<Socket>> socketMap = new HashMap<String, List<Socket>>();
+        final Map<String, List<Socket>> socketMap = new HashMap<>();
 
         _gateKeeper = new InterruptableRunnable()
         {
             @Override
             public void run()
             {
-                while (!terminated)
+                while (!_terminated.get())
                 {
                     try
                     {
@@ -209,12 +213,8 @@ public class SocketNetworkController implements NetworkController
                         System.out.printf("Connection from %s (%s)%n",
                                           info.getHostName(), info.getHostAddress());
 
-                        List<Socket> currentSockets = socketMap.get(info.getHostAddress());
-                        if (currentSockets == null)
-                        {
-                            currentSockets = new LinkedList<Socket>();
-                            socketMap.put(info.getHostAddress(), currentSockets);
-                        }
+                        List<Socket> currentSockets = socketMap.computeIfAbsent(
+                                info.getHostAddress(), k -> new LinkedList<>());
 
                         if (currentSockets.size() < 2)
                         {
@@ -249,7 +249,7 @@ public class SocketNetworkController implements NetworkController
         private final String _password;
         private final List<Socket> _socketList;
 
-        public ServerRunner(String password, List<Socket> socketList)
+        ServerRunner(String password, List<Socket> socketList)
         {
             _password = password;
             _socketList = socketList;
@@ -272,6 +272,12 @@ public class SocketNetworkController implements NetworkController
                 String password = ss.readNextCommand();
                 if (_password.isEmpty() || password.equals(_password))
                 {
+                    if (!_localProducer.isTerminated())
+                    {
+                        _localProducer.terminate();
+                        _services.getService(CommandQueue.class).kill();
+                    }
+
                     System.out.println("password accepted");
                     _audioCon.addClient(ss);
                     ss.sendCommand(ackMessage);

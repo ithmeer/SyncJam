@@ -40,7 +40,6 @@ public class SyncJam
         servCon.addService(AudioController.class, audioController);
 
         SocketNetworkController networkCon = new SocketNetworkController(servCon);
-        audioController.setNetworkController(networkCon);
 
         servCon.addService(NetworkController.class, networkCon);
 

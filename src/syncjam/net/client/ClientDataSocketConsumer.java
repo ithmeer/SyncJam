@@ -31,9 +31,8 @@ public class ClientDataSocketConsumer extends SocketConsumer
     @Override
     public void run()
     {
-        while (!terminated)
+        while (!_terminated.get())
         {
-
             try
             {
                 ObjectInputStream socketObjectReader = new ObjectInputStream(_inputStream);

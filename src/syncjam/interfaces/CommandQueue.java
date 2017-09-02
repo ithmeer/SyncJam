@@ -11,6 +11,8 @@ public interface CommandQueue
 
     void gotoSong(int song);
 
+    void kill();
+
     void nextSong();
 
     void prevSong();

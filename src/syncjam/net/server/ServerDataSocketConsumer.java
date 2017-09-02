@@ -44,7 +44,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
         }
 
 
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {
@@ -65,7 +65,7 @@ public class ServerDataSocketConsumer extends SocketConsumer
                     catch (IOException e)
                     {
                         e.printStackTrace();
-                        throw new SyncJamException(e.getMessage());
+                        continue;
                     }
 
                     socketObjectWriter.writeObject(metadata);

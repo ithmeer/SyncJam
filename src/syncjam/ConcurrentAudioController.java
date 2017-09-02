@@ -23,46 +23,45 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConcurrentAudioController implements AudioController
 {
-    private volatile SourceDataLine mLine;
+    private volatile SourceDataLine _mLine;
 
-    private volatile FloatControl volume;
+    private volatile FloatControl _volume;
 
-    private final AtomicInteger volumeLevel = new AtomicInteger(50);
+    private volatile BooleanControl _mute;
+
+    private final AtomicInteger _volumeLevel = new AtomicInteger(50);
 
     private final AtomicBoolean _interrupted = new AtomicBoolean(false);
 
-    private final Playlist playlist;
+    private final Playlist _playlist;
 
-    private final PlayController playController;
+    private final PlayController _playController;
 
-    private final CommandQueue queue;
-
-    // effectively final
-    private volatile NetworkController _networkController;
+    private final CommandQueue _queue;
 
     // block thread if stopped
-    private final Semaphore sem = new Semaphore(0);
+    private final Semaphore _pausedSemaphore = new Semaphore(0);
 
     // synchronized on this
-    private boolean playing;
+    private boolean _playing;
 
     // thread-safe container map (synchronized on itself)
     private final Map<SocketAddress, XugglerClient> _clientMap;
 
     public ConcurrentAudioController(Playlist pl, PlayController playCon, CommandQueue cq)
     {
-        playController = playCon;
-        playlist = pl;
-        queue = cq;
+        _playController = playCon;
+        _playlist = pl;
+        _queue = cq;
 
         _clientMap = Collections.synchronizedMap(new HashMap<SocketAddress, XugglerClient>());
 
         synchronized (this)
         {
-            playing = false;
+            _playing = false;
         }
 
-        //Global.setFFmpegLoggingLevel(-1);
+        Global.setFFmpegLoggingLevel(-1);
     }
 
     public void addClient(NetworkSocket client)
@@ -85,26 +84,17 @@ public class ConcurrentAudioController implements AudioController
     }
 
     /**
-     * Set the network controller (call before starting)
-     * @param networkCon the network controller
-     */
-    public void setNetworkController(NetworkController networkCon)
-    {
-        _networkController = networkCon;
-    }
-
-    /**
      * Play audio and unblock thread.
      */
     @Override
     public synchronized void play()
     {
-        if (!playing)
+        if (!_playing)
         {
-            playing = true;
-            if (mLine != null)
-                mLine.start();
-            sem.release();
+            _playing = true;
+            if (_mLine != null)
+                _mLine.start();
+            _pausedSemaphore.release();
         }
     }
 
@@ -114,19 +104,19 @@ public class ConcurrentAudioController implements AudioController
     @Override
     public synchronized void pause()
     {
-        if (playing)
+        if (_playing)
         {
-            playing = false;
+            _playing = false;
             try
             {
-                sem.acquire();
+                _pausedSemaphore.acquire();
             } catch (InterruptedException e)
             {
                 // this should be impossible
                 e.printStackTrace();
             }
-            if (mLine != null)
-                mLine.stop();
+            if (_mLine != null)
+                _mLine.stop();
         }
     }
 
@@ -143,9 +133,17 @@ public class ConcurrentAudioController implements AudioController
         else if (level > 100)
             level = 100;
 
-        volumeLevel.set(level);
-        if (volume != null)
-            volume.setValue(-60 + Math.round(Math.sqrt(level) * 6.0));
+        _volumeLevel.set(level);
+
+        if (_mute != null)
+        {
+            _mute.setValue(level == 0);
+        }
+
+        if (_volume != null)
+        {
+            _volume.setValue(-60 + Math.round(Math.sqrt(level) * 6.0));
+        }
     }
 
     @Override
@@ -163,8 +161,8 @@ public class ConcurrentAudioController implements AudioController
         {
             try
             {
-                Song next = playlist.getNextSong();
-                playController.setSong(next);
+                Song next = _playlist.getNextSong();
+                _playController.setSong(next);
                 if (next instanceof DatagramChannelSong)
                 {
                     playSong((DatagramChannelSong) next);
@@ -270,12 +268,10 @@ public class ConcurrentAudioController implements AudioController
 
         if (isServer)
         {
-            playController.setSongPosition(0);
+            _playController.setSongPosition(0);
 
             synchronized (_clientMap)
             {
-                List<XugglerClient> deadClients = new LinkedList<>();
-
                 for (XugglerClient client : _clientMap.values())
                 {
                     try
@@ -284,48 +280,35 @@ public class ConcurrentAudioController implements AudioController
                     }
                     catch (Exception ex)
                     {
-                        if (client.isDead())
-                        {
-                            deadClients.add(client);
-                        }
                     }
-                }
-
-                for (XugglerClient client : deadClients)
-                {
-                    _clientMap.remove(client.address);
                 }
             }
         }
 
+        double seekOffset = 0;
         IPacket packet = IPacket.make();
+
         outer: while (container.readNextPacket(packet) >= 0)
         {
+            if (packet.getDuration() == -1)
+            {
+                break;
+            }
+
             if (packet.getStreamIndex() == audioStreamId)
             {
                 // stream to all client containers
                 if (isServer)
                 {
-                    List<XugglerClient> deadClients = new LinkedList<>();
-
                     for (XugglerClient client : _clientMap.values())
                     {
                         try
                         {
-                            client.getContainer().writePacket(IPacket.make(packet, true));
+                            client.getContainer().writePacket(packet);
                         }
                         catch (Exception ex)
                         {
-                            if (client.isDead())
-                            {
-                                deadClients.add(client);
-                            }
                         }
-                    }
-
-                    for (XugglerClient client : deadClients)
-                    {
-                        _clientMap.remove(client.address);
                     }
                 }
 
@@ -343,20 +326,29 @@ public class ConcurrentAudioController implements AudioController
                         continue outer;
                     }
 
-                    int curPos = (int) (packet.getTimeStamp() * packet.getTimeBase().getDouble());
-                    int oldPos = playController.getSongPosition();
-                    long timeStamp = (long) (oldPos / packet.getTimeBase().getDouble());
-                    if ((oldPos > curPos + 1 || oldPos < curPos - 1) && isServer)
+                    double calculatedPos = packet.getTimeStamp() * packet.getTimeBase().getDouble();
+                    int nextSeekPosition = _playController.getNextSeekPosition();
+
+                    if (isServer)
                     {
-                        int length = playController.getSongLength();
-                        queue.seek(Math.round((oldPos / (float) length) * 100.0f));
-                        mLine.flush();
-                        container.seekKeyFrame(audioStreamId, timeStamp, timeStamp, timeStamp,
-                                               IContainer.SEEK_FLAG_BACKWARDS);
+                        if (nextSeekPosition != -1)
+                        {
+                            long timeStamp = (long) (nextSeekPosition / packet.getTimeBase().getDouble());
+                            container.seekKeyFrame(audioStreamId, 0, timeStamp, timeStamp, 0);
+                        }
+                        else
+                        {
+                            _playController.setSongPosition((int) calculatedPos);
+                        }
                     }
                     else
                     {
-                        playController.setSongPosition(curPos);
+                        if (nextSeekPosition != -1)
+                        {
+                            seekOffset = nextSeekPosition - calculatedPos;
+                        }
+
+                        _playController.setSongPosition((int) (calculatedPos + seekOffset));
                     }
 
                     offset += bytesDecoded;
@@ -368,6 +360,23 @@ public class ConcurrentAudioController implements AudioController
                     }
                 }
             }
+        }
+
+        if (isServer)
+        {
+            for (XugglerClient client : _clientMap.values())
+            {
+                try
+                {
+                    IPacket endPacket = IPacket.make();
+                    endPacket.setDuration(-1);
+                    client.getContainer().writePacket(endPacket);
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+
         }
 
         _interrupted.set(false);
@@ -400,7 +409,7 @@ public class ConcurrentAudioController implements AudioController
 
         if (clientContainer.isOpened())
         {
-            //clientContainer.writeTrailer();
+            clientContainer.writeTrailer();
             clientContainer.close();
             clientContainer = IContainer.make();
         }
@@ -428,6 +437,7 @@ public class ConcurrentAudioController implements AudioController
         coder.setSampleRate(origCoder.getSampleRate());
         coder.setChannels(origCoder.getChannels());
         coder.setTimeBase(origCoder.getTimeBase());
+
         int coderStatus = coder.open(orig.getMetaData(), IMetaData.make());
         if (coderStatus < 0)
         {
@@ -451,17 +461,18 @@ public class ConcurrentAudioController implements AudioController
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
         try
         {
-            mLine = (SourceDataLine) AudioSystem.getLine(info);
-            mLine.open(audioFormat);
+            _mLine = (SourceDataLine) AudioSystem.getLine(info);
+            _mLine.open(audioFormat);
             synchronized (this)
             {
-                if (playing)
+                if (_playing)
                 {
-                    mLine.start();
+                    _mLine.start();
                 }
             }
-            volume = (FloatControl) mLine.getControl(FloatControl.Type.MASTER_GAIN);
-            setVolume(volumeLevel.get());
+            _volume = (FloatControl) _mLine.getControl(FloatControl.Type.MASTER_GAIN);
+            _mute = (BooleanControl) _mLine.getControl(BooleanControl.Type.MUTE);
+            setVolume(_volumeLevel.get());
         }
         catch (LineUnavailableException e)
         {
@@ -475,25 +486,25 @@ public class ConcurrentAudioController implements AudioController
         int length = aSamples.getSize();
         byte[] rawBytes = aSamples.getData().getByteArray(0, length);
 
-        written = mLine.write(rawBytes, 0, length);
+        written = _mLine.write(rawBytes, 0, length);
         while (written != length)
         {
             try
             {
-                sem.acquire();
+                _pausedSemaphore.acquire();
             }
             catch (InterruptedException e)
             {
                 e.printStackTrace();
             }
-            sem.release();
+            _pausedSemaphore.release();
 
             if (_interrupted.get())
             {
                 break;
             }
 
-            written += mLine.write(rawBytes, written, length - written);
+            written += _mLine.write(rawBytes, written, length - written);
         }
     }
 
@@ -501,9 +512,9 @@ public class ConcurrentAudioController implements AudioController
     {
         if (drain)
         {
-            mLine.drain();
+            _mLine.drain();
         }
-        mLine.close();
+        _mLine.close();
     }
 
     private class BytesHandler implements IURLProtocolHandler

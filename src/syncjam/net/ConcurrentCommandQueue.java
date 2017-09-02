@@ -67,15 +67,15 @@ public class ConcurrentCommandQueue implements CommandQueue
                 _playlist.remove(second);
                 break;
             case 'S':
-                if (second == 'T')
-                {
-                    _player.playToggle(false);
-                }
-                else
+                if (second <= 100)
                 {
                     int pos = Math.round(
                             (cmdBuffer.charAt(1) / 100.0f) * (float) _player.getSongLength());
-                    _player.setSongPosition(pos);
+                    _player.setNextSeekPosition(pos);
+                }
+                else
+                {
+                    _player.playToggle(false);
                 }
                 break;
         }
@@ -90,6 +90,11 @@ public class ConcurrentCommandQueue implements CommandQueue
         {
             _queue.add(String.format("G%c", song));
         }
+    }
+
+    public synchronized void kill()
+    {
+        _queue.add("DI");
     }
 
     @Override
@@ -134,9 +139,14 @@ public class ConcurrentCommandQueue implements CommandQueue
         if (_enabled)
         {
             if (state)
+            {
                 _queue.add("PL");
+            }
             else
-                _queue.add("ST");
+            {
+                // 'e' in ASCII is 101, so choose that to not clash with "ST" (seek 84)
+                _queue.add("Se");
+            }
         }
     }
 

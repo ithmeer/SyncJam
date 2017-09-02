@@ -1,26 +1,23 @@
-package syncjam.net.client;
+package syncjam.net;
 
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.ServiceContainer;
-import syncjam.net.SocketProducer;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Objects;
 
 /**
- * Listen on a socket for commands.
- * Created by Ithmeer on 11/12/2015.
+ * A producer for local commands.
  */
-public class ClientProducer extends SocketProducer
+public class LocalProducer extends InterruptableRunnable
 {
-    protected final CommandQueue _cmdQueue;
+    private final CommandQueue _cmdQueue;
 
-    public ClientProducer(OutputStream outStream, ServiceContainer services)
+    public LocalProducer(ServiceContainer services)
     {
-        super(outStream);
         _cmdQueue = services.getService(CommandQueue.class);
     }
 
+    @Override
     public void run()
     {
         _cmdQueue.toggleEnabled(true);
@@ -30,16 +27,23 @@ public class ClientProducer extends SocketProducer
             try
             {
                 String command = _cmdQueue.take();
+
+                // TODO: change to method on cmdQueue
+                if (command.equals("DI"))
+                {
+                    break;
+                }
+
                 System.out.println("produced command: " + command);
                 _cmdQueue.executeCommand(command);
-                _outputStream.write(command.getBytes());
             }
-            catch (InterruptedException | IOException e)
+            catch (InterruptedException e)
             {
                 // TODO: log error
                 break;
             }
         }
 
+        int x = 5;
     }
 }

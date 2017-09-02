@@ -31,7 +31,7 @@ public class ServerDataSocketProducer extends SocketProducer
     @Override
     public void run()
     {
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {
@@ -52,7 +52,7 @@ public class ServerDataSocketProducer extends SocketProducer
                     {
                         // TODO: log error
                         e.printStackTrace();
-                        throw new SyncJamException(e.getMessage());
+                        continue;
                     }
 
                     socketObjectWriter.writeObject(metadata);

@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class SyncJamSettings implements Settings
     private static final String _savePath = "settings.xml";
 
     @XmlElement(name="server")
-    private List<XmlServerInfo> _servers;
+    private List<XmlServerInfo> _servers = new ArrayList<>();
     @XmlElement(name="username")
     private String _userName = "default";
     @XmlElement(name="default_port")
@@ -72,7 +73,7 @@ public class SyncJamSettings implements Settings
         synchronized (SyncJamSettings.class)
         {
             _servers.clear();
-            servers.stream().forEach(s -> _servers.add(new XmlServerInfo(s)));
+            servers.forEach(s -> _servers.add(new XmlServerInfo(s)));
         }
     }
     @Override

@@ -14,6 +14,8 @@ public interface PlayController
 
     String getArtistName();
 
+    int getNextSeekPosition();
+
     Song getSong();
 
     int getSongLength();
@@ -31,6 +33,8 @@ public interface PlayController
     void playToggle(boolean state);
 
     void playToggle();
+
+    void setNextSeekPosition(int pos);
 
     void setSong(Song song);
 

@@ -27,12 +27,13 @@ public class ServerProducer extends SocketProducer
     {
         _cmdQueue.toggleEnabled(true);
 
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {
                 String command = _cmdQueue.take();
                 System.out.println("produced command: " + command);
+                _cmdQueue.executeCommand(command);
                 for (ServerSideSocket client : _clients)
                 {
                     client.sendCommand(command);

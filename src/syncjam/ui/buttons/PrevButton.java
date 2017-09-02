@@ -1,5 +1,6 @@
 package syncjam.ui.buttons;
 
+import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.Playlist;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
@@ -9,25 +10,25 @@ import java.awt.*;
 
 public class PrevButton extends ButtonUI
 {
-    private final Playlist _playlist;
+    private final CommandQueue _cmdQueue;
 
     public PrevButton(int w, int h, ServiceContainer services)
     {
         super(w, h);
         setPreferredSize(new Dimension(getW() + 20, getH()));
-        _playlist = services.getService(Playlist.class);
+        _cmdQueue = services.getService(CommandQueue.class);
     }
 
     public PrevButton(int w, int h, Colors c, ServiceContainer services)
     {
         super(w, h, c);
         setPreferredSize(new Dimension(getW() + 20, getH()));
-        _playlist = services.getService(Playlist.class);
+        _cmdQueue = services.getService(CommandQueue.class);
     }
 
     protected void clicked()
     {
-        _playlist.prevSong();
+        _cmdQueue.prevSong();
     }
 
     public void paintComponent(Graphics g)

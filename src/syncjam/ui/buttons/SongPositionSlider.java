@@ -1,5 +1,6 @@
 package syncjam.ui.buttons;
 
+import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.PlayController;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.ui.Colors;
@@ -11,12 +12,14 @@ import java.text.SimpleDateFormat;
 
 public class SongPositionSlider extends SliderUI
 {
+    private final CommandQueue _cmdQueue;
     private final PlayController _player;
 
     public SongPositionSlider(ServiceContainer services)
     {
         super(0, 0, false);
         _player = services.getService(PlayController.class);
+        _cmdQueue = services.getService(CommandQueue.class);
     }
 
     public void paintComponent(Graphics g)
@@ -28,7 +31,7 @@ public class SongPositionSlider extends SliderUI
 
         if(_player.isPlaying())
         {
-            setValue(_player.getSongPosition());
+            setValue(_player.getSongPosition(), false);
         }
 
         super.paintComponent(g);
@@ -49,10 +52,13 @@ public class SongPositionSlider extends SliderUI
         }
     }
 
-    public void setValue(int n)
+    public void setValue(int n, boolean wasClicked)
     {
-        super.setValue(n);
-        _player.setSongPosition(n);
+        super.setValue(n, wasClicked);
+        if (wasClicked)
+        {
+            _cmdQueue.seek(Math.round((n / (float) _player.getSongLength()) * 100.0f));
+        }
     }
 
     public String getTimeStamp(int seconds)

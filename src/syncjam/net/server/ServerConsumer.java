@@ -27,7 +27,7 @@ public class ServerConsumer extends ClientConsumer
     {
         byte[] commandBuffer = new byte[3];
 
-        while (!terminated)
+        while (!_terminated.get())
         {
             try
             {

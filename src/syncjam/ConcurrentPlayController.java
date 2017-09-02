@@ -18,6 +18,7 @@ public class ConcurrentPlayController implements PlayController
     private volatile Song currentSong;
     private boolean isPlaying = false; // synchronized on this
     private final AtomicInteger songPosition = new AtomicInteger(0);
+    private final AtomicInteger _nextSeekPosition = new AtomicInteger(-1);
 
     @Override
     public BufferedImage getAlbumArt()   { return currentSong.getAlbumArt(); }
@@ -86,6 +87,18 @@ public class ConcurrentPlayController implements PlayController
     public void setSongPosition(int pos)
     {
         songPosition.set(pos);
+    }
+
+    @Override
+    public int getNextSeekPosition()
+    {
+        return _nextSeekPosition.getAndSet(-1);
+    }
+
+    @Override
+    public void setNextSeekPosition(int pos)
+    {
+        _nextSeekPosition.set(pos);
     }
 
     @Override
