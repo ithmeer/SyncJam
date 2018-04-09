@@ -4,6 +4,7 @@ import syncjam.interfaces.*;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class to provide access to the currently playing song. Thread-safe.
@@ -15,37 +16,45 @@ public class ConcurrentPlayController implements PlayController
     private volatile CommandQueue _cmdQueue;
     private volatile Playlist _playlist;
 
-    private volatile Song currentSong;
-    private boolean isPlaying = false; // synchronized on this
+    private AtomicReference<Song> currentSong = new AtomicReference<>();
+    private boolean isPlaying; // synchronized on this
     private final AtomicInteger songPosition = new AtomicInteger(0);
     private final AtomicInteger _nextSeekPosition = new AtomicInteger(-1);
 
-    @Override
-    public BufferedImage getAlbumArt()   { return currentSong.getAlbumArt(); }
+    public ConcurrentPlayController()
+    {
+        synchronized (this)
+        {
+            isPlaying = false;
+        }
+    }
 
     @Override
-    public String getAlbumName()         { return currentSong.getAlbumName(); }
+    public BufferedImage getAlbumArt()   { return currentSong.get().getAlbumArt(); }
 
     @Override
-    public String getArtistName()        { return currentSong.getArtistName(); }
+    public String getAlbumName()         { return currentSong.get().getAlbumName(); }
 
     @Override
-    public Song getSong()                { return currentSong; }
+    public String getArtistName()        { return currentSong.get().getArtistName(); }
 
     @Override
-    public int getSongLength()           { return currentSong.getLength(); }
+    public Song getSong()                { return currentSong.get(); }
 
     @Override
-    public String getSongLengthString()  { return currentSong.getLengthString(); }
+    public int getSongLength()           { return currentSong.get().getLength(); }
 
     @Override
-    public String getSongName()          { return currentSong.getTitle(); }
+    public String getSongLengthString()  { return currentSong.get().getLengthString(); }
+
+    @Override
+    public String getSongName()          { return currentSong.get().getTitle(); }
 
     @Override
     public int getSongPosition()         { return songPosition.get(); }
 
     @Override
-    public BufferedImage getScaledAlbumArt(int w, int h) { return currentSong.getScaledAlbumArt(w, h); }
+    public BufferedImage getScaledAlbumArt(int w, int h) { return currentSong.get().getScaledAlbumArt(w, h); }
 
     @Override
     public synchronized boolean isPlaying() { return isPlaying; }
@@ -53,7 +62,9 @@ public class ConcurrentPlayController implements PlayController
     @Override
     public synchronized void playToggle(boolean state)
     {
-        if (currentSong == null)
+        boolean oldState = isPlaying;
+
+        if (currentSong == null || state == oldState)
             return;
 
         if(state)
@@ -71,13 +82,16 @@ public class ConcurrentPlayController implements PlayController
     }
 
     @Override
-    public void playToggle()
+    public synchronized void playToggle()
     {
         playToggle(!isPlaying);
     }
 
     @Override
-    public void setSong(Song song) { currentSong = song; }
+    public void setSong(Song song)
+    {
+        currentSong.set(song);
+    }
 
     /**
      * Set the current position in the song and provide length if needed.
@@ -107,7 +121,6 @@ public class ConcurrentPlayController implements PlayController
     @Override
     public synchronized void updateSong()
     {
-        isPlaying = true;
         _audioController.updateSong();
     }
 

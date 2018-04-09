@@ -1,10 +1,13 @@
 package syncjam.net.client;
 
+import syncjam.SyncJamException;
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.net.CommandPacket;
 import syncjam.net.SocketProducer;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 /**
@@ -23,23 +26,24 @@ public class ClientProducer extends SocketProducer
 
     public void run()
     {
-        _cmdQueue.toggleEnabled(true);
-
-        while (!_terminated.get())
+        try
         {
-            try
+            _cmdQueue.toggleEnabled(true);
+            ObjectOutputStream socketObjectWriter = new ObjectOutputStream(_outputStream);
+
+            while (!_terminated.get())
             {
-                String command = _cmdQueue.take();
-                System.out.println("produced command: " + command);
-                _cmdQueue.executeCommand(command);
-                _outputStream.write(command.getBytes());
-            }
-            catch (InterruptedException | IOException e)
-            {
-                // TODO: log error
-                break;
+                CommandPacket packet = _cmdQueue.take();
+                System.out.println("produced command: " + packet.toString());
+                _cmdQueue.executeCommand(packet);
+                socketObjectWriter.writeObject(packet);
             }
         }
-
+        catch (InterruptedException | IOException e)
+        {
+            // TODO: log error
+            e.printStackTrace();
+            throw new SyncJamException(e.getMessage());
+        }
     }
 }

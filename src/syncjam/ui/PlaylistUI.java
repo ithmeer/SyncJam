@@ -20,40 +20,38 @@ public class PlaylistUI extends ItemList<Song>
 {
     private final Playlist _playlist;
     private final SongQueue _songQueue;
+    private final CommandQueue _cmdQueue;
     private final Settings _settings;
     private final NetworkController _networkController;
     private final FileDrop _fileDrop;
+    private final PlayController _playController;
     private MatteBorder _fileDropBorder;
     private int artHoverIndex = -1;
     private int removeHoverIndex = -1;
-
-    //private final String[] _ignoredFileTypes = {"jpg", "png", "bmp", "gif"};
 
     public PlaylistUI(final ServiceContainer services)
     {
         _playlist = services.getService(Playlist.class);
         _songQueue = services.getService(SongQueue.class);
         _settings = services.getService(Settings.class);
+        _cmdQueue = services.getService(CommandQueue.class);
+        _playController = services.getService(PlayController.class);
+
         _networkController = services.getService(NetworkController.class);
         this.setEnableCustomDrawing(true);
 
         _fileDropBorder = new ColorableMatteBorder(2, 2, 2, 2, Colors.Highlight);
-        _fileDrop = new FileDrop(this, _fileDropBorder, files -> {
-            addAll(files);
-        });
+        _fileDrop = new FileDrop(this, _fileDropBorder, this::addAll);
     }
 
-    public void addAll(File[] files) {
+    public void addAll(File[] files)
+    {
         BytesSong[] songs = new BytesSong[files.length];
+
         for(int i = 0; i < files.length; i++)
         {
             try
             {
-                    /*String fileType = "";
-                    int x = files[i].getName().lastIndexOf('.');
-                    if (x > 0) {
-                        fileType = files[i].getName().substring(x+1);
-                    }*/
                 songs[i] = new BytesSong(files[i]);
             }
             catch (SyncJamException e)
@@ -126,10 +124,10 @@ public class PlaylistUI extends ItemList<Song>
             if(_itemHoverIndex != -1)
             {
                 int hoverItemYPos = getYPosInUI(_itemHoverIndex);
-                if(_mouseY < hoverItemYPos + itemHeight/2)
+                if(_mouseY < hoverItemYPos + itemHeight / 2)
                     _itemDropIndex = _itemHoverIndex;
                 else if(_mouseY >= hoverItemYPos - itemHeight/2)
-                    _itemDropIndex = _itemHoverIndex +1;
+                    _itemDropIndex = _itemHoverIndex + 1;
             }
             if(_lastDropIndex != _itemDropIndex)
             {
@@ -156,7 +154,7 @@ public class PlaylistUI extends ItemList<Song>
         {
             g.setColor(Colors.get(Colors.Highlight));
             g.drawRect(x,  y,   getRight() - 3, itemHeight);
-            g.drawRect(x+1,y+1, getRight() - 5, itemHeight-2);
+            g.drawRect(x+1,y+1, getRight() - 5, itemHeight  -2);
         }
     }
 
@@ -171,15 +169,15 @@ public class PlaylistUI extends ItemList<Song>
             g.setColor(Colors.get(Colors.Background1));
             g.fillRect(x, y, getWidth() - _scrollbar.getWidth(), itemHeight);
 
-            if(progress > 0)
+            if (progress > 0)
             {
                 g.setColor(Colors.get(Colors.Highlight));
 
-                float progWidth = (float)progress/100 * (getWidth() - _scrollbar.getWidth());
+                float progWidth = (float) progress / 100 * (getWidth() - _scrollbar.getWidth());
 
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
-                g2.fillRect(x, y, (int)progWidth, itemHeight);
+                g2.fillRect(x, y, (int) progWidth, itemHeight);
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
                 g2.dispose();
             }
@@ -400,7 +398,8 @@ public class PlaylistUI extends ItemList<Song>
         }
         else
         {
-            while(str.length() > 0 && (f.stringWidth(str) + f.stringWidth("...") > width || str.charAt(str.length()-1) == ' '))
+            while(str.length() > 0 && (f.stringWidth(str) + f.stringWidth("...") > width ||
+                    str.charAt(str.length() - 1) == ' '))
             {
                 str = str.substring(0,str.length()-1);
             }
@@ -409,21 +408,34 @@ public class PlaylistUI extends ItemList<Song>
     }
 
     @Override
-    protected void updateScrollbar() { _scrollbar.setMaxValue(_playlist.size() * itemHeight + _yOffset *2); }
+    protected void updateScrollbar()
+    {
+        _scrollbar.setMaxValue(_playlist.size() * itemHeight + _yOffset * 2);
+    }
 
     private void buildSplitArray()
     {
-        _splits = new int[_playlist.size()+1];
+        _splits = new int[_playlist.size() + 1];
     }
 
     @Override
     public void remove(int index)
     {
-        _playlist.remove(index);
+        int curSongIndex = _playlist.getCurrentSongIndex();
+        _cmdQueue.removeSong(index);
+
+        // we just removed the current song
+        if (index == curSongIndex)
+        {
+            _playlist.nextSong();
+        }
+
+
         if(index < _playlist.getCurrentSongIndex() && _settings.getFollowMarker())
             _scrollbar.adjustMarker(-1);
         updateScrollbar();
     }
+
     public void clear()
     {
         _playlist.clear();
@@ -444,7 +456,7 @@ public class PlaylistUI extends ItemList<Song>
                 if(_itemDragIndex != _itemDropIndex -1) {
                     int curSongPos = _playlist.getCurrentSongIndex();
 
-                    _playlist.moveSong(_itemDragIndex, _itemDropIndex);
+                    _cmdQueue.moveSong(_itemDragIndex, _itemDropIndex - 1);
 
                     int newSongPos = _playlist.getCurrentSongIndex();
                     _scrollbar.adjustMarker(newSongPos - curSongPos);  //if the song position changes, adjust scrollbar marker to reflect

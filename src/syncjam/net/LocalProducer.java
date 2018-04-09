@@ -2,6 +2,7 @@ package syncjam.net;
 
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.utilities.CommandType;
 
 import java.util.Objects;
 
@@ -26,16 +27,16 @@ public class LocalProducer extends InterruptableRunnable
         {
             try
             {
-                String command = _cmdQueue.take();
+                CommandPacket packet = _cmdQueue.take();
 
                 // TODO: change to method on cmdQueue
-                if (command.equals("DI"))
+                if (packet.getType() == CommandType.Kill)
                 {
                     break;
                 }
 
-                System.out.println("produced command: " + command);
-                _cmdQueue.executeCommand(command);
+                System.out.println("produced command: " + packet.toString());
+                _cmdQueue.executeCommand(packet);
             }
             catch (InterruptedException e)
             {
@@ -43,7 +44,5 @@ public class LocalProducer extends InterruptableRunnable
                 break;
             }
         }
-
-        int x = 5;
     }
 }

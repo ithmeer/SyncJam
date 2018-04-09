@@ -1,9 +1,13 @@
 package syncjam.net.server;
 
+import syncjam.SyncJamException;
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.net.CommandPacket;
 import syncjam.net.SocketProducer;
+import syncjam.utilities.CommandFlags;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -31,18 +35,22 @@ public class ServerProducer extends SocketProducer
         {
             try
             {
-                String command = _cmdQueue.take();
-                System.out.println("produced command: " + command);
-                _cmdQueue.executeCommand(command);
+                CommandPacket packet = _cmdQueue.take();
+                System.out.println("produced command: " + packet.toString());
+                if (!packet.getFlags().contains(CommandFlags.Suppressed))
+                {
+                    _cmdQueue.executeCommand(packet);
+                }
                 for (ServerSideSocket client : _clients)
                 {
-                    client.sendCommand(command);
+                    client.sendCommand(packet);
                 }
             }
-            catch (InterruptedException e)
+            catch (IOException | InterruptedException e)
             {
                 // TODO: log error
-                break;
+                e.printStackTrace();
+                throw new SyncJamException(e.getMessage());
             }
         }
     }

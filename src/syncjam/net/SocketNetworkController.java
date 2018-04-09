@@ -5,6 +5,8 @@ import syncjam.SyncJamException;
 import syncjam.interfaces.AudioController;
 import syncjam.interfaces.CommandQueue;
 import syncjam.interfaces.NetworkController;
+import syncjam.utilities.CommandFlags;
+import syncjam.utilities.CommandType;
 import syncjam.utilities.ServerInfo;
 import syncjam.interfaces.ServiceContainer;
 import syncjam.net.client.ClientSideSocket;
@@ -146,11 +148,14 @@ public class SocketNetworkController implements NetworkController
                                                        new NonClosingSocket(streamSocket),
                                                        commandSocket.getRemoteSocketAddress());
 
-            cs.sendCommand(serverInfo.password);
+            CommandPacket passPacket = new CommandPacket(CommandType.Password,
+                                                        EnumSet.noneOf(CommandFlags.class),
+                                                        serverInfo.password);
+            cs.sendCommand(passPacket);
 
-            String ack = cs.readNextCommand();
+            CommandPacket ack = cs.readNextCommand();
 
-            if (ack.equals(ackMessage))
+            if (ack.getType() == CommandType.Welcome)
             {
                 // TODO: log message
                 System.out.println("password accepted");
@@ -165,7 +170,7 @@ public class SocketNetworkController implements NetworkController
                 setStatus(ConnectionStatus.Disconnected);
             }
         }
-        catch (IOException e)
+        catch (ClassNotFoundException | IOException e)
         {
             // TODO: log error
             setStatus(ConnectionStatus.Disconnected);
@@ -269,8 +274,11 @@ public class SocketNetworkController implements NetworkController
                                                            commandSocket.getRemoteSocketAddress());
 
                 // TODO: investigate
-                String password = ss.readNextCommand();
-                if (_password.isEmpty() || password.equals(_password))
+                CommandPacket passwordPacket = ss.readNextCommand();
+                String password = passwordPacket.getArgs()[0];
+
+                if (passwordPacket.getType() == CommandType.Password &&
+                        (_password.isEmpty() || password.equals(_password)))
                 {
                     if (!_localProducer.isTerminated())
                     {
@@ -280,14 +288,16 @@ public class SocketNetworkController implements NetworkController
 
                     System.out.println("password accepted");
                     _audioCon.addClient(ss);
-                    ss.sendCommand(ackMessage);
+                    ss.sendCommand(new CommandPacket(CommandType.Welcome,
+                                                     EnumSet.noneOf(CommandFlags.class)));
                     ss.start();
                     _clients.add(ss);
                 }
                 else
                 {
                     System.out.println("password rejected");
-                    ss.sendCommand("bad password");
+                    ss.sendCommand(new CommandPacket(CommandType.Error,
+                                                     EnumSet.noneOf(CommandFlags.class)));
                     commandSocket.close();
                     dataSocket.close();
                 }
@@ -297,7 +307,7 @@ public class SocketNetworkController implements NetworkController
                 // TODO: log error
                 System.out.println("Socket timed out: " + ex.getMessage());
             }
-            catch (IOException ex)
+            catch (ClassNotFoundException | IOException ex)
             {
                 // TODO: log error
                 System.out.println("Cannot create socket: " + ex.getMessage());

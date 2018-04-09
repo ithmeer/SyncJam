@@ -1,5 +1,6 @@
 package syncjam;
 
+import com.xuggle.ferry.IBuffer;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.io.IURLProtocolHandler;
 import com.xuggle.xuggler.io.InputOutputStreamHandler;
@@ -149,9 +150,8 @@ public class ConcurrentAudioController implements AudioController
     @Override
     public void updateSong()
     {
-        // if already playing, does nothing
-        play();
         _interrupted.set(true);
+
     }
 
     @Override
@@ -163,21 +163,24 @@ public class ConcurrentAudioController implements AudioController
             {
                 Song next = _playlist.getNextSong();
                 _playController.setSong(next);
-                if (next instanceof DatagramChannelSong)
+                if (_playController.isPlaying())
                 {
-                    playSong((DatagramChannelSong) next);
-                }
-                else if (next instanceof BytesSong)
-                {
-                    playSong((BytesSong) next);
-                }
-                else if (next instanceof PartialBytesSong)
-                {
-                    playSong((PartialBytesSong) next);
-                }
-                else
-                {
-                    System.out.println("bad format");
+                    if (next instanceof DatagramChannelSong)
+                    {
+                        playSong((DatagramChannelSong) next);
+                    }
+                    else if (next instanceof BytesSong)
+                    {
+                        playSong((BytesSong) next);
+                    }
+                    else if (next instanceof PartialBytesSong)
+                    {
+                        playSong((PartialBytesSong) next);
+                    }
+                    else
+                    {
+                        System.out.println("bad format");
+                    }
                 }
             }
             catch (InterruptedException e)
@@ -287,10 +290,11 @@ public class ConcurrentAudioController implements AudioController
 
         double seekOffset = 0;
         IPacket packet = IPacket.make();
+        IPacket prevPacket = null;
 
         outer: while (container.readNextPacket(packet) >= 0)
         {
-            if (packet.getDuration() == -1)
+            if (packet.getFlags() == Integer.MAX_VALUE)
             {
                 break;
             }
@@ -304,12 +308,16 @@ public class ConcurrentAudioController implements AudioController
                     {
                         try
                         {
-                            client.getContainer().writePacket(packet);
+                            if (prevPacket != null)
+                            {
+                                client.getContainer().writePacket(packet);
+                            }
                         }
                         catch (Exception ex)
                         {
                         }
                     }
+                    prevPacket = packet;
                 }
 
                 IAudioSamples samples = IAudioSamples.make(1024, audioCoder.getChannels());
@@ -368,9 +376,8 @@ public class ConcurrentAudioController implements AudioController
             {
                 try
                 {
-                    IPacket endPacket = IPacket.make();
-                    endPacket.setDuration(-1);
-                    client.getContainer().writePacket(endPacket);
+                    packet.setFlags(Integer.MAX_VALUE);
+                    client.getContainer().writePacket(packet);
                 }
                 catch (Exception ex)
                 {

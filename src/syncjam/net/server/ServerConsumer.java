@@ -1,11 +1,14 @@
 package syncjam.net.server;
 
+import syncjam.SyncJamException;
 import syncjam.interfaces.ServiceContainer;
+import syncjam.net.CommandPacket;
 import syncjam.net.NetworkSocket;
 import syncjam.net.client.ClientConsumer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 
 /**
  * Listen on a socket for commands.
@@ -25,30 +28,29 @@ public class ServerConsumer extends ClientConsumer
     @Override
     public void run()
     {
-        byte[] commandBuffer = new byte[3];
-
-        while (!_terminated.get())
+        try
         {
-            try
-            {
-                _inputStream.read(commandBuffer);
-                String command = new String(commandBuffer);
-                System.out.println("consumed command: " + command);
-                _cmdQueue.executeCommand(command);
+            ObjectInputStream socketObjectReader = new ObjectInputStream(_inputStream);
 
+            while (!_terminated.get())
+            {
+                CommandPacket packet = (CommandPacket) socketObjectReader.readObject();
+                System.out.println("consumed command: " + packet.toString());
+                _cmdQueue.executeCommand(packet);
                 for (ServerSideSocket client : _clients)
                 {
                     if (_inputStream != client.getInputStream(NetworkSocket.SocketType.Command))
                     {
-                        client.sendCommand(commandBuffer);
+                        client.sendCommand(packet);
                     }
                 }
             }
-            catch (IOException e)
-            {
-                // TODO: log error
-                break;
-            }
+        }
+        catch (ClassNotFoundException | IOException e)
+        {
+            // TODO: log error
+            e.printStackTrace();
+            throw new SyncJamException(e.getMessage());
         }
     }
 }

@@ -15,8 +15,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ConcurrentPlaylist implements Playlist
 {
-    // a thread-safe ArrayList to store the songs (synchronized on itself)
-    private final List<Song> _songList = new CopyOnWriteArrayList<>();
+    // a thread-safe List to store the songs
+    private final List<Song> _songList;
     private final PlayController _playController;
 
     private volatile CommandQueue _cmdQueue;
@@ -29,6 +29,10 @@ public class ConcurrentPlaylist implements Playlist
     public ConcurrentPlaylist(PlayController playCon)
     {
         _playController = playCon;
+        synchronized (this)
+        {
+            _songList = new CopyOnWriteArrayList<>();
+        }
     }
 
     /**
@@ -126,8 +130,6 @@ public class ConcurrentPlaylist implements Playlist
     @Override
     public void moveSong(int from, int to)
     {
-        _cmdQueue.moveSong(from, to);
-
         synchronized (_songList)
         {
             Song toSwap = _songList.remove(from);
@@ -144,9 +146,6 @@ public class ConcurrentPlaylist implements Playlist
             else if(to >= _currentSong && from < _currentSong)
                 _currentSong -= 1;
 
-            if (to > from)
-                to--;
-
             _songList.add(to, toSwap);
         }
     }
@@ -162,7 +161,6 @@ public class ConcurrentPlaylist implements Playlist
             if (waitingForSong())
                 return;
         }
-        _cmdQueue.nextSong();
         _playController.updateSong();
     }
 
@@ -211,10 +209,10 @@ public class ConcurrentPlaylist implements Playlist
             if (i < 0 || i >= _songList.size())
                 return;
 
-            _cmdQueue.removeSong(i);
             _songList.remove(i);
             if (_currentSong > i)
                 _currentSong -= 1;
+            wakeUp();
         }
     }
 

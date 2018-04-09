@@ -2,9 +2,7 @@ package syncjam.net;
 
 import syncjam.interfaces.Song;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;
@@ -32,8 +30,8 @@ public abstract class NetworkSocket
         _exec = exec;
         _ipAddress = ipAddress;
 
-        _inputStreams = new HashMap<SocketType, InputStream>();
-        _outputStreams = new HashMap<SocketType, OutputStream>();
+        _inputStreams = new HashMap<>();
+        _outputStreams = new HashMap<>();
 
         _inputStreams.put(SocketType.Command, sockets.get(0).getInputStream());
         _outputStreams.put(SocketType.Command, sockets.get(0).getOutputStream());
@@ -64,39 +62,17 @@ public abstract class NetworkSocket
         return _outputStreams.get(type);
     }
 
-    public String readNextCommand()
+    public CommandPacket readNextCommand() throws IOException, ClassNotFoundException
     {
-        byte[] next = new byte[20];
-
-        try
-        {
-            getInputStream(SocketType.Command).read(next);
-        }
-        catch (IOException e)
-        {
-            // TODO: log and report error
-            e.printStackTrace();
-        }
-
-        return new String(next).trim();
+        ObjectInputStream socketObjectReader = new ObjectInputStream(
+                getInputStream(SocketType.Command));
+        return (CommandPacket) socketObjectReader.readObject();
     }
 
-    public void sendCommand(String cmd)
+    public void sendCommand(CommandPacket packet) throws IOException
     {
-        sendCommand(cmd.getBytes());
-    }
-
-    public void sendCommand(byte[] cmd)
-    {
-        try
-        {
-            getOutputStream(SocketType.Command).write(cmd);
-        }
-        catch (IOException e)
-        {
-            // TODO: log and report error
-            e.printStackTrace();
-        }
+        ObjectOutputStream cmdStream = new ObjectOutputStream(getOutputStream(SocketType.Command));
+        cmdStream.writeObject(packet);
     }
 
     public abstract void start();
